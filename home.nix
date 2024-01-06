@@ -57,7 +57,10 @@
     # Use Fish shell
     programs.fish.enable = true;
     # Enable atuin in Fish
-    programs.atuin.enableFishIntegration = true;
+    programs.atuin = {
+      enable = true;
+      enableFishIntegration = true;
+    };
     # Starship prompt
     programs.starship = {
       enable = true;
