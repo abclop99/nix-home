@@ -1,4 +1,4 @@
-{ pkgs, ... }: {
+{ config, pkgs, ... }: {
 
 	config = {
 
@@ -171,18 +171,20 @@
 				fade-in = 1;
 				color = "331100";
 
+				# TODO: Swaylock effects order mattes, nix doesn't allow multiple or different orders
 				screenshots = true;
 				# effect-scale = 0.5;
 				effect-vignette = "0.22:0.85";
-				# effect-custom=
-				effect-blur = "5x5";
+				effect-custom = "${config.xdg.configHome}/swaylock/effect-blue-filter/filter.c";
+				effect-blur = "7x5";
 				# effect-scale = 2.0;
-				scaling = "center";
 			};
 		};
-		# Needs pam access in system config for unlocking
+		## Needs pam access in system config for unlocking
 		# Otherwise, it will not unlock
 		# security.pam.services.swaylock = {};
-		
+		## Swaylock blue filter files
+		xdg.configFile."swaylock/effect-blue-filter".source =
+			./files/swaylock/effect-blue-filter;
 	};
 }
