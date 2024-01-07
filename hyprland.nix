@@ -89,22 +89,42 @@
 	        ", Print, exec, grimblast copy area"
 					"$mod, L, exec, $lock"
 
-					# Keybinds for window managment
+					## Keybinds for window managment
+					# Close window
 					"$mod SHIFT, Q, killactive"
-	        "$mod, F, fullscreen, 1"
-	        "$mod SHIFT, F, fullscreen, 0"
+					# Fullscreen and Fullscreener
+					"$mod, F, fullscreen, 1"
+					"$mod SHIFT, F, fullscreen, 0"
+					# Floating
+					"$mod SHIFT, SPACE, togglefloating"
+					# Toggle tabs
+					"$mod, T, togglegroup"
+					# Focus and move between tabs using < >
+					"$mod, code:59, changegroupactive, b"
+					"$mod, code:60, changegroupactive, f"
+					"$mod SHIFT, code:59, movegroupwindow, b"
+					"$mod SHIFT, code:60, movegroupwindow, f"
 
-	        # Move focus using mod + arrow keys
-	        "$mod, left, movefocus, l"
-	        "$mod, right, movefocus, r"
-	        "$mod, up, movefocus, u"
-	        "$mod, down, movefocus, d"
+					# Move focus using mod + arrow keys
+					"$mod, left, movefocus, l"
+					"$mod, up, movefocus, u"
+					"$mod, down, movefocus, d"
+					"$mod, right, movefocus, r"
+					# hjkl -> ynio on norman layout
+					"$mod, y, movefocus, l"
+					"$mod, n, movefocus, u"
+					"$mod, i, movefocus, d"
+					"$mod, o, movefocus, r"
 
-	        # Move windows using mod + arrow keys
-	        "$mod SHIFT, left, movewindow, l"
-	        "$mod SHIFT, right, movewindow, r"
-	        "$mod SHIFT, up, movewindow, u"
-	        "$mod SHIFT, down, movewindow, d"
+					# Move windows using mod + arrow keys
+					"$mod SHIFT, left, movewindow, l"
+					"$mod SHIFT, up, movewindow, u"
+					"$mod SHIFT, down, movewindow, d"
+					"$mod SHIFT, right, movewindow, r"
+					"$mod SHIFT, y, movewindow, l"
+					"$mod SHIFT, n, movewindow, u"
+					"$mod SHIFT, i, movewindow, d"
+					"$mod SHIFT, o, movewindow, r"
 
 					# Special workspace (scratchpad)
 					# TODO: What does this do?
