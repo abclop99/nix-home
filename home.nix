@@ -47,6 +47,8 @@
       #   echo "Hello, ${config.home.username}!"
       # '')
 
+      pinentry       # GPG passphrase input
+
       bat            # Fancy `cat` clone
       ripgrep        # Better grep in rust
       tree           # tree view ls thing
@@ -154,6 +156,11 @@
         init.defaultBranch = "main";
         push.autoSetupRemote = true;
       };
+    };
+
+    # GPG
+    programs.gpg = {
+      enable = true;
     };
 
     # Firefox
