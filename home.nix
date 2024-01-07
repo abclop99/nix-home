@@ -37,7 +37,8 @@
       # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
       # # fonts?
       (nerdfonts.override { fonts = [ "FiraCode" "VictorMono" "NerdFontsSymbolsOnly" ]; })
-      font-awesome
+      font-awesome      # Symbols
+      cm_unicode        # Computer Modern with unicode stuff
 
       # # You can also create simple shell scripts directly inside your
       # # configuration. For example, this adds a command 'my-hello' to your
@@ -178,6 +179,8 @@
 
     # Enable fontconfig discovering fonts
     fonts.fontconfig.enable = true;
+    # Manual fontconfig configuration because HM doesn't do it
+    xdg.configFile."fontconfig/fonts.conf".source = ./files/fontconfig/fonts.conf;
 
     # Home Manager can also manage your environment variables through
     # 'home.sessionVariables'. If you don't want to manage your shell through Home
