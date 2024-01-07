@@ -95,6 +95,12 @@
         tab_title_max_lenth = 16;
 
         background_opacity = "0.9";
+
+        disable_ligatures = "cursor";
+      };
+
+      font = {
+        name = "VictorMono Nerd Font";
       };
     };
 
