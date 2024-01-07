@@ -1,0 +1,85 @@
+(defwindow bar
+	:monitor 0
+	:geometry (geometry
+		:x "0%"
+		:y "9px"
+		:width "98%"
+		:height "30px"
+		:anchor "top center"
+	)
+	:stacking "fg"
+	:reserve (struts :distance "40px" :side "top")
+	:windowtype "dock"
+	:wm-ignore false
+	:exclusive true
+	:focusable false
+
+	(bar)
+)
+
+; Overall widget
+(defwidget bar []
+	(centerbox  :orientation "horizontal"
+							:halign "fill"
+		(left)
+		(center)
+		(right)
+	)
+)
+
+; Left, center, right sections
+(defwidget left []
+	(box  :orientation "h"
+				:space-evenly false
+				:halign "start"
+				:class "section left"
+
+		(workspaces)
+	)
+)
+
+(defwidget center []
+	(box  :orientation "h"
+				:space-evenly false
+				:halign "center"
+				:class "section center"
+
+		(active_window)
+	)
+)
+
+(defwidget right []
+	(box  :orientation "h"
+				:space-evenly false
+				:halign "end"
+				:class "section right"
+
+		"right section placeholder"
+	)
+)
+
+; Workspace module: Left
+(deflisten workspaces :initial "[]" "bash ~/.config/eww/scripts/get-workspaces")
+(deflisten current_workspace :initial "1" "bash ~/.config/eww/scripts/get-active-workspace")
+(defwidget workspaces []
+	(eventbox :onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${current_workspace}"
+		(box  :space-eenly true
+			; (label :text "${workspaces}${current_workspace}" :visible false)
+			(for workspace in workspaces
+				(eventbox :onclick "hyprctl dispatch workspace ${workspace.id}"
+									:class "workspace-entry ${workspace.id == current_workspace ? "current" : ""} ${workspace.windows > 0 ? "occupied" : "empty"}"
+					(label :text "${workspace.id}")
+				)
+			)
+		)
+	)
+)
+
+; Window title module: Ceter
+(deflisten active_window_title :initial "..." "sh ~/.config/eww/scripts/get-window-title")
+(defwidget active_window []
+	
+	(box  :class "window_title"
+		(label :text "${active_window_title}")
+	)
+)

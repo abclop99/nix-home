@@ -6,6 +6,13 @@
 		home.packages = with pkgs; [
 	    networkmanagerapplet    # Systray for NetworkManager
 	    grimblast               # Screenshot tool for hyprland
+			swaynotificationcenter  # Notification center
+			
+			# Used in eww's scripts
+			# TODO: Wrap dependencies in the scripts?
+			jq
+			socat
+			python3
 		];
 	
 	  # Hyprland itself
@@ -44,16 +51,18 @@
 				};
       
 	      # Define programs to use
-	      "$bar" = "waybar";
+	      "$bar" = "eww open bar";
 	      # "$browser" = "firefox";
 	      "$terminal" = "kitty";
 	      "$menu" = "pkill wofi; wofi --show drun";
 				"$lock" = "swaylock";
+				"$notif" = "swaync";
 
 	      # Execute programs at launch
 	      "exec-once" = [
 	        "$bar"
 	        "nm-applet --indicator"
+					"$notif"
 	      ];
 
 	      # Input config
@@ -132,28 +141,11 @@
 	  programs.wofi.enable = true;
 	
 	  # Bar program
-	  programs.waybar = {
-	    enable = true;
-	    settings = {
-	      mainBar = {
-	        layer = "top";
-	        postion = "top";
-	        height = 30;
-      
-	        # Modules for each part of the bar
-	        modules-left = [ "hyprland/workspaces" "hyprland/submap" ]; 
-	        modules-center = [ "hyprland/window" ];
-	        modules-right = [ "tray" "idle_inhibitor" "pulseaudio" "keyboard-state" "hyprland/language" "clock" ];
-
-	        # Configure modules
-	        "hyprland/language" = {
-	          format-en = "en";
-	          format-apl = "apl";
-	          format-cn = "cn";
-	        };
-	      };
-	    };
-	  };
+		programs.eww = {
+			enable = true;
+			configDir = ./files/eww;
+			package = pkgs.eww-wayland;
+		};
 
 		# Lock screen program
 		programs.swaylock = {

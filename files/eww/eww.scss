@@ -1,0 +1,75 @@
+/*
+Theming for eww bar
+*/
+
+/* Polar night colors */
+$nord0: #2E3440;
+$nord1: #3b4252;
+$nord2: #434C5E;
+$nord3: #4C566A;
+
+/* Snow storm color */
+$nord4: #D8DEE9;
+$nord5: #E5E9F0;
+$nord6: #ECEFF4;
+
+/* Frost colors */
+$nord7: #8FBCBB;
+$nord8: #88C0D0;
+$nord9: #81A1C1;
+$nord10: #5E81AC;
+
+/* Aurora Colors */
+$nord11: #BF616A;
+$nord12: #D08770;
+$nord13: #EBCB8B;
+$nord14: #A3BE8C;
+$nord15: #B48EAD;
+
+/* Aliases for Aurora colors */
+$red: $nord11;
+$orange: $nord12;
+$yellow: $nord13;
+$green: $nord14;
+$purple: $nord15;
+
+/* Theme colors */
+$bg_color: $nord0;
+$fg_color: $nord6;
+$selection_bg_color: $nord2;
+$selection_fg_color: $fg_color;
+$hover_bg_color: $nord1;
+$comment_fg_color: $nord3;
+
+/* Other variables */
+$radius: 5;
+
+window {
+	background: transparent;
+}
+
+.section {
+	background-color: $bg_color;
+	color: $fg_color;
+
+	padding-left: $radius;
+	padding-right: $radius;
+
+	border-radius: $radius;
+}
+
+.workspace-entry.empty {
+	background-color: $bg_color;
+	color: $comment_fg_color;
+}
+.workspace-entry.occupied {
+	background-color: $bg_color;
+	color: $fg_color;
+}
+.workspace-entry.current {
+	background-color: $selection_bg_color;
+	color: $selection_fg_color;
+}
+.workspace-entry:hover {
+	background-color: $hover_bg_color;
+}
