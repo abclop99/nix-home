@@ -42,7 +42,16 @@ $hover_bg_color: $nord1;
 $comment_fg_color: $nord3;
 
 /* Other variables */
-$radius: 5;
+$radius: 5px;
+$sep: 5px;
+$animation_duration: 0.2s;
+
+/* Cofigure CSS transitions */
+* {
+	transition-property: opacity, width, height, background-color, color;
+	transition-duration: $animation_duration;
+	transition-timing-function: ease-out;
+}
 
 window {
 	background: transparent;
@@ -58,6 +67,7 @@ window {
 	border-radius: $radius;
 }
 
+/* Workspaces widget */
 .workspace-entry.empty {
 	background-color: $bg_color;
 	color: $comment_fg_color;
@@ -72,4 +82,26 @@ window {
 }
 .workspace-entry:hover {
 	background-color: $hover_bg_color;
+}
+
+/* Center (window title) */
+.section.center.empty {
+	opacity: 0;
+}
+
+/* Right */
+.separator {
+	color: $comment_fg_color;
+	font-weight: bold;
+	font-size: 22px;
+	margin: 0px $sep 0px $sep;
+}
+.module {
+}
+.clock .date {
+	margin-right: $sep;
+}
+.clock .percent {
+	margin-left: $sep;
+	border-radius: 5px;
 }

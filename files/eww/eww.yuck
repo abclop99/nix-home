@@ -1,3 +1,6 @@
+; Define some variables used in this config
+(defvar eww "eww")   ; Change eww command to work
+
 (defwindow bar
 	:monitor 0
 	:geometry (geometry
@@ -42,7 +45,7 @@
 	(box  :orientation "h"
 				:space-evenly false
 				:halign "center"
-				:class "section center"
+				:class "section center ${active_window_title == "" ? "empty" : "occupied" }"
 
 		(active_window)
 	)
@@ -54,7 +57,13 @@
 				:halign "end"
 				:class "section right"
 
-		"right section placeholder"
+		"Systray"
+		(sep)
+		"Volume, etc."
+		(sep)
+		"System info"
+		(sep)
+		(clock)
 	)
 )
 
@@ -63,7 +72,7 @@
 (deflisten current_workspace :initial "1" "bash ~/.config/eww/scripts/get-active-workspace")
 (defwidget workspaces []
 	(eventbox :onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${current_workspace}"
-		(box  :space-eenly true
+		(box  :space-evenly true
 			; (label :text "${workspaces}${current_workspace}" :visible false)
 			(for workspace in workspaces
 				(eventbox :onclick "hyprctl dispatch workspace ${workspace.id}"
@@ -81,5 +90,42 @@
 	
 	(box  :class "window_title"
 		(label :text "${active_window_title}")
+	)
+)
+
+; Right side stuff
+(defwidget sep []
+	(box  :class "separator"
+		(label :text "|")
+	)
+)
+
+(defvar time_rev false)
+(defpoll day_percent :interval "10m" "echo $(( ($(date '+%H') * 60 + $(date '+%M')) * 100 / 1440 ))")
+(defpoll date :interval "10s" "date '+%F'")
+(defpoll time :interval "1s" "date '+%T'")
+(defwidget clock []
+	(eventbox 
+			:onhover "${eww} update time_rev=true"
+			:onhoverlost "${eww} update time_rev=false"
+			:class "module"
+
+		(box  :space-evenly "false"
+					:class "clock"
+			(revealer :transition "slideleft"
+								:reveal time_rev
+								:duration "200ms"
+
+				(box :class "date" date)
+			)
+			(box :class "time" time)
+			(circular-progress :class "percent"
+				:value day_percent
+				:start-at 25
+				:thickness 5
+				:clockwise true
+				:tooltip "${day_percent}% of the day"
+			)
+		)
 	)
 )
