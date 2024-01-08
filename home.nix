@@ -163,6 +163,10 @@
       enable = true;
     };
 
+    services.gnome-keyring = {
+      enable = true;
+    };
+
     # Firefox
     programs.firefox = {
       enable = true;
