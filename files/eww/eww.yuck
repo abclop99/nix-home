@@ -101,7 +101,7 @@
 )
 
 (defvar time_rev false)
-(defpoll day_percent :interval "10m" "echo $(( ($(date '+%H') * 60 + $(date '+%M')) * 100 / 1440 ))")
+(defpoll day_percent :interval "10m" "echo $(( ($(date '+%-H') * 60 + $(date '+%-M')) * 100 / 1440 ))")
 (defpoll date :interval "10s" "date '+%F'")
 (defpoll time :interval "1s" "date '+%T'")
 (defwidget clock []
