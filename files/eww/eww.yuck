@@ -104,6 +104,7 @@
 (defpoll day_percent :interval "10m" "echo $(( ($(date '+%-H') * 60 + $(date '+%-M')) * 100 / 1440 ))")
 (defpoll date :interval "10s" "date '+%F'")
 (defpoll time :interval "1s" "date '+%T'")
+(defpoll minute :interval "30s" "date '+%-M'")
 (defwidget clock []
 	(eventbox 
 			:onhover "${eww} update time_rev=true"
@@ -122,9 +123,17 @@
 			(circular-progress :class "percent"
 				:value day_percent
 				:start-at 25
-				:thickness 5
+				:thickness 2
 				:clockwise true
-				:tooltip "${day_percent}% of the day"
+				:tooltip `${day_percent}% of the day
+${round(100 * minute / 60, 0)}% of the hour`
+
+				(circular-progress :class "hour-percent"
+					:value {100 * minute / 60}
+					:start-at 25
+					:thickness 3
+					:clockwise true
+				)
 			)
 		)
 	)

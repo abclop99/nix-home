@@ -102,6 +102,10 @@ window {
 	margin-right: $sep;
 }
 .clock .percent {
-	margin-left: $sep;
-	border-radius: 5px;
+	color: $nord8;
+	margin-left: 5px;
+}
+.clock .percent .hour-percent {
+	color: $nord10;
+	margin: 5px;
 }
