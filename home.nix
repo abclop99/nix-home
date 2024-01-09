@@ -173,6 +173,18 @@
       # TODO: profile settings, such as userchrome, extensions, etc.
     };
 
+    # Gammastep: blue light filter
+    services.gammastep =
+    let 
+      location = builtins.fromJSON( builtins.readFile( ./location.json.secret ) );
+    in
+    {
+      enable = true;
+      provider = "manual";
+      latitude = location.latitude;
+      longitude = location.longitude;
+    };
+
     # Home Manager is pretty good at managing dotfiles. The primary way to manage
     # plain files is through 'home.file'.
     home.file = {
