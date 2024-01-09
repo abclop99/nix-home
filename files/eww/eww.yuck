@@ -1,5 +1,4 @@
 ; Define some variables used in this config
-(defvar eww "eww")   ; Change eww command to work
 
 (defwindow bar
 	:monitor 0
@@ -106,8 +105,8 @@
 (defpoll day_percent :initial 0 :interval "10m" "echo $(( ($(date '+%-H') * 60 + $(date '+%-M')) * 100 / 1440 ))")
 (defwidget clock []
 	(eventbox 
-			:onhover "${eww} update time_rev=true"
-			:onhoverlost "${eww} update time_rev=false"
+			:onhover "${EWW_CMD} update time_rev=true"
+			:onhoverlost "${EWW_CMD} update time_rev=false"
 			:class "module"
 
 		(box  :space-evenly "false"
