@@ -1,0 +1,58 @@
+; Includes
+(include "./hyprland.yuck")
+(include "./system.yuck")
+(include "./clock.yuck")
+
+; Overall widget
+(defwidget bar []
+	(centerbox  :orientation "horizontal"
+							:halign "fill"
+		(left)
+		(center)
+		(right)
+	)
+)
+
+; Left, center, right sections
+(defwidget left []
+	(box  :orientation "h"
+				:space-evenly false
+				:halign "start"
+				:class "section left"
+
+		(workspaces)
+	)
+)
+
+(defwidget center []
+	(box  :orientation "h"
+				:space-evenly false
+				:halign "center"
+				:class "section center ${active_window_title == "" ? "empty" : "occupied" }"
+
+		(active_window)
+	)
+)
+
+(defwidget right []
+	(box  :orientation "h"
+				:space-evenly false
+				:halign "end"
+				:class "section right"
+
+		"Systray"
+		(sep)
+		"Volume, etc."
+		(sep)
+		(system-info)
+		(sep)
+		(clock)
+	)
+)
+
+; Right side stuff
+(defwidget sep []
+	(box  :class "separator"
+		(label :text "|")
+	)
+)

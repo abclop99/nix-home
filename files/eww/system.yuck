@@ -1,0 +1,31 @@
+; System info
+(defwidget system-info []
+	(box  :class "module system-info"
+				:space-evenly false
+		(circular-progress :class "circular-progress cpu"
+			:value {EWW_CPU.avg}
+			; Sorry for this mess, but string proccessing doesn't seem to exist
+			; oustide of `jq` and escape sequences don't work.
+			:tooltip `Avg: ${round(EWW_CPU.avg, 2)}%
+──────────
+${replace(replace(jq(EWW_CPU.cores, "
+map(.core + \": \" + (.usage|tostring) + \", \" + (.freq/1000|tostring) ) | join(\"\n\")
+"), "\n", "
+"), "^.|.$", "")}`
+			:start-at 25
+			:thickness 2.5
+			:clockwise true
+
+			""
+		)
+		(circular-progress :class "circular-progress memory"
+			:value {100 * EWW_RAM.used_mem / EWW_RAM.total_mem}
+			:tooltip "${100 * EWW_RAM.used_mem / (1024*1024*1024)} / ${EWW_RAM.total_mem / (1024*1024*1024)}"
+			:start-at 25
+			:thickness 2.5
+			:clockwise true
+
+			""
+		)
+	)
+)
