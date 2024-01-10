@@ -98,6 +98,16 @@ window {
 }
 .module {
 }
+/* System info circular bars */
+.system-info .circular-progress {
+	background-color: $nord1;
+	margin: 2px;
+}
+.system-info .circular-progress label {
+	font-size: 80%;
+	margin: 5px;
+}
+/* Clock stuff */
 .clock .date {
 	margin-right: $sep;
 }
