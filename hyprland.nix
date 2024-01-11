@@ -206,7 +206,7 @@
 		services.swayidle =
 		let 
 			lockProcess = "swaylock";
-			lockCommand = "${pkgs.swaylock}/bin/swaylock -f";
+			lockCommand = "${pkgs.swaylock-effects}/bin/swaylock -f";
 			dpmsCommand = "${pkgs.hyprland}/bin/hyprctl dispatch dpms";
 		in
 		{
