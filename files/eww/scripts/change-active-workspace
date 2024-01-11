@@ -12,11 +12,11 @@ current=$2
 if test "$direction" = "down"
 then 
 	target=$(clamp 1 10 $(($current+1)))
-	echo "jumping to $target"
-	hyprctl dispatch workspace $target
+	echo "jumping from workspace $current to workspace $target"
+	hyprctl dispatch workspace $target > /dev/null
 elif test "$direction" = "up"
 then 
 	target=$(clamp 1 10 $(($current-1)))
-	echo "jumping to $target"
-	hyprctl dispatch workspace $target
+	echo "jumping from workspace $current to workspace $target"
+	hyprctl dispatch workspace $target > /dev/null
 fi

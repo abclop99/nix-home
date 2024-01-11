@@ -10,9 +10,12 @@
 			
 			# Used in eww's scripts
 			# TODO: Wrap dependencies in the scripts?
-			jq
+			jaq
 			socat
 			python3
+			pamixer                 # Volume info and control
+			pulseaudio              # pactl subscribe
+			brightnessctl           # Brightness control
 		];
 	
 	  # Hyprland itself

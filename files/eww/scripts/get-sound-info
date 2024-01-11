@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+jaq -nc --arg volume "$(pamixer --get-volume)" --arg muted "$(pamixer --get-mute)" '$ARGS.named'
+pactl subscribe | rg --line-buffered "sink" | while read -r UNUSED_LINE; do (jaq -nc --arg volume "$(pamixer --get-volume)" --arg muted "$(pamixer --get-mute)" '$ARGS.named'); done

@@ -1,0 +1,70 @@
+(defwidget controls []
+	(box  :class "module controls"
+	      :space-evenly false
+		(brightness)
+		(volume)
+	)
+)
+
+(deflisten sound_info :initial '{"volume": "100", "muted": "false"}' "bash ./scripts/get-sound-info")
+(defvar vol_reveal false)
+(defwidget volume []
+	(box :class "item"
+		(eventbox :class "volume"
+		          :onhover     "${EWW_CMD} update vol_reveal=true"
+		          :onhoverlost "${EWW_CMD} update vol_reveal=false"
+					    :tooltip "Volume: ${sound_info.muted ? 'Muted' : sound_info.volume + '%'}"
+			(box :space-evenly false
+				(revealer :transition "slideright"
+				          :reveal vol_reveal
+				          :duration "200ms"
+					(scale :class "slider"
+					       :value {sound_info.volume}
+					       :onchange "pamixer --set-volume {}"
+					       :orientation "h"
+					       :max 101
+					       :min 0
+					)
+				)
+				(eventbox :class "icon"
+				          :onclick "pamixer --toggle-mute"
+					(label :text {sound_info.muted ? "󰝟" : (sound_info.volume <= 33 ? "󰕿" : (sound_info.volume <= 66 ? "󰖀" : "󰕾") )})
+					; 󰕾
+				)
+			)
+		)
+	)
+)
+
+(defvar br_reveal false)
+(defpoll brightness :interval "0.2s"
+                    :initial "100" 
+                    :run-while br_reveal
+                    "brightnessctl get"
+)
+(deflisten max_brightness :interval "10h" :initial "100"  "brightnessctl max")
+(defwidget brightness []
+	(box :class "item"
+		(eventbox :class "brightness"
+		          :onhover     "${EWW_CMD} update br_reveal=true"
+		          :onhoverlost "${EWW_CMD} update br_reveal=false"
+			        :tooltip "Brightness: ${100 * brightness / max_brightness}%"
+			(box :space-evenly false
+				(revealer :transition "slideright"
+				          :reveal br_reveal
+				          :duration "200ms"
+					(scale :class "slider"
+					       :value {brightness}
+					       :onchange "brightnessctl set {} > /dev/null"
+					       :orientation "h"
+					       :max {max_brightness + 1}
+					       :min 1
+					)
+				)
+				(eventbox :class "icon"
+					(label :text {brightness <= 25 ? "󰃞" : (brightness <= 50 ? "󰃟" : (brightness <= 75 ? "󰃝" : "󰃠"))})
+				)
+			)
+		)
+	)
+)

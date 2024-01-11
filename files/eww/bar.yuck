@@ -1,5 +1,6 @@
 ; Includes
 (include "./hyprland.yuck")
+(include "./controls.yuck")
 (include "./system.yuck")
 (include "./clock.yuck")
 
@@ -42,7 +43,7 @@
 
 		"Systray"
 		(sep)
-		"Volume, etc."
+		(controls)
 		(sep)
 		(system-info)
 		(sep)

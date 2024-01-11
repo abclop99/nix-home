@@ -11,7 +11,7 @@
 
 		(box  :space-evenly "false"
 					:class "clock"
-			(revealer :transition "slideleft"
+			(revealer :transition "slideright"
 								:reveal time_rev
 								:duration "200ms"
 

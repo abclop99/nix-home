@@ -1,12 +1,12 @@
 ; Hyprland workspaces module
-(deflisten workspaces :initial "[]" "bash ~/.config/eww/scripts/get-workspaces")
-(deflisten current_workspace :initial "1" "bash ~/.config/eww/scripts/get-active-workspace")
+(deflisten workspaces :initial "[]" "bash ./scripts/get-workspaces")
+(deflisten current_workspace :initial "1" "bash ./scripts/get-active-workspace")
 (defwidget workspaces []
 	(eventbox :onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${current_workspace}"
 		(box  :space-evenly true
 			; (label :text "${workspaces}${current_workspace}" :visible false)
 			(for workspace in workspaces
-				(eventbox :onclick "hyprctl dispatch workspace ${workspace.id}"
+				(eventbox :onclick "hyprctl dispatch workspace ${workspace.id} > /dev/null"
 									:class "workspace-entry ${workspace.id == current_workspace ? "current" : ""} ${workspace.windows > 0 ? "occupied" : "empty"}"
 					(label :text "${workspace.id}")
 				)
@@ -16,7 +16,7 @@
 )
 
 ; Active widow title module
-(deflisten active_window_title :initial "..." "sh ~/.config/eww/scripts/get-window-title")
+(deflisten active_window_title :initial "..." "sh ./scripts/get-window-title")
 (defwidget active_window []
 	(box  :class "window_title"
 		(label :text "${active_window_title}")

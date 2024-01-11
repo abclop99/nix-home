@@ -98,15 +98,69 @@ window {
 }
 .module {
 }
+.module .item {
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+/* Control sliders */
+scale {
+	// border: 1px solid $red;
+	padding-right: $sep;
+	padding-left: $sep;
+}
+scale trough {
+	min-height: 5px;
+	min-width: 50px;
+	border-radius: 10px;
+
+	background-color: $nord1;
+	box-shadow: none;
+	border: none;
+}
+scale trough highlight {
+	background-color: $nord7;
+	border: 0;
+	border-radius: 10px;
+}
+/* Hide the slider while keeping it */
+scale slider {
+	background: none;
+	border: none;
+	box-shadow: none;
+}
+
+/* Fix the width of the icons to prevent unequal and changing widths */
+.controls .icon label {
+	min-width: 13px;
+}
+
+/* Colors for the brightness and volume sliders and icons */
+$volume-color: $orange;
+$brightness-color: $yellow;
+
+.volume .icon {
+	color: $volume-color;
+}
+.volume highlight {
+	background-color: $volume-color;
+}
+.brightness .icon {
+	color: $brightness-color;
+}
+.brightness highlight {
+	background-color: $brightness-color;
+}
+
 /* System info circular bars */
 .system-info .circular-progress {
 	background-color: $nord1;
-	margin: 2px;
 }
 .system-info .circular-progress label {
 	font-size: 80%;
 	margin: 5px;
 }
+
 /* Clock stuff */
 .clock .date {
 	margin-right: $sep;
