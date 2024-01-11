@@ -201,5 +201,31 @@
 		## Swaylock blue filter files
 		xdg.configFile."swaylock/effect-blue-filter".source =
 			./files/swaylock/effect-blue-filter;
+
+		# Swayidle
+		services.swayidle =
+		let 
+			lockProcess = "swaylock";
+			lockCommand = "${pkgs.swaylock}/bin/swaylock -f";
+			dpmsCommand = "${pkgs.hyprland}/bin/hyprctl dispatch dpms";
+		in
+		{
+			enable = true;
+			systemdTarget = "hyprland-session.target"; # Uses hyprctl
+			timeouts = [
+				# Main locking timeout
+				{ timeout = 600; command = lockCommand; }
+				# Timeout after locked: turn off screen
+				{
+					timeout = 15;
+					command = "if ${pkgs.procps}/bin/pgrep -x ${lockProcess}; then ${dpmsCommand} off; fi";
+					resumeCommand = "${dpmsCommand} on";
+				}
+			];
+			events = [
+				{ event = "before-sleep"; command =  lockCommand; }
+				{ event = "lock"; command =  lockCommand; }
+			];
+		};
 	};
 }
