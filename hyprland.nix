@@ -21,7 +21,6 @@
 	  # Hyprland itself
 	  wayland.windowManager.hyprland = {
 	    enable = true;
-	    # enableNvidiaPatches = true;
 	    settings = {
 
 				general = {
