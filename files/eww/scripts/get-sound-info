@@ -1,4 +1,16 @@
 #!/usr/bin/env bash
 
-jaq -nc --arg volume "$(pamixer --get-volume)" --arg muted "$(pamixer --get-mute)" '$ARGS.named'
-pactl subscribe | rg --line-buffered "sink" | while read -r UNUSED_LINE; do (jaq -nc --arg volume "$(pamixer --get-volume)" --arg muted "$(pamixer --get-mute)" '$ARGS.named'); done
+jaq -nc \
+  --arg volume "$(pamixer --get-volume)" \
+  --arg muted "$(pamixer --get-mute)" \
+  --arg mic_muted "$( if [ "$(pactl get-source-mute 0)" = "Mute: no" ]; then echo "false"; else echo "true"; fi )" \
+  '$ARGS.named'
+
+pactl subscribe | rg --line-buffered "sink|source" | while read -r UNUSED_LINE; do
+  (
+    jaq -nc \
+      --arg volume "$(pamixer --get-volume)" \
+      --arg muted "$(pamixer --get-mute)" \
+      --arg mic_muted "$( if [ "$(pactl get-source-mute 0)" = "Mute: no" ]; then echo "false"; else echo "true"; fi )" \
+      '$ARGS.named'
+  ); done

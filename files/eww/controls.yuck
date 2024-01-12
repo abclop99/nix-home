@@ -3,10 +3,12 @@
 	      :space-evenly false
 		(brightness)
 		(volume)
+		(microphone)
 	)
 )
 
-(deflisten sound_info :initial '{"volume": "100", "muted": "false"}' "bash ./scripts/get-sound-info")
+(deflisten sound_info :initial '{"volume": "50", "muted": "false", "mic_muted": "false"}' "bash ./scripts/get-sound-info")
+
 (defvar vol_reveal false)
 (defwidget volume []
 	(box :class "item"
@@ -32,6 +34,15 @@
 					; 󰕾
 				)
 			)
+		)
+	)
+)
+
+(defwidget microphone []
+	(box :class "item"
+		(eventbox :class "icon"
+		          :onclick "pactl set-source-mute 0 toggle"
+			(label :text "${sound_info.mic_muted ? "󰍭" : "󰍬" }")
 		)
 	)
 )
