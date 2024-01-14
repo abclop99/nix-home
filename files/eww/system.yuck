@@ -29,7 +29,7 @@ map(.core + \": \" + (.usage|tostring) + \", \" + (.freq/1000|tostring) ) | join
 (defwidget mem_info []
 	(circular-progress :class "item circular-progress memory"
 		:value {100 * EWW_RAM.used_mem / EWW_RAM.total_mem}
-		:tooltip "${100 * EWW_RAM.used_mem / (1024*1024*1024)} / ${EWW_RAM.total_mem / (1024*1024*1024)}"
+		:tooltip "${round(EWW_RAM.used_mem / (1024*1024*1024), 1)} GB / ${round(EWW_RAM.total_mem / (1024*1024*1024), 1)} GB"
 		:start-at 25
 		:thickness 2.5
 		:clockwise true
