@@ -150,6 +150,10 @@
           "extensions.activeThemeID" = pkgs.nur.repos.rycee.firefox-addons.theme-nord-polar-night.addonId;
           "extensions.webextensions.ExtensionStorageIDB.migrated.${pkgs.nur.repos.rycee.firefox-addons.keepassxc-browser.addonId}" = true;
 
+          # For TST userChrome CSS
+          "toolkit.legacyUserProfileCustomizations.stylesheets" = true; # Enable userChrome and userContent
+          "layout.css.has-selector.enabled" = true; # For conditionally hiding tabs
+
           "extensions.pocket.enabled" = false;
 
           "browser.newtabpage.activity-stream.showSponsored" = false;
@@ -160,7 +164,12 @@
           "privacy.trackingprotection.socialtracking.enabled" = true;
         };
 
-        # userchrome = "";
+        userChrome = ''
+          /* Hide horizontal tabs at top of the window when TST visible */
+          html#main-window body:has(#sidebar-box[sidebarcommand=treestyletab_piro_sakura_ne_jp-sidebar-action][checked=true]) #TabsToolbar {
+            visibility: collapse !important;
+          }
+        '';
         # userContent = "";
       };
       
