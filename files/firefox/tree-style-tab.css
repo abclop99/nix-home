@@ -1,0 +1,40 @@
+/*
+  User style sheet for Tree Style Tab
+
+  Should be put entered into the TST preferences page under the "Advanced"
+  section.
+*/
+
+/* Show title of unread tabs with red and italic font */
+:root.sidebar tab-item.unread .label-content {
+  color: red !important;
+  font-style: italic !important;
+}
+
+/* Add private browsing indicator per tab */
+/*
+:root.sidebar tab-item.private-browsing tab-label:before {
+  content: "🕶";
+}
+*/
+
+/* Disable indent when collapsed */
+:root:not(:hover) tab-item tab-item-substance {
+  margin-left: 0 !important;
+}
+
+/* Hide label in collapsed state */
+:root:not(:hover) tab-item .label {
+  display: none;
+}
+
+/* Hide close buttons in collapsed state. */
+tab-item:not(:hover) .closebox {
+    visibility: collapse;
+}
+
+/* Center new tab sign when collapsed */
+root:not(:hover) .newtab-button {
+  outline: 1px solid mageta;
+  padding-left: 0.48em !important;
+}
