@@ -4,6 +4,7 @@
 
   imports = [
     ./hyprland.nix
+    ./firefox.nix
   ];
 
   config = {
@@ -167,12 +168,6 @@
       enable = true;
     };
 
-    # Firefox
-    programs.firefox = {
-      enable = true;
-      # TODO: profile settings, such as userchrome, extensions, etc.
-    };
-
     # Gammastep: blue light filter
     services.gammastep =
     let 
@@ -204,6 +199,10 @@
     fonts.fontconfig.enable = true;
     # Manual fontconfig configuration because HM doesn't do it
     xdg.configFile."fontconfig/fonts.conf".source = ./files/fontconfig/fonts.conf;
+
+    # Nixpkgs config file
+    nixpkgs.config = import ./nixpkgs-config.nix;
+    xdg.configFile."nixpkgs/config.nix".source = ./nixpkgs-config.nix;
 
     # Home Manager can also manage your environment variables through
     # 'home.sessionVariables'. If you don't want to manage your shell through Home
