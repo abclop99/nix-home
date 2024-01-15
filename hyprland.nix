@@ -158,6 +158,28 @@
 				
 	    };
 	  };
+
+		# Cursors
+		home.pointerCursor = {
+			gtk.enable = true;
+			x11.enable = true;
+			name = "breeze_cursors";
+			size = 16;
+			package = pkgs.libsForQt5.breeze-gtk;
+		};
+
+		# Theme
+		gtk = {
+			enable = true;
+			theme = {
+				name = "Nordic";
+				package = pkgs.nordic;
+			};
+		};
+		qt = {
+			enable = true;
+			platformTheme = "gtk";
+		};
 	
 	  # Menu program
 	  programs.wofi.enable = true;
