@@ -4,8 +4,8 @@
 
 		# Other packages
 		home.packages = with pkgs; [
-	    networkmanagerapplet    # Systray for NetworkManager
-	    grimblast               # Screenshot tool for hyprland
+			networkmanagerapplet    # Systray for NetworkManager
+			grimblast               # Screenshot tool for hyprland
 			swaynotificationcenter  # Notification center
 			
 			# Used in eww's scripts
@@ -18,32 +18,32 @@
 			brightnessctl           # Brightness control
 		];
 	
-	  # Hyprland itself
-	  wayland.windowManager.hyprland = {
-	    enable = true;
-	    settings = {
+		# Hyprland itself
+		wayland.windowManager.hyprland = {
+			enable = true;
+			settings = {
 
 				general = {
 					gaps_in = 5;
 					gaps_out = 20;
 				};
 				
-	      decoration = {
-	        rounding = 5;
+				decoration = {
+					rounding = 5;
 
-	        blur = {
-	          enabled = true;
-	          size = 3;
-	          passes = 1;
+					blur = {
+						enabled = true;
+						size = 3;
+						passes = 1;
 
-	          vibrancy = 0.1696;
-	        };
+						vibrancy = 0.1696;
+					};
 
-	        drop_shadow = true;
-	        shadow_range = 4;
-	        shadow_render_power = 3;
-	        "col.shadow" = "rgba(1a1a1aee)";
-	      };
+					drop_shadow = true;
+					shadow_range = 4;
+					shadow_render_power = 3;
+					"col.shadow" = "rgba(1a1a1aee)";
+				};
 
 				misc = {
 					# Disable hypr-chan
@@ -51,44 +51,44 @@
 					# Variable refresh rate
 					vrr = 1;
 				};
-      
-	      # Define programs to use
-	      "$bar" = "eww open bar";
-	      # "$browser" = "firefox";
-	      "$terminal" = "kitty";
-	      "$menu" = "pkill wofi; wofi --show drun";
+
+				# Define programs to use
+				"$bar" = "eww open bar";
+				# "$browser" = "firefox";
+				"$terminal" = "kitty";
+				"$menu" = "pkill wofi; wofi --show drun";
 				"$lock" = "swaylock";
 				"$notif" = "swaync";
 
-	      # Execute programs at launch
-	      "exec-once" = [
-	        "$bar"
-	        "nm-applet --indicator"
+				# Execute programs at launch
+				"exec-once" = [
+					"$bar"
+					"nm-applet --indicator"
 					"$notif"
-	      ];
+				];
 
-	      # Input config
-	      input = {
-	        kb_layout = "us,apl";
-	        kb_variant = "norman,";
-	        kb_options = "eurosign:e, caps:escape, grp:switch";
+				# Input config
+				input = {
+					kb_layout = "us,apl";
+					kb_variant = "norman,";
+					kb_options = "eurosign:e, caps:escape, grp:switch";
 
-	        touchpad = {
-	          natural_scroll = true;
-	        };
-	      };
-      
-	      # Super (win) key for modifier
-	      "$mod" = "SUPER";
+					touchpad = {
+						natural_scroll = true;
+					};
+				};
 
-	      # Binds
-	      # Super key on its own -> menu
-	      # bindr = "SUPER, SUPER_L, exec, $menu";
-	      bind = [
+				# Super (win) key for modifier
+				"$mod" = "SUPER";
+
+				# Binds
+				# Super key on its own -> menu
+				# bindr = "SUPER, SUPER_L, exec, $menu";
+				bind = [
 					# Keybinds for launching stuff
-	        "$mod, D, exec, $menu"
-	        "$mod, RETURN, exec, $terminal"
-	        ", Print, exec, grimblast copy area"
+					"$mod, D, exec, $menu"
+					"$mod, RETURN, exec, $terminal"
+					", Print, exec, grimblast copy area"
 					"$mod, L, exec, $lock"
 
 					## Keybinds for window managment
@@ -132,22 +132,22 @@
 					# TODO: What does this do?
 					"$mod, S, togglespecialworkspace, magic"
 					"$mod SHIFT, S, togglespecialworkspace, special:magic"
-	      ]
-	      ++ (
-	        # workspaces Shortcuts
-	        # binds $mod + [shift +] {1..10} to [move to] workspace {1..10}
-	        builtins.concatLists (builtins.genList (
-	          x: let
-	            ws = let
-	              c = (x + 1) / 10;
-	            in
-	              builtins.toString (x + 1 - (c * 10));
-	          in [
-	            "$mod, ${ws}, workspace, ${toString (x + 1)}"
-	            "$mod SHIFT, ${ws}, movetoworkspace, ${toString (x + 1)}"
-	          ]
-	        ) 10)
-	      );
+				]
+				++ (
+					# workspaces Shortcuts
+					# binds $mod + [shift +] {1..10} to [move to] workspace {1..10}
+					builtins.concatLists (builtins.genList (
+						x: let
+							ws = let
+								c = (x + 1) / 10;
+							in
+								builtins.toString (x + 1 - (c * 10));
+						in [
+							"$mod, ${ws}, workspace, ${toString (x + 1)}"
+							"$mod SHIFT, ${ws}, movetoworkspace, ${toString (x + 1)}"
+						]
+					) 10)
+				);
 
 				# Move/resize mouse with mod + LMB/RMB and dragging
 				# TODO: Doesn't seem to be working
@@ -156,8 +156,8 @@
 					"$mod, mouse:273, resizeWindow"
 				];
 				
-	    };
-	  };
+			};
+		};
 
 		# Cursors
 		home.pointerCursor = {
@@ -181,10 +181,10 @@
 			platformTheme = "gtk";
 		};
 	
-	  # Menu program
-	  programs.wofi.enable = true;
+		# Menu program
+		programs.wofi.enable = true;
 	
-	  # Bar program
+		# Bar program
 		programs.eww = {
 			enable = true;
 			configDir = ./files/eww;
