@@ -127,6 +127,9 @@
             select = "underline";
           };
           indent-guides.render = true;
+          whitespace.render = {
+            nbsp = "all";
+          };
           soft-wrap.enable = true;
           lsp.display-messages = true;
           statusline.left = ["mode" "spinner" "version-control" "file-name"];
