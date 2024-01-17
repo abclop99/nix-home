@@ -150,10 +150,10 @@
 				);
 
 				# Move/resize mouse with mod + LMB/RMB and dragging
-				# TODO: Doesn't seem to be working
 				bindm = [
-					"$mod, mouse:272, moveWindow"
-					"$mod, mouse:273, resizeWindow"
+					"$mod, mouse:272, movewindow"
+					"$mod, mouse:273, resizewindow"
+					"$mod ALT, mouse:272, resizewindow"
 				];
 				
 			};
