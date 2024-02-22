@@ -149,9 +149,9 @@
       userEmail = "a1li@ucsd.edu";
 
       # Enable signing if key is given in a file
-      signing = if (builtins.pathExists ./gpg-key-fingerprint.secret) then {
+      signing = if (builtins.pathExists ./private/gpg-key-fingerprint) then {
         signByDefault = true;
-        key = (builtins.readFile ./gpg-key-fingerprint.secret);
+        key = (builtins.readFile ./private/gpg-key-fingerprint);
       } else {
         key = null;
       };
@@ -174,7 +174,7 @@
     # Gammastep: blue light filter
     services.gammastep =
     let 
-      location = builtins.fromJSON( builtins.readFile( ./location.json.secret ) );
+      location = builtins.fromJSON( builtins.readFile( ./private/location.json ) );
     in
     {
       enable = true;
