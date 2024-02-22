@@ -19,6 +19,12 @@
           tree-style-tab
 
           # TST add-ons
+          copy-selected-tabs-to-clipboard
+          move-unloaded-tabs-for-tst
+          multiple-tab-handler
+          tst-indent-line
+          tst-lock-tree-collapsed
+          tst-more-tree-commands
           tst-wheel-and-double
 
           # Theme
@@ -36,9 +42,12 @@
           auto-tab-discard
           darkreader
           dearrow
+          qr-code-address-bar
           sponsorblock
+          tridactyl        # Vim-like interface for Firefox
           ublacklist
           unpaywall
+          user-agent-string-switcher
 
           # Customization
           violentmonkey
