@@ -57,6 +57,8 @@
       nil            # Nix lsp for helix
 
       keepassxc      # Password manager
+
+      blender        # VR Interview work
     ];
 
     ## Configure shell
