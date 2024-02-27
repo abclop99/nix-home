@@ -173,6 +173,9 @@
         key = null;
       };
 
+      # Delta syntax highlighter
+      delta.enable = true;
+
       extraConfig = {
         init.defaultBranch = "main";
         push.autoSetupRemote = true;
