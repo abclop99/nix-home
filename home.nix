@@ -55,6 +55,8 @@
       tree           # tree view ls thing
 
       nil            # Nix lsp for helix
+
+      keepassxc      # Password manager
     ];
 
     ## Configure shell
@@ -181,6 +183,12 @@
       provider = "manual";
       latitude = location.latitude;
       longitude = location.longitude;
+    };
+
+    # Syncthing: syncs files between computers
+    services.syncthing = {
+      enable = true;
+      tray.enable = true;
     };
 
     # Home Manager is pretty good at managing dotfiles. The primary way to manage
