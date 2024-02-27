@@ -59,6 +59,7 @@
       keepassxc      # Password manager
 
       blender        # VR Interview work
+      multiviewer-for-f1 # F1 Multiviewer for watching F1 & stuff (unfree)
     ];
 
     ## Configure shell
