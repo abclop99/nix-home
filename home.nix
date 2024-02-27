@@ -67,6 +67,18 @@
       enable = true;
       enableFishIntegration = true;
     };
+    programs.fzf = {
+      enable = true;
+      enableFishIntegration = true;
+    };
+    # Enable zoxide (better cd)
+    programs.zoxide = {
+      enable = true;
+      enableFishIntegration = true;
+      options = [
+        "--cmd cd"
+      ];
+    };
     # Starship prompt
     programs.starship = {
       enable = true;
