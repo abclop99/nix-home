@@ -53,6 +53,7 @@
       bat            # Fancy `cat` clone
       ripgrep        # Better grep in rust
       tree           # tree view ls thing
+      mosh           # Mobile shell: smarter SSH
 
       nil            # Nix lsp for helix
 
@@ -104,6 +105,19 @@
     programs.thefuck = {
       enable = true;
       enableFishIntegration = true;
+    };
+
+    # SSH config
+    programs.ssh = {
+      enable = true;
+      compression = true;
+      controlMaster = "auto";
+      forwardAgent = true;
+      extraConfig = if (builtins.pathExists ./private/ssh/config) then 
+        (builtins.readFile ./private/ssh/config)
+      else
+        ""
+      ;
     };
 
     # Virtual terminal program
