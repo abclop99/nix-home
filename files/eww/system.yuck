@@ -4,6 +4,7 @@
 				:space-evenly false
 		(cpu_info)
 		(mem_info)
+		(battery_info)
 	)
 )
 
@@ -35,5 +36,17 @@ map(.core + \": \" + (.usage|tostring) + \", \" + (.freq/1000|tostring) ) | join
 		:clockwise true
 
 		""
+	)
+)
+
+(defwidget battery_info []
+	(circular-progress :class "item circular-progress battery"
+		:value {EWW_BATTERY.total_avg}
+		:tooltip EWW_BATTERY
+		:start-at 25
+		:thickness 2.5
+		:clockwise true
+
+		"󰂑"
 	)
 )
