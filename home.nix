@@ -54,6 +54,8 @@
       ripgrep        # Better grep in rust
       tree           # tree view ls thing
       mosh           # Mobile shell: smarter SSH
+      feh            # Image viewer
+      mpv            # Command line media player
 
       nil            # Nix lsp for helix
 
