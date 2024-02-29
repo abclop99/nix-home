@@ -16,6 +16,7 @@
 			pamixer                 # Volume info and control
 			pulseaudio              # pactl subscribe
 			brightnessctl           # Brightness control
+			bemenu                  # Menu program (launcher)
 		];
 	
 		# Hyprland itself
@@ -56,7 +57,7 @@
 				"$bar" = "eww open bar";
 				# "$browser" = "firefox";
 				"$terminal" = "kitty";
-				"$menu" = "pkill wofi; wofi --show drun";
+				"$menu" = "bemenu-run";
 				"$lock" = "swaylock";
 				"$notif" = "swaync";
 
@@ -195,9 +196,6 @@
 			enable = true;
 			platformTheme = "gtk";
 		};
-	
-		# Menu program
-		programs.wofi.enable = true;
 	
 		# Bar program
 		programs.eww = {
