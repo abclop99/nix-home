@@ -86,7 +86,7 @@
 				# bindr = "SUPER, SUPER_L, exec, $menu";
 				bind = [
 					# Keybinds for launching stuff
-					"$mod, D, exec, $menu"
+					"$mod, SPACE, exec, $menu"
 					"$mod, RETURN, exec, $terminal"
 					", Print, exec, grimblast copy area"
 					"$mod, L, exec, $lock"
