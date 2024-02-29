@@ -155,6 +155,21 @@
 					"$mod, mouse:273, resizewindow"
 					"$mod ALT, mouse:272, resizewindow"
 				];
+
+				# Window rules
+				windowrulev2 = [
+					# Add slight transparency to non-fullscreen windows
+					"opacity 0.95,fullscreen:0"
+					
+					# Floating, pinned, small in corner Picure-in-Picture window
+					"float,class:firefox,title:Picture-in-Picture"
+					"pin,class:firefox,title:Picture-in-Picture"
+					"size 240 135,class:firefox,title:Picture-in-Picture"
+					"move 990 550,class:firefox,title:Picture-in-Picture"
+					# Make slightly transparent when not fullscreen
+					"opacity 0.9,class:firefox,title:Picture-in-Picture,fullscreen:0"
+					# TODO: Allow fullscreen for P-i-P
+				];
 				
 			};
 		};
