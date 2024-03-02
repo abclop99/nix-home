@@ -40,13 +40,33 @@ map(.core + \": \" + (.usage|tostring) + \", \" + (.freq/1000|tostring) ) | join
 )
 
 (defwidget battery_info []
-	(circular-progress :class "item circular-progress battery"
+	(circular-progress
+		:class "item circular-progress battery ${
+			EWW_BATTERY.total_avg < 20 ? "low" :
+			EWW_BATTERY.total_avg < 90 ? "medium" :
+			"high"
+		}"
 		:value {EWW_BATTERY.total_avg}
 		:tooltip EWW_BATTERY
 		:start-at 25
 		:thickness 2.5
 		:clockwise true
 
-		"󰂑"
+		(label 
+		
+			:text "${
+				EWW_BATTERY.BAT0?.status == "Charging" ? "󰂄" :
+				EWW_BATTERY.BAT0?.status == "Discharging" ? "󰁹" :
+				EWW_BATTERY.BAT0?.status == "Not charging" ? "󰁹" :
+				"󰂑" ; Fallback battery symbol
+			}"
+
+			:class "${
+				EWW_BATTERY.BAT0?.status == "Charging" ? "charging" :
+				EWW_BATTERY.BAT0?.status == "Discharging" ? "discharging" :
+				EWW_BATTERY.BAT0?.status == "Not charging" ? "not_charging" :
+				"unknown" ; Fallback battery symbol
+			}"
+		)
 	)
 )

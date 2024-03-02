@@ -161,6 +161,33 @@ $brightness-color: $yellow;
 	margin: 5px;
 }
 
+/* System info battery */
+.system-info .circular-progress.battery.low {
+	color: $red;
+}
+.system-info .circular-progress.battery.medium {
+	color: $fg_color;
+}
+.system-info .circular-progress.battery.high {
+	color: $green;
+}
+.system-info .circular-progress.battery label {
+	font-size: 80%;
+	margin: 6px;
+}
+.system-info .circular-progress.battery label.charging {
+	color: $green;
+}
+.system-info .circular-progress.battery label.discharging {
+	color: $yellow;
+}
+.system-info .circular-progress.battery label.not_charging {
+	color: $fg_color;
+}
+.system-info .circular-progress.battery label.unknown {
+	color: $purple;
+}
+
 /* Clock stuff */
 .clock .date {
 	margin-right: $sep;
