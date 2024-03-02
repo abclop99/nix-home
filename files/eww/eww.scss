@@ -184,6 +184,9 @@ $brightness-color: $yellow;
 .system-info .circular-progress.battery label.not_charging {
 	color: $fg_color;
 }
+.system-info .circular-progress.battery label.full {
+	color: $green;
+}
 .system-info .circular-progress.battery label.unknown {
 	color: $purple;
 }

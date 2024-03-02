@@ -58,6 +58,7 @@ map(.core + \": \" + (.usage|tostring) + \", \" + (.freq/1000|tostring) ) | join
 				EWW_BATTERY.BAT0?.status == "Charging" ? "󰂄" :
 				EWW_BATTERY.BAT0?.status == "Discharging" ? "󰁹" :
 				EWW_BATTERY.BAT0?.status == "Not charging" ? "󰁹" :
+				EWW_BATTERY.BAT0?.status == "Full" ? "󰁹" :
 				"󰂑" ; Fallback battery symbol
 			}"
 
@@ -65,6 +66,7 @@ map(.core + \": \" + (.usage|tostring) + \", \" + (.freq/1000|tostring) ) | join
 				EWW_BATTERY.BAT0?.status == "Charging" ? "charging" :
 				EWW_BATTERY.BAT0?.status == "Discharging" ? "discharging" :
 				EWW_BATTERY.BAT0?.status == "Not charging" ? "not_charging" :
+				EWW_BATTERY.BAT0?.status == "Full" ? "full" :
 				"unknown" ; Fallback battery symbol
 			}"
 		)
