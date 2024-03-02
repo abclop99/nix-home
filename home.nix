@@ -16,6 +16,8 @@
 
     # Manage XDG directories
     xdg.enable = true;
+    xdg.userDirs.enable = true;
+    xdg.userDirs.createDirectories = true;
 
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
@@ -56,6 +58,7 @@
       mosh           # Mobile shell: smarter SSH
       feh            # Image viewer
       mpv            # Command line media player
+      mpc-cli        # CLI interface for MPD
 
       nil            # Nix lsp for helix
 
@@ -223,6 +226,11 @@
     services.syncthing = {
       enable = true;
       tray.enable = true;
+    };
+
+    # Media player daemon
+    services.mpd = {
+      enable = true;
     };
 
     # Home Manager is pretty good at managing dotfiles. The primary way to manage
