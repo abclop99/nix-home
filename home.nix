@@ -64,7 +64,7 @@
 
       keepassxc      # Password manager
 
-      blender        # VR Interview work
+      (blender.override { cudaSupport = true; })        # VR Interview work & 3D modeling
       multiviewer-for-f1 # F1 Multiviewer for watching F1 & stuff (unfree)
     ];
 
