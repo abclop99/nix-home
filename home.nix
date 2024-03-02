@@ -233,6 +233,10 @@
       enable = true;
     };
 
+    # udisk2 front-end with auto-mount
+    services.udiskie.enable = true;
+    # In configuration.nix: services.udisks2.enable = true;
+
     # Home Manager is pretty good at managing dotfiles. The primary way to manage
     # plain files is through 'home.file'.
     home.file = {
