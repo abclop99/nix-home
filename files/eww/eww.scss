@@ -172,6 +172,7 @@ $brightness-color: $yellow;
 	color: $green;
 }
 .system-info .circular-progress.battery label {
+	color: $fg_color;
 	font-size: 80%;
 	margin: 6px;
 }
