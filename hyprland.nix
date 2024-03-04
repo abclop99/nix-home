@@ -70,10 +70,15 @@
 
 				# Input config
 				input = {
+					# Keyboard layout
 					kb_layout = "us,apl";
 					kb_variant = "norman,";
 					kb_options = "eurosign:e, caps:escape, grp:switch";
 
+					# Enable numlock by default
+					numlock_by_default = true;
+
+					# Touchpad scroll direction
 					touchpad = {
 						natural_scroll = true;
 					};
