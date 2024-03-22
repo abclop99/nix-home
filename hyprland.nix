@@ -24,6 +24,19 @@
 			enable = true;
 			settings = {
 
+				env = [
+          # "LIBVA_DRIVER_NAME,nvidia"
+          # "XDG_SESSION_TYPE,wayland"
+          "WLR_NO_HARDWARE_CURSORS,1"
+        ];
+
+				monitor = [
+					# Laptop display
+					"eDP-1, 1920x1080, 0x0, 1.25"
+					# Default, any random monitor connected. Automatically placed to the right
+					",preferred,auto,1"
+				];
+
 				general = {
 					gaps_in = 5;
 					gaps_out = 20;
@@ -133,6 +146,16 @@
 					"$mod SHIFT, n, movewindow, u"
 					"$mod SHIFT, i, movewindow, d"
 					"$mod SHIFT, o, movewindow, r"
+
+					# Move workspaces between monitors
+					"$mod CTRL, left, movecurrentworkspacetomonitor, l"
+					"$mod CTRL, up, movecurrentworkspacetomonitor, u"
+					"$mod CTRL, down, movecurrentworkspacetomonitor, d"
+					"$mod CTRL, right, movecurrentworkspacetomonitor, r"
+					"$mod CTRL, y, movecurrentworkspacetomonitor, l"
+					"$mod CTRL, n, movecurrentworkspacetomonitor, u"
+					"$mod CTRL, i, movecurrentworkspacetomonitor, d"
+					"$mod CTRL, o, movecurrentworkspacetomonitor, r"
 
 					# Special workspace (scratchpad)
 					# TODO: What does this do?
