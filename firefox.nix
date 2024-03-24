@@ -56,50 +56,6 @@
           keepassxc-browser
         ];
 
-        # Multi-accout containers
-        containers = {
-          "Personal" = {
-            id = 1;
-            color = "blue";
-            icon = "fingerprint";
-          };
-          "Work" = {
-            id = 2;
-            color = "orange";
-            icon = "briefcase";
-          };
-          "Banking" = {
-            id = 3;
-            color = "green";
-            icon = "dollar";
-          };
-          "Shopping" = {
-            id = 4;
-            color = "pink";
-            icon = "cart";
-          };
-          "Entertainment" = {
-            id = 5;
-            color = "red";
-            icon = "chill";
-          };
-          "Miscellaneous" = {
-            id = 6;
-            color = "yellow";
-            icon = "circle";
-          };
-          "Search" = {
-            id = 7;
-            color = "turquoise";
-            icon = "chill";
-          };
-          "Facebook" = {
-            id = 255;
-            color = "toolbar";
-            icon = "fence";
-          };
-        };
-
         search = {
           default = "Bing";
           privateDefault = "Ecosia";
