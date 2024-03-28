@@ -145,7 +145,14 @@
       };
 
       font = {
-        name = "VictorMono Nerd Font";
+        name = "VictorMono NF";
+        package = pkgs.nerdfonts.override {
+          fonts = [
+            "FiraCode"
+            "VictorMono"
+            "NerdFontsSymbolsOnly"
+          ];
+        };
       };
     };
 
