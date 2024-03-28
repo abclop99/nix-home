@@ -84,11 +84,13 @@
     programs.fzf = {
       enable = true;
       enableFishIntegration = true;
+      enableBashIntegration = true;
     };
     # Enable zoxide (better cd)
     programs.zoxide = {
       enable = true;
       enableFishIntegration = true;
+      enableBashIntegration = true;
       options = [
         "--cmd cd"
       ];
@@ -97,6 +99,7 @@
     programs.starship = {
       enable = true;
       enableFishIntegration = true;
+      enableBashIntegration = true;
       enableTransience = true;
       settings = {
         "$schema" = "https://starship.rs/config-schema.json";
@@ -115,6 +118,7 @@
     programs.thefuck = {
       enable = true;
       enableFishIntegration = true;
+      enableBashIntegration = true;
     };
 
     # SSH config
@@ -134,6 +138,7 @@
     programs.kitty = {
       enable = true;
       shellIntegration.enableFishIntegration = true;
+      shellIntegration.enableBashIntegration = true;
       settings = {
         tab_bar_style = "powerline";
         tab_powerline_style = "slanted";
