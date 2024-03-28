@@ -51,6 +51,7 @@
       # '')
 
       pinentry       # GPG passphrase input
+      pavucontrol    # Audio control panel
 
       bat            # Fancy `cat` clone
       ripgrep        # Better grep in rust
@@ -59,13 +60,17 @@
       feh            # Image viewer
       mpv            # Command line media player
       mpc-cli        # CLI interface for MPD
+      zathura        # PDF reader
 
       nil            # Nix lsp for helix
 
       keepassxc      # Password manager
 
-      (blender.override { cudaSupport = true; })        # VR Interview work & 3D modeling
+      # (blender.override { cudaSupport = true; })        # VR Interview work & 3D modeling
+      blender
       multiviewer-for-f1 # F1 Multiviewer for watching F1 & stuff (unfree)
+      zoom-us         # Video meetings
+      prismlauncher   # Minceraft launcher
     ];
 
     ## Configure shell
