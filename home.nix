@@ -230,11 +230,27 @@
     # Gammastep: blue light filter
     services.gammastep =
     let 
-      location = builtins.fromJSON( builtins.readFile( ./private/location.json ) );
+
+      # location = if (builtins.pathExists ./private/location.json ) then {
+      #   f = builtins.fromJSON( builtins.readFile( ./private/location.json ));
+      # } else {
+      #   longitude = null;
+      #   latitude = null;
+      # };
+      # # location = builtins.fromJSON( builtins.readFile( ./private/location.json ) );
+
+      # key = if builtins.pathExists ./path then "woot" else "bummer";
+
+      location = if (builtins.pathExists ./private/location.json ) then
+        builtins.fromJSON( builtins.readFile( ./private/location.json ))
+      else {
+        longitude = null;
+        latitude = null;
+      };
     in
     {
       enable = true;
-      provider = "manual";
+      provider = "geoclue2";
       latitude = location.latitude;
       longitude = location.longitude;
     };
