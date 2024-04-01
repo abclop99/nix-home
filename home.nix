@@ -168,6 +168,8 @@
           ];
         };
       };
+
+      theme = "Catppuccin-Frappe";
     };
 
     # Helix configuration
