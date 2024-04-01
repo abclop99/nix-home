@@ -69,6 +69,7 @@
       mpv            # Command line media player
       mpc-cli        # CLI interface for MPD
       zathura        # PDF reader
+      zellij
 
       nil            # Nix lsp for helix
 
