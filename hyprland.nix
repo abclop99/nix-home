@@ -32,7 +32,8 @@
 
 				monitor = [
 					# Laptop display
-					"eDP-1, 1920x1080, 0x0, 1.25"
+					"eDP-1, preferred, 0x0, 1.25"
+					"desc:LG Electronics LG FHD 0x01010101, preferred, -1745x-360, 1.1"
 					# Default, any random monitor connected. Automatically placed to the right
 					",preferred,auto,1"
 				];
@@ -192,13 +193,16 @@
 				bindm = [
 					"$mod, mouse:272, movewindow"
 					"$mod, mouse:273, resizewindow"
-					"$mod ALT, mouse:272, resizewindow"
+					"$mod SHIFT, mouse:272, resizewindow"
 				];
 
 				# Window rules
 				windowrulev2 = [
 					# Add slight transparency to non-fullscreen windows
 					"opacity 0.95,fullscreen:0"
+
+					# Inhibit idle when fullscreen
+					"idleinhibit fullscreen,fullscreen:1"
 					
 					# Floating, pinned, small in corner Picure-in-Picture window
 					"float,class:firefox,title:Picture-in-Picture"
