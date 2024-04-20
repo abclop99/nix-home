@@ -62,18 +62,21 @@
       pavucontrol    # Audio control panel
 
       bat            # Fancy `cat` clone
+      uutils-coreutils-noprefix   # Rust rewrite of GNU coreutils
       ripgrep        # Better grep in rust
-      tree           # tree view ls thing
+      eza            # Better ls
       mosh           # Mobile shell: smarter SSH
       feh            # Image viewer
       mpv            # Command line media player
       mpc-cli        # CLI interface for MPD
       zathura        # PDF reader
-      zellij
+      zellij         # Terminal multiplexer and session thing
+      wl-clipboard   # Copy and paste
 
       nil            # Nix lsp for helix
 
       keepassxc      # Password manager
+      glxinfo        # For glxgears to force screen to update every frame instead of delayed by 1 frame
 
       # (blender.override { cudaSupport = true; })        # VR Interview work & 3D modeling
       blender
@@ -84,7 +87,21 @@
 
     ## Configure shell
     # Use Fish shell
-    programs.fish.enable = true;
+    programs.fish = {
+      enable = true;
+      shellAliases = {
+        eza = "eza --icons=auto --dereference --color-scale=all --smart-group --header";
+      };
+      shellAbbrs = {
+        ls = "eza";
+        ll = "eza -l";
+        la = "eza -a";
+        lla = "eza -laa";
+
+        tree = "eza --tree";
+      };
+    };
+    #
     # Enable atuin in Fish
     programs.atuin = {
       enable = true;
