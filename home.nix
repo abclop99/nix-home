@@ -72,6 +72,7 @@
       zathura        # PDF reader
       zellij         # Terminal multiplexer and session thing
       wl-clipboard   # Copy and paste
+      git-annex      # Manage files between remotes with git
 
       nil            # Nix lsp for helix
 
@@ -83,6 +84,7 @@
       multiviewer-for-f1 # F1 Multiviewer for watching F1 & stuff (unfree)
       zoom-us         # Video meetings
       prismlauncher   # Minceraft launcher
+      calibre         # Ebook reader and manager
     ];
 
     ## Configure shell
@@ -99,6 +101,8 @@
         lla = "eza -laa";
 
         tree = "eza --tree";
+
+        ga = "git annex";
       };
     };
     #
