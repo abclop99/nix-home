@@ -93,7 +93,7 @@
     programs.fish = {
       enable = true;
       shellAliases = {
-        eza = "eza --icons=auto --dereference --color-scale=all --smart-group --header";
+        eza = "eza --icons=auto --dereference --color-scale=all --group --smart-group --header";
       };
       shellAbbrs = {
         ls = "eza";
