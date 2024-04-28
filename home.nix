@@ -5,6 +5,7 @@
   imports = [
     ./hyprland.nix
     ./firefox.nix
+    ./librewolf.nix
   ];
 
   config = {
