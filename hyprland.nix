@@ -96,6 +96,9 @@
 					touchpad = {
 						natural_scroll = true;
 					};
+
+					# Fix menus closing immediately
+					# mouse_refocus=false;
 				};
 
 				# Super (win) key for modifier
@@ -212,6 +215,10 @@
 					# Make slightly transparent when not fullscreen
 					"opacity 0.9,class:firefox,title:Picture-in-Picture,fullscreen:0"
 					# TODO: Allow fullscreen for P-i-P
+
+					# Fix menus closing in a few applications
+					"stayfocused, title:^()$,class:^(steam)$"
+					"stayfocused, title:^()$,class:^(zoom)$"
 				];
 				
 			};
