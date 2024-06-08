@@ -41,7 +41,9 @@
 				:halign "end"
 				:class "section right"
 
-		"Systray"
+		(systray
+			:orientation 'h'
+		)
 		(sep)
 		(controls)
 		(sep)

@@ -32,8 +32,8 @@
 
 				monitor = [
 					# Laptop display
-					"eDP-1, preferred, 0x0, 1.25"
-					"desc:LG Electronics LG FHD 0x01010101, preferred, -1745x-360, 1.1"
+					"eDP-1, preferred, 0x0, 1.2"
+					"desc:LG Electronics LG FHD 0x01010101, preferred, -1600x-360, 1.0"
 					# Default, any random monitor connected. Automatically placed to the right
 					",preferred,auto,1"
 				];
@@ -243,14 +243,14 @@
 		};
 		qt = {
 			enable = true;
-			platformTheme = "gtk";
+			platformTheme.name = "gtk";
 		};
 	
 		# Bar program
 		programs.eww = {
 			enable = true;
 			configDir = ./files/eww;
-			package = pkgs.eww-wayland;
+			package = pkgs.eww;
 		};
 
 		# Lock screen program
