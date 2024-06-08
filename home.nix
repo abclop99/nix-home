@@ -262,6 +262,15 @@
       enable = true;
     };
 
+    programs.thunderbird = {
+      enable = true;
+
+      profiles.default = {
+        isDefault = true;
+        withExternalGnupg = true;
+      };
+    };
+
     # Gammastep: blue light filter
     services.gammastep =
     let 
