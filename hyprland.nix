@@ -33,7 +33,7 @@
 				monitor = [
 					# Laptop display
 					"eDP-1, preferred, 0x0, 1.2"
-					"desc:LG Electronics LG FHD 0x01010101, preferred, -1600x-360, 1.0"
+					"desc:LG Electronics LG FHD 0x01010101, preferred, -1920x-360, 1.0"
 					# Default, any random monitor connected. Automatically placed to the right
 					",preferred,auto,1"
 				];
@@ -78,8 +78,11 @@
 				# Execute programs at launch
 				"exec-once" = [
 					"$bar"
-					"nm-applet --indicator"
 					"$notif"
+
+					# Systray items
+					"nm-applet --indicator"
+					"systemctl --user start blueman-applet.service"
 				];
 
 				# Input config
