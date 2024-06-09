@@ -145,14 +145,25 @@
 					"$mod, o, movefocus, r"
 
 					# Move windows using mod + arrow keys
-					"$mod SHIFT, left, movewindow, l"
-					"$mod SHIFT, up, movewindow, u"
-					"$mod SHIFT, down, movewindow, d"
-					"$mod SHIFT, right, movewindow, r"
-					"$mod SHIFT, y, movewindow, l"
-					"$mod SHIFT, n, movewindow, u"
-					"$mod SHIFT, i, movewindow, d"
-					"$mod SHIFT, o, movewindow, r"
+					# Will move windows in/out of groups
+					"$mod SHIFT, left, movewindoworgroup, l"
+					"$mod SHIFT, up, movewindoworgroup, u"
+					"$mod SHIFT, down, movewindoworgroup, d"
+					"$mod SHIFT, right, movewindoworgroup, r"
+					"$mod SHIFT, y, movewindoworgroup, l"
+					"$mod SHIFT, n, movewindoworgroup, u"
+					"$mod SHIFT, i, movewindoworgroup, d"
+					"$mod SHIFT, o, movewindoworgroup, r"
+
+					# Move windows or full groups using mod + arrow keys
+					"$mod CTRL SHIFT, left, movewindow, l"
+					"$mod CTRL SHIFT, up, movewindow, u"
+					"$mod CTRL SHIFT, down, movewindow, d"
+					"$mod CTRL SHIFT, right, movewindow, r"
+					"$mod CTRL SHIFT, y, movewindow, l"
+					"$mod CTRL SHIFT, n, movewindow, u"
+					"$mod CTRL SHIFT, i, movewindow, d"
+					"$mod CTRL SHIFT, o, movewindow, r"
 
 					# Move workspaces between monitors
 					"$mod CTRL, left, movecurrentworkspacetomonitor, l"
