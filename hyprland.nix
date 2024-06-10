@@ -81,6 +81,7 @@
 					"$notif"
 
 					# Systray items
+					"keepassc"
 					"nm-applet --indicator"
 					"systemctl --user start blueman-applet.service"
 				];
