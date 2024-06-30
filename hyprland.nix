@@ -284,8 +284,8 @@
 						monitor = "";
 						path = "screenshot";
 
-						blur_passes = 1;
-						blur_size = 7;
+						blur_passes = 3;
+						blur_size = 3;
 						noise = 0.0117;
 					}
 				];
