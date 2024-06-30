@@ -321,6 +321,22 @@
 						    halign = "center";
 						    valign = "center";
 					}
+					{
+								# Show fail reason and number of attempts under input field
+						    monitor = "";
+						    text = "$FAIL $ATTEMPTS[]";
+						    text_align = "center"; # center/right or any value for default left. multi-line text alignment inside label container
+						    color = "rgba(191, 97, 106, 1.0)";
+							  shadow_passes = 3;
+							  shadow_color="rgb(46, 52, 64, 1.0)";
+						    font_size = 20;
+						    font_family = "Noto Sans";
+						    rotate = 0; # degrees, counter-clockwise
+
+						    position = "0, -100";
+						    halign = "center";
+						    valign = "center";
+					}
 				];
 
 				input-field = [
