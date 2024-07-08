@@ -85,6 +85,7 @@
       zellij         # Terminal multiplexer and session thing
       wl-clipboard   # Copy and paste
       git-annex      # Manage files between remotes with git
+      yt-dlp         # Youtube downloader
 
       nil            # Nix lsp for helix
 
@@ -117,6 +118,8 @@
         tree = "eza --tree";
 
         ga = "git annex";
+
+        youtube-download = "yt-dlp -x -f 'bestaudio[ext=m4a]' --add-metadata --embed-thumbnail --sponsorblock-remove music_offtopic";
       };
     };
     #
