@@ -49,8 +49,9 @@
       # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
       # # fonts?
       (nerdfonts.override { fonts = [ "FiraCode" "VictorMono" "NerdFontsSymbolsOnly" ]; })
-      font-awesome      # Symbols
-      cm_unicode        # Computer Modern with unicode stuff
+      font-awesome              # Symbols
+      cm_unicode                # Computer Modern with unicode stuff
+      atkinson-hyperlegible     # A font designed to be easily readable
 
       # # You can also create simple shell scripts directly inside your
       # # configuration. For example, this adds a command 'my-hello' to your
@@ -93,7 +94,7 @@
     programs.fish = {
       enable = true;
       shellAliases = {
-        eza = "eza --icons=auto --dereference --color-scale=all --group --smart-group --header";
+        eza = "eza --icons=auto --color-scale=all --group --smart-group --header";
       };
       shellAbbrs = {
         ls = "eza";
