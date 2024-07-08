@@ -23,9 +23,20 @@
     home.homeDirectory = "/home/abclop99";
 
     # Manage XDG directories
-    xdg.enable = true;
-    xdg.userDirs.enable = true;
-    xdg.userDirs.createDirectories = true;
+    xdg = {
+      enable = true;
+      userDirs = {
+        enable = true;
+        createDirectories = true;
+      };
+      # Apparently not available on stable yet
+      # portal = {
+      #   enable = true;
+      #   configPackages = with pkgs; [
+      #     xdg-desktop-portal-hyprland
+      #   ];
+      # };
+    };
 
     # This value determines the Home Manager release that your configuration is
     # compatible with. This helps avoid breakage when a new Home Manager release
