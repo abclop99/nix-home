@@ -1,5 +1,4 @@
-{ nix, pkgs, ... }:
-
+{ pkgs, ... }:
 {
 
   imports = [
