@@ -254,6 +254,19 @@
       };
     };
 
+    # Github CLI
+    programs.gh = {
+      enable = true;
+      settings = {
+        git_protocol = "ssh";
+      };
+      extensions = with pkgs; [
+        gh-eco
+        gh-markdown-preview
+        gh-notify
+      ];
+    };
+
     # GPG
     programs.gpg = {
       enable = true;
