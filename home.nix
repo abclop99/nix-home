@@ -264,6 +264,7 @@
       extraConfig = {
         init.defaultBranch = "main";
         push.autoSetupRemote = true;
+        safe.directory = "/persist/etc/nixos";
       };
     };
 
