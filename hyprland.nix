@@ -86,6 +86,10 @@
 					"systemctl --user start blueman-applet.service"
 				];
 
+				exec = [
+					"${pkgs.hyprshade}/bin/hyprshade auto"
+				];
+
 				# Input config
 				input = {
 					# Keyboard layout
@@ -259,6 +263,37 @@
 		qt = {
 			enable = true;
 			platformTheme.name = "gtk";
+		};
+
+		# Hyprshade configuration
+		xdg.configFile."hypr/hyprshade.toml".text = ''
+[[shades]]
+name = "blue-light-filter"
+start_time = 21:00:00
+end_time = 06:00:00
+		'';
+		# Systemd service unit
+		systemd.user.services.hyprshade = {
+			Unit = {
+				Description = "Apply screen filter";
+			};
+			Service = {
+				Type = "oneshot";
+				ExecStart = "${pkgs.hyprshade}/bin/hyprshade auto";
+			};
+		};
+		# Systemd timer unit
+		systemd.user.timers.hyprshade = {
+			Unit = {
+				Description = "Apply screen filter on a schedule";
+			};
+			Timer = {
+				OnCalendar = [
+					"21:00:00"
+					"06:00:00"
+				];
+			};
+			Install.WantedBy = [ "timers.target" ];
 		};
 	
 		# Bar program
