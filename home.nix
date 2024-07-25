@@ -95,7 +95,6 @@
 
       # (blender.override { cudaSupport = true; })        # VR Interview work & 3D modeling
       blender
-      multiviewer-for-f1 # F1 Multiviewer for watching F1 & stuff (unfree)
       zoom-us         # Video meetings
       prismlauncher   # Minceraft launcher
       calibre         # Ebook reader and manager
