@@ -5,6 +5,7 @@
     ./hyprland.nix
     ./firefox.nix
     ./librewolf.nix
+    ./vscode.nix
   ];
 
   config = {
