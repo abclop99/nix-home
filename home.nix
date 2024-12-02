@@ -60,7 +60,6 @@
       # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
       # # fonts?
       (nerdfonts.override { fonts = [ "FiraCode" "VictorMono" "NerdFontsSymbolsOnly" ]; })
-      font-awesome              # Symbols
       cm_unicode                # Computer Modern with unicode stuff
       atkinson-hyperlegible     # A font designed to be easily readable
 
@@ -143,24 +142,7 @@
       ];
     };
     # Starship prompt
-    programs.starship = {
-      enable = true;
-      enableFishIntegration = true;
-      enableBashIntegration = true;
-      enableTransience = true;
-      settings = {
-        "$schema" = "https://starship.rs/config-schema.json";
-        right_format = "$status$cmd_duration$time";
-        os = {
-          disabled = false;
-          symbols.Arch = "";
-        };
-        shell.disabled = false;
-        status.disabled = false;
-        sudo.disabled = false;
-        time.disabled = false;
-      };
-    };
+    programs.starship = import ./starship.nix;
     # `thefuck` corrects previous command
     programs.thefuck = {
       enable = true;
