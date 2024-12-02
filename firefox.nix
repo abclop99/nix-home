@@ -37,6 +37,7 @@
           libredirect
           noscript
           privacy-badger
+          temporary-containers
 
           # QOL
           auto-tab-discard
