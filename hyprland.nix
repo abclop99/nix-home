@@ -336,7 +336,7 @@ end_time = 07:00:00
 				    rotate = 0;
 				    xray = false; # if true, make a "hole" in the background (rectangle of specified size, no rotation)
 
-				    position = "0, 80";
+				    position = "0, 20";
 				    halign = "center";
 				    valign = "center";
 					}
@@ -344,33 +344,44 @@ end_time = 07:00:00
 
 				label = [
 					{
-						    monitor = "";
-						    text = "Hi there, $USER";
-						    text_align = "center"; # center/right or any value for default left. multi-line text alignment inside label container
-						    color = "rgba(200, 200, 200, 1.0)";
-						    font_size = 25;
-						    font_family = "Noto Sans";
-						    rotate = 0; # degrees, counter-clockwise
+						monitor = "";
+						text = "$TIME";
+						text_align = "center";
+						color = "#eceff4";
+					  shadow_passes = 3;
+					  shadow_color="rgb(46, 52, 64, 1.0)";
+						font_size = 30;
 
-						    position = "0, 80";
-						    halign = "center";
-						    valign = "center";
+				    position = "0, 140";
+				    halign = "center";
+				    valign = "center";
 					}
 					{
-								# Show fail reason and number of attempts under input field
-						    monitor = "";
-						    text = "$FAIL $ATTEMPTS[]";
-						    text_align = "center"; # center/right or any value for default left. multi-line text alignment inside label container
-						    color = "rgba(191, 97, 106, 1.0)";
-							  shadow_passes = 3;
-							  shadow_color="rgb(46, 52, 64, 1.0)";
-						    font_size = 20;
-						    font_family = "Noto Sans";
-						    rotate = 0; # degrees, counter-clockwise
+				    monitor = "";
+				    text = "Hi there, $USER";
+				    text_align = "center"; # center/right or any value for default left. multi-line text alignment inside label container
+				    color = "rgba(200, 200, 200, 1.0)";
+				    font_size = 25;
+				    font_family = "Noto Sans";
 
-						    position = "0, -100";
-						    halign = "center";
-						    valign = "center";
+				    position = "0, 20";
+				    halign = "center";
+				    valign = "center";
+					}
+					{
+						# Show fail reason and number of attempts under input field
+				    monitor = "";
+				    text = "$FAIL $ATTEMPTS[]";
+				    text_align = "center"; # center/right or any value for default left. multi-line text alignment inside label container
+				    color = "rgba(191, 97, 106, 1.0)";
+					  shadow_passes = 3;
+					  shadow_color="rgb(46, 52, 64, 1.0)";
+				    font_size = 20;
+				    font_family = "Noto Sans";
+
+				    position = "0, -180";
+				    halign = "center";
+				    valign = "center";
 					}
 				];
 
@@ -401,7 +412,7 @@ end_time = 07:00:00
 				    invert_numlock = false; # change color if numlock is off
 				    swap_font_color = false; # see below
 
-				    position = "0, -20";
+				    position = "0, -80";
 				    halign = "center";
 				    valign = "center";
 					}
