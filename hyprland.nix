@@ -54,10 +54,10 @@
 						vibrancy = 0.1696;
 					};
 
-					drop_shadow = true;
-					shadow_range = 4;
-					shadow_render_power = 3;
-					"col.shadow" = "rgba(1a1a1aee)";
+					# drop_shadow = true;
+					# shadow_range = 4;
+					# shadow_render_power = 3;
+					# "col.shadow" = "rgba(1a1a1aee)";
 				};
 
 				misc = {
@@ -68,12 +68,12 @@
 				};
 
 				# Define programs to use
-				"$bar" = "eww open bar";
+				"$bar" = "${pkgs.eww}/bin/eww open bar";
 				# "$browser" = "firefox";
-				"$terminal" = "kitty";
-				"$menu" = "bemenu-run";
+				"$terminal" = "${pkgs.kitty}/bin/kitty";
+				"$menu" = "${pkgs.bemenu}/bin/bemenu-run";
 				"$lock" = "${pkgs.systemd}/bin/loginctl lock-session";
-				"$notif" = "swaync";
+				"$notif" = "${pkgs.swaynotificationcenter}/bin/swaync";
 
 				# Execute programs at launch
 				"exec-once" = [

@@ -189,7 +189,7 @@
         };
       };
 
-      theme = "Catppuccin-Frappe";
+      themeFile = "Catppuccin-Frappe";
     };
 
     # Helix configuration
