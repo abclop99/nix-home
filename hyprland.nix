@@ -270,7 +270,7 @@
 [[shades]]
 name = "blue-light-filter"
 start_time = 21:00:00
-end_time = 06:00:00
+end_time = 07:00:00
 		'';
 		# Systemd service unit
 		systemd.user.services.hyprshade = {
@@ -290,7 +290,7 @@ end_time = 06:00:00
 			Timer = {
 				OnCalendar = [
 					"21:00:00"
-					"06:00:00"
+					"07:00:00"
 				];
 			};
 			Install.WantedBy = [ "timers.target" ];
