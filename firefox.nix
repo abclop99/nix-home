@@ -198,7 +198,9 @@
             min-width: var(--wide-tab-width) !important;
             max-width: var(--wide-tab-width) !important;
             margin-right: calc((var(--wide-tab-width) - var(--thin-tab-width)) * -1) !important;
-            z-index: 1;
+
+            /* Dynamically compute z-index to be in front */
+            z-index: calc(var(--browser-area-z-index-tabbox) + 1);
           }
         '';
         # userContent = "";
