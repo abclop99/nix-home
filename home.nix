@@ -79,6 +79,7 @@
       eza            # Better ls
       mosh           # Mobile shell: smarter SSH
       feh            # Image viewer
+      gitmoji-cli    # CLI for using gitmoji (emojis in git commit messages)
       mpv            # Command line media player
       mpc-cli        # CLI interface for MPD
       zathura        # PDF reader
@@ -117,6 +118,8 @@
         tree = "eza --tree";
 
         ga = "git annex";
+
+        icat = "kitten icat";
 
         youtube-download = "yt-dlp -x -f 'bestaudio[ext=m4a]' --add-metadata --embed-thumbnail --sponsorblock-remove music_offtopic";
       };
@@ -249,6 +252,16 @@
         safe.directory = "/persist/etc/nixos";
       };
     };
+
+    # Gitmoji (manual config)
+    xdg.configFile."gitmoji-nodejs/config.json".text = (builtins.toJSON {
+      autoAdd = false;
+      emojiFormat = "emoji";
+      scopePrompt = true;
+      messagePrompt = true;
+      capitalizeTitle = true;
+    	# gitmojisUrl = "https://gitmoji.dev/api/gitmojis";
+    });
 
     # Github CLI
     programs.gh = {
