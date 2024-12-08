@@ -191,6 +191,9 @@
             transition: all 100ms !important;
             min-width: var(--thin-tab-width) !important;
             max-width: var(--thin-tab-width) !important;
+
+            /* Dynamically compute z-index to be in front */
+            z-index: calc(var(--browser-area-z-index-tabbox) + 1);
           }
           #sidebar-box[sidebarcommand="treestyletab_piro_sakura_ne_jp-sidebar-action"]:hover {
             transition: all 200ms !important;
@@ -198,9 +201,6 @@
             min-width: var(--wide-tab-width) !important;
             max-width: var(--wide-tab-width) !important;
             margin-right: calc((var(--wide-tab-width) - var(--thin-tab-width)) * -1) !important;
-
-            /* Dynamically compute z-index to be in front */
-            z-index: calc(var(--browser-area-z-index-tabbox) + 1);
           }
         '';
         # userContent = "";
