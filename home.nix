@@ -121,7 +121,7 @@
 
         icat = "kitten icat";
 
-        youtube-download = "yt-dlp -x -f 'bestaudio[ext=m4a]' --add-metadata --embed-thumbnail --sponsorblock-remove music_offtopic";
+        youtube-download = "yt-dlp -x -f 'bestaudio' --add-metadata --embed-thumbnail --sponsorblock-remove music_offtopic";
       };
     };
     #
