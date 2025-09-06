@@ -28,6 +28,12 @@
 		# Hyprland itself
 		wayland.windowManager.hyprland = {
 			enable = true;
+
+			plugins = with pkgs; [
+				# i3/sway like layout
+				hyprlandPlugins.hy3
+			];
+
 			settings = {
 
 				env = [
@@ -47,6 +53,9 @@
 				general = {
 					gaps_in = 5;
 					gaps_out = 20;
+
+					# Enable hy3 layout
+					layout = "hy3";
 				};
 				
 				decoration = {
@@ -131,29 +140,34 @@
 					## Keybinds for window managment
 					# Close window
 					"$mod SHIFT, Q, killactive"
-					# Fullscreen and Fullscreener
-					"$mod, F, fullscreen, 1"
-					"$mod SHIFT, F, fullscreen, 0"
-					# Floating
+					# Toggle fullscreen
+					"$mod, F, fullscreen, 0"
+					# Toggle floating
 					"$mod SHIFT, SPACE, togglefloating"
+					## Splitting containers
+					# Split opposite
+					"$mod, V, hy3:makegroup, opposite, ephemeral"
+					## Changing container layout
 					# Toggle tabs
-					"$mod, T, togglegroup"
-					# Focus and move between tabs using < >
-					"$mod, code:59, changegroupactive, b"
-					"$mod, code:60, changegroupactive, f"
-					"$mod SHIFT, code:59, movegroupwindow, b"
-					"$mod SHIFT, code:60, movegroupwindow, f"
+					"$mod, W, hy3:changegroup, toggletab"
+					# Switch between vertical/horizontal (if untabbed)
+					"$mod, E, hy3:changegroup, opposite"
+
+					# Raise/lower focus
+					"$mod, a, hy3:changefocus, raise"
+					"$mod SHIFT, a, hy3:changefocus, lower"
 
 					# Move focus using mod + arrow keys
-					"$mod, left, movefocus, l"
-					"$mod, up, movefocus, u"
-					"$mod, down, movefocus, d"
-					"$mod, right, movefocus, r"
+					"$mod, left, hy3:movefocus, l"
+					"$mod, up, hy3:movefocus, u"
+					"$mod, down, hy3:movefocus, d"
+					"$mod, right, hy3:movefocus, r"
 					# hjkl -> ynio on norman layout
-					"$mod, y, movefocus, l"
-					"$mod, n, movefocus, u"
-					"$mod, i, movefocus, d"
-					"$mod, o, movefocus, r"
+					# jkl; -> nioh on Norman layout
+					"$mod, n, hy3:movefocus, l"
+					"$mod, i, hy3:movefocus, d"
+					"$mod, o, hy3:movefocus, u"
+					"$mod, h, hy3:movefocus, r"
 
 					# Move windows using mod + arrow keys
 					# Will move windows in/out of groups
@@ -161,30 +175,30 @@
 					"$mod SHIFT, up, movewindoworgroup, u"
 					"$mod SHIFT, down, movewindoworgroup, d"
 					"$mod SHIFT, right, movewindoworgroup, r"
-					"$mod SHIFT, y, movewindoworgroup, l"
-					"$mod SHIFT, n, movewindoworgroup, u"
+					"$mod SHIFT, n, movewindoworgroup, l"
 					"$mod SHIFT, i, movewindoworgroup, d"
-					"$mod SHIFT, o, movewindoworgroup, r"
+					"$mod SHIFT, o, movewindoworgroup, u"
+					"$mod SHIFT, h, movewindoworgroup, r"
 
 					# Move windows or full groups using mod + arrow keys
-					"$mod CTRL SHIFT, left, movewindow, l"
-					"$mod CTRL SHIFT, up, movewindow, u"
-					"$mod CTRL SHIFT, down, movewindow, d"
-					"$mod CTRL SHIFT, right, movewindow, r"
-					"$mod CTRL SHIFT, y, movewindow, l"
-					"$mod CTRL SHIFT, n, movewindow, u"
-					"$mod CTRL SHIFT, i, movewindow, d"
-					"$mod CTRL SHIFT, o, movewindow, r"
+					"$mod CTRL SHIFT, left, hy3:movewindow, l"
+					"$mod CTRL SHIFT, up, hy3:movewindow, u"
+					"$mod CTRL SHIFT, down, hy3:movewindow, d"
+					"$mod CTRL SHIFT, right, hy3:movewindow, r"
+					"$mod CTRL SHIFT, n, hy3:movewindow, l"
+					"$mod CTRL SHIFT, i, hy3:movewindow, d"
+					"$mod CTRL SHIFT, o, hy3:movewindow, u"
+					"$mod CTRL SHIFT, h, hy3:movewindow, r"
 
 					# Move workspaces between monitors
 					"$mod CTRL, left, movecurrentworkspacetomonitor, l"
 					"$mod CTRL, up, movecurrentworkspacetomonitor, u"
 					"$mod CTRL, down, movecurrentworkspacetomonitor, d"
 					"$mod CTRL, right, movecurrentworkspacetomonitor, r"
-					"$mod CTRL, y, movecurrentworkspacetomonitor, l"
-					"$mod CTRL, n, movecurrentworkspacetomonitor, u"
+					"$mod CTRL, n, movecurrentworkspacetomonitor, l"
 					"$mod CTRL, i, movecurrentworkspacetomonitor, d"
-					"$mod CTRL, o, movecurrentworkspacetomonitor, r"
+					"$mod CTRL, o, movecurrentworkspacetomonitor, u"
+					"$mod CTRL, h, movecurrentworkspacetomonitor, r"
 
 					# Special workspace (scratchpad)
 					# TODO: What does this do?
