@@ -126,7 +126,12 @@
         youtube-download = "yt-dlp -x -f 'bestaudio[ext=m4a]' --add-metadata --embed-thumbnail --sponsorblock-remove music_offtopic";
       };
     };
-    #
+    # Also enable bash shell
+    programs.bash = {
+      enable = true;
+
+      enableVteIntegration = true;
+    };
     # Enable atuin in Fish
     programs.atuin = {
       enable = true;
