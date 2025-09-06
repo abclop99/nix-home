@@ -59,7 +59,9 @@
       # # overrides. You can do that directly here, just don't forget the
       # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
       # # fonts?
-      (nerdfonts.override { fonts = [ "FiraCode" "VictorMono" "NerdFontsSymbolsOnly" ]; })
+      nerd-fonts.fira-code
+      nerd-fonts.victor-mono
+      nerd-fonts.symbols-only
       cm_unicode                # Computer Modern with unicode stuff
       atkinson-hyperlegible     # A font designed to be easily readable
 
@@ -182,14 +184,10 @@
       };
 
       font = {
-        name = "FiraCode Nerd Font";
-        package = pkgs.nerdfonts.override {
-          fonts = [
-            "FiraCode"
-            "VictorMono"
-            "NerdFontsSymbolsOnly"
-          ];
-        };
+        # name = "FiraCode Nerd Font";
+        # package = pkgs.nerd-fonts.fira-code;
+        name = "Fira Code";
+        package = pkgs.fira-code;
       };
 
       themeFile = "Catppuccin-Frappe";
