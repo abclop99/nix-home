@@ -18,6 +18,12 @@
 			brightnessctl           # Brightness control
 			bemenu                  # Menu program (launcher)
 		];
+
+		programs = {
+			bemenu = {
+				enable = true;
+			};
+		};
 	
 		# Hyprland itself
 		wayland.windowManager.hyprland = {
@@ -81,9 +87,9 @@
 					"$notif"
 
 					# Systray items
-					"keepassc"
-					"nm-applet --indicator"
-					"systemctl --user start blueman-applet.service"
+					"${pkgs.keepassxc}/bin/keepassc"
+					"${pkgs.networkmanagerapplet}/bin/nm-applet --indicator"
+					"$${pkgs.systemd}/bin/systemctl --user start blueman-applet.service"
 				];
 
 				exec = [
