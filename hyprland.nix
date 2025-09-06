@@ -462,15 +462,21 @@ end_time = 07:00:00
 					}
 
 					{
-						timeout = 10;       # Seconds after lock/last interaction
+						timeout = 10;       # Seconds after last interaction
 						on-timeout = "${pkgs.procps}/bin/pgrep -x hyprlock && ${dpms_command} off";  # Turn off screen if locked
 						on-resume = "${dpms_command} on";  # Screen on
 					}
 
 					{
-						timeout = 1800;      # 30 min
-						on-timeout = "${pkgs.systemd}/bin/systemctl suspend"; # Suspend PC
+						timeout = 310;       # Seconds after lock
+						on-timeout = "${pkgs.procps}/bin/pgrep -x hyprlock && ${dpms_command} off";  # Turn off screen if locked
+						on-resume = "${dpms_command} on";  # Screen on
 					}
+
+					# {
+					# 	timeout = 1800;      # 30 min
+					# 	on-timeout = "${pkgs.systemd}/bin/systemctl suspend"; # Suspend PC
+					# }
 				];
 			};
 		};
