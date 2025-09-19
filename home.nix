@@ -64,6 +64,7 @@
       nerd-fonts.symbols-only
       cm_unicode                # Computer Modern with unicode stuff
       atkinson-hyperlegible     # A font designed to be easily readable
+      libertinus                # Open source fonts with a serif-like sans serif
 
       # # You can also create simple shell scripts directly inside your
       # # configuration. For example, this adds a command 'my-hello' to your
