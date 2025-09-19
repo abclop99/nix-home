@@ -167,6 +167,9 @@
       compression = true;
       controlMaster = "auto";
       forwardAgent = true;
+      matchBlocks."*" = {
+        forwardX11 = true;
+      };
       extraConfig = if (builtins.pathExists ./private/ssh/config) then 
         (builtins.readFile ./private/ssh/config)
       else
