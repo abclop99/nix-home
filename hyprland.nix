@@ -269,7 +269,7 @@
 			x11.enable = true;
 			name = "breeze_cursors";
 			size = 16;
-			package = pkgs.libsForQt5.breeze-gtk;
+			package = pkgs.kdePackages.breeze-gtk;
 		};
 
 		# Theme

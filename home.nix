@@ -73,7 +73,7 @@
       #   echo "Hello, ${config.home.username}!"
       # '')
 
-      pinentry       # GPG passphrase input
+      pinentry-all   # GPG passphrase input
       pavucontrol    # Audio control panel
 
       bat            # Fancy `cat` clone
@@ -84,7 +84,9 @@
       feh            # Image viewer
       gitmoji-cli    # CLI for using gitmoji (emojis in git commit messages)
       mpv            # Command line media player
-      mpc-cli        # CLI interface for MPD
+      mpc            # CLI interface for MPD
+      trashy         # Trash can front end
+      usbutils       # USB tools like lsusb
       zathura        # PDF reader
       zellij         # Terminal multiplexer and session thing
       wl-clipboard   # Copy and paste
@@ -94,7 +96,7 @@
       nil            # Nix lsp for helix
 
       keepassxc      # Password manager
-      glxinfo        # For glxgears to force screen to update every frame instead of delayed by 1 frame
+      mesa-demos     # For glxgears to force screen to update every frame instead of delayed by 1 frame
 
       # (blender.override { cudaSupport = true; })        # VR Interview work & 3D modeling
       blender
@@ -154,8 +156,8 @@
     };
     # Starship prompt
     programs.starship = import ./starship.nix;
-    # `thefuck` corrects previous command
-    programs.thefuck = {
+    # Suggestions to correct previous command
+    programs.pay-respects = {
       enable = true;
       enableFishIntegration = true;
       enableBashIntegration = true;
@@ -164,12 +166,15 @@
     # SSH config
     programs.ssh = {
       enable = true;
-      compression = true;
-      controlMaster = "auto";
-      forwardAgent = true;
+      enableDefaultConfig = false;
+
       matchBlocks."*" = {
         forwardX11 = true;
+        compression = true;
+        controlMaster = "auto";
+        forwardAgent = true;
       };
+
       extraConfig = if (builtins.pathExists ./private/ssh/config) then 
         (builtins.readFile ./private/ssh/config)
       else
@@ -239,9 +244,6 @@
     programs.git = {
       enable = true;
 
-      userName = "Aaron Li";
-      userEmail = "a1li@ucsd.edu";
-
       # Enable signing if key is given in a file
       signing = if (builtins.pathExists ./private/gpg-key-fingerprint) then {
         signByDefault = true;
@@ -249,15 +251,21 @@
       } else {
         key = null;
       };
+      
+      settings = {
+        user = {
+          name = "Aaron Li";
+          email = "a628li@uwaterloo.ca";
+        };
 
-      # Delta syntax highlighter
-      delta.enable = true;
-
-      extraConfig = {
         init.defaultBranch = "main";
         push.autoSetupRemote = true;
         safe.directory = "/persist/etc/nixos";
       };
+    };
+    programs.delta = {
+      enable = true;
+      enableGitIntegration = true;
     };
 
     # Gitmoji (manual config)
