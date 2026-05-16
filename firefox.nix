@@ -58,8 +58,8 @@
         ];
 
         search = {
-          default = "Bing";
-          privateDefault = "Ecosia";
+          default = "bing";
+          privateDefault = "ecosia";
           force = true;
 
           engines = {
@@ -77,41 +77,41 @@
             
             "NixOS Wiki" = {
               urls = [{ template = "https://nixos.wiki/index.php?search={searchTerms}"; }];
-              iconUpdateURL = "https://nixos.wiki/favicon.png";
+              icon = "https://nixos.wiki/favicon.png";
               updateInterval = 24 * 60 * 60 * 1000; # Every day
               definedAliases = [ "@nw" ];
             };
 
             "MyNixOS" = {
               urls = [{ template = "https://mynixos.com/search?search={searchTerms}"; }];
-              iconUpdateURL = "https://mynixos.com/static/icons/nix-snowflake-white.svg";
+              icon = "https://mynixos.com/static/icons/nix-snowflake-white.svg";
               updateInterval = 24 * 60 * 60 * 1000; # Every day
               definedAliases = [ "@mynixos" ];
             };
 
             "Arch Wiki" = {
               urls = [{ template = "https://wiki.archlinux.org/index.php?search={searchTerms}"; }];
-              iconUpdateURL = "https://wiki.archlinux.org/favicon.ico";
+              icon = "https://wiki.archlinux.org/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000; # Every day
               definedAliases = [ "@aw" ];
             };
 
             "Lib.rs" = {
               urls = [{ template = "https://lib.rs/search?q={searchTerms}"; }];
-              iconUpdateURL = "https://lib.rs/favicon.ico";
+              icon = "https://lib.rs/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000; # Every day
               definedAliases = [ "@rs" ];
             };
 
-            "Ecosia" = {
+            ecosia = {
               urls = [{ template = "https://www.ecosia.org/search?q={searchTerms}"; }];
-              iconUpdateURL = "https://www.ecosia.org/static/icons/favicon.ico";
+              icon = "https://www.ecosia.org/static/icons/favicon.ico";
               updateInterval = 24 * 60 * 60 * 1000; # Every day
               definedAliases = [ "@e" "@ecosia" ];
             };
 
-            "Bing".metaData.alias = "@b";
-            "Google".metaData.alias = "@g";
+            bing.metaData.alias = "@b";
+            google.metaData.alias = "@g";
           };
         };
 
