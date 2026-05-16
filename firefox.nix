@@ -16,7 +16,7 @@
         extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
           # Basic UI
           multi-account-containers
-          tree-style-tab
+          # tree-style-tab
 
           # TST add-ons
           copy-selected-tabs-to-clipboard
