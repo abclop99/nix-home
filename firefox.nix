@@ -13,7 +13,7 @@
       profiles.default = {
         isDefault = true;
 
-        extensions = with pkgs.nur.repos.rycee.firefox-addons; [
+        extensions.packages = with pkgs.nur.repos.rycee.firefox-addons; [
           # Basic UI
           multi-account-containers
           tree-style-tab
