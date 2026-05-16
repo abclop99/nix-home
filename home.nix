@@ -104,6 +104,8 @@
       blender
       prismlauncher   # Minceraft launcher
       calibre         # Ebook reader and manager
+      qmk             # For custom keyboard firmwares
+      qmk-udev-rules  # Udev rules for QMK
     ];
 
     ## Configure shell
