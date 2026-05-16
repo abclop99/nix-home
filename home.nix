@@ -102,7 +102,6 @@
 
       # (blender.override { cudaSupport = true; })        # VR Interview work & 3D modeling
       blender
-      zoom-us         # Video meetings
       prismlauncher   # Minceraft launcher
       calibre         # Ebook reader and manager
     ];
