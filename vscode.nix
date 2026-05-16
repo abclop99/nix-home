@@ -3,20 +3,24 @@
   config = {
     programs.vscode = {
       enable = true;
-      extensions = with pkgs.vscode-extensions; [
-        ms-vscode-remote.remote-ssh
+      profiles.default = {
+        extensions = with pkgs.vscode-extensions; [
+          ms-vscode-remote.remote-ssh
 
-        catppuccin.catppuccin-vsc
-        catppuccin.catppuccin-vsc-icons
+          catppuccin.catppuccin-vsc
+          catppuccin.catppuccin-vsc-icons
 
-        ms-toolsai.jupyter
-        ms-python.python
-        ms-pyright.pyright
+          ms-python.python
+          ms-pyright.pyright
 
-        rust-lang.rust-analyzer
+          ms-toolsai.jupyter
+          ms-toolsai.jupyter-renderers
 
-        gruntfuggly.todo-tree
-      ];
+          rust-lang.rust-analyzer
+
+          gruntfuggly.todo-tree
+        ];
+      };
     };
   };
 }
