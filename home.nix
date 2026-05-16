@@ -76,6 +76,8 @@
       pinentry-all   # GPG passphrase input
       pavucontrol    # Audio control panel
 
+      nix-index      # For locating programs in Nix packages
+
       bat            # Fancy `cat` clone
       uutils-coreutils-noprefix   # Rust rewrite of GNU coreutils
       ripgrep        # Better grep in rust
