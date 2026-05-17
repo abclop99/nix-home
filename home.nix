@@ -117,6 +117,8 @@
       atomicparsley
       exiftool
       vorbis-tools
+
+      micromamba
     ];
 
     ## Configure shell
