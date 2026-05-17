@@ -28,6 +28,7 @@
 		# Hyprland itself
 		wayland.windowManager.hyprland = {
 			enable = true;
+			xwayland.enable = true;
 
 			plugins = with pkgs; [
 				# i3/sway like layout
