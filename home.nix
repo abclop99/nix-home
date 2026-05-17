@@ -106,6 +106,9 @@
       calibre         # Ebook reader and manager
       qmk             # For custom keyboard firmwares
       qmk-udev-rules  # Udev rules for QMK
+
+      lutris                         # Game manager
+      wineWowPackages.waylandFull    # Windows not-emulator
     ];
 
     ## Configure shell
