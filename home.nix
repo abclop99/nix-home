@@ -297,6 +297,11 @@
       };
     };
 
+    # Claude Code
+    programs.claude-code = {
+      enable = true;
+    };
+
     # git
     programs.git = {
       enable = true;
