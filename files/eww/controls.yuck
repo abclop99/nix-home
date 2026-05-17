@@ -49,11 +49,11 @@
 
 (defvar br_reveal false)
 (defpoll brightness :interval "0.2s"
-                    :initial "100" 
+                    :initial "852" 
                     :run-while br_reveal
                     "brightnessctl get"
 )
-(deflisten max_brightness :interval "10h" :initial "100"  "brightnessctl max")
+(defpoll max_brightness :interval "1h" :initial "852" "brightnessctl max")
 (defwidget brightness []
 	(box :class "item"
 		(eventbox :class "brightness"
@@ -73,7 +73,7 @@
 					)
 				)
 				(eventbox :class "icon"
-					(label :text {brightness <= 25 ? "󰃞" : (brightness <= 50 ? "󰃟" : (brightness <= 75 ? "󰃝" : "󰃠"))})
+					(label :text {100 * brightness / max_brightness <= 25 ? "󰃞" : (100 * brightness / max_brightness <= 50 ? "󰃟" : (100 * brightness / max_brightness <= 75 ? "󰃝" : "󰃠"))})
 				)
 			)
 		)
