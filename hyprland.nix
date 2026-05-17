@@ -99,7 +99,8 @@
 					# Systray items
 					"${pkgs.keepassxc}/bin/keepassc"
 					"${pkgs.networkmanagerapplet}/bin/nm-applet --indicator"
-					"$${pkgs.systemd}/bin/systemctl --user start blueman-applet.service"
+					"${pkgs.systemd}/bin/systemctl --user start blueman-applet.service"
+					"${pkgs.antimicrox}/bin/antimicrox --tray"
 				];
 
 				exec = [
