@@ -109,6 +109,9 @@
 
       lutris                         # Game manager
       wineWowPackages.waylandFull    # Windows not-emulator
+
+      # For controller remapping
+      antimicrox
     ];
 
     ## Configure shell
