@@ -38,7 +38,10 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 
 ## Conventions
 
-- Commit messages use **gitmoji** format (emoji prefix, e.g. `✨`, `🔧`, `👽️`) with a scope in parentheses.
+- Commit messages use **gitmoji** format (emoji prefix, e.g. `✨`, `🔧`, `👽️`) with a scope in parentheses (e.g. `hypr`, `firefox`, `home`, `eww`, `helix`). Scope = module/area name.
+- Commits should be atomic (one logical change each). Non-obvious changes should have a reason in the commit body.
 - The configuration targets NixOS 25.11 (unstable channel) with Home Manager state version 23.11.
 - Nix experimental features `nix-command` and `flakes` are enabled.
 - Default editor is Helix (`hx`), default shell is Fish.
+- Keyboard layout is **Norman** — hyprland keybindings use `n/i/o/h` instead of `h/j/k/l`.
+- Theme is **Catppuccin Frappe** across kitty, firefox, and other apps.
