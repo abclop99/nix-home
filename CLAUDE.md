@@ -23,11 +23,19 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 
 ## Architecture
 
-- **`home.nix`** — Main entry point. Imports other modules, declares packages, shell config (fish/bash), editor (helix), git, SSH, kitty terminal, and services.
-- **`hyprland.nix`** — Hyprland window manager configuration, keybindings, and related packages (grimblast, eww, bemenu).
-- **`firefox.nix`** / **`librewolf.nix`** — Browser configurations with extensions and settings.
-- **`vscode.nix`** — VS Code extensions and settings.
-- **`starship.nix`** — Starship prompt configuration (imported as a value, not a module).
+- **`home.nix`** — Main entry point. Imports all modules, declares core identity (username, XDG, SSH, fontconfig, nixpkgs config).
+- **`modules/`** — Split by concern, each following the `{ pkgs, ... }: { config = { ... }; }` pattern:
+  - `packages.nix` — All `home.packages` (categorized: fonts, cliTools, apps, gaming, mediaTools).
+  - `shell.nix` — Fish, Bash, Atuin, fzf, zoxide, Starship, pay-respects.
+  - `editor.nix` — Helix configuration.
+  - `claude-code.nix` — Claude Code configuration.
+  - `terminal.nix` — Kitty terminal.
+  - `git.nix` — Git, delta, GitHub CLI, GPG, gitmoji config.
+  - `services.nix` — Syncthing, MPD, udiskie, gnome-keyring, Thunderbird, HM auto-upgrade.
+  - `hyprland.nix` — Hyprland window manager, keybindings, eww bar, hyprlock, hypridle.
+  - `firefox.nix` / `librewolf.nix` — Browser configurations with extensions and settings.
+  - `vscode.nix` — VS Code extensions and settings.
+  - `starship.nix` — Starship prompt configuration (imported as a value, not a module).
 - **`nixpkgs-config.nix`** — Shared nixpkgs config (allowUnfree, etc.), used both by HM and standalone nix commands.
 - **`files/`** — Static config files managed via `xdg.configFile` or `home.file`:
   - `eww/` — Eww widget bar (yuck/scss) with scripts for workspace/audio/window info.

@@ -321,7 +321,7 @@ end_time = 07:00:00
 		# Bar program
 		programs.eww = {
 			enable = true;
-			configDir = ./files/eww;
+			configDir = ../files/eww;
 			package = pkgs.eww;
 		};
 
@@ -446,7 +446,7 @@ end_time = 07:00:00
 		# security.pam.services.swaylock = {};
 		## Swaylock blue filter files
 		xdg.configFile."swaylock/effect-blue-filter".source =
-			./files/swaylock/effect-blue-filter;
+			../files/swaylock/effect-blue-filter;
 
 		# Swayidle
 		services.hypridle =

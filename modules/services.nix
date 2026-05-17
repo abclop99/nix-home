@@ -1,0 +1,32 @@
+{ ... }:
+{
+  config = {
+    services.gnome-keyring = {
+      enable = true;
+    };
+
+    programs.thunderbird = {
+      enable = true;
+      profiles.default = {
+        isDefault = true;
+        withExternalGnupg = true;
+      };
+    };
+
+    services.syncthing = {
+      enable = true;
+      tray.enable = true;
+    };
+
+    services.mpd = {
+      enable = true;
+    };
+
+    services.udiskie.enable = true;
+
+    services.home-manager.autoUpgrade = {
+      enable = true;
+      frequency = "weekly";
+    };
+  };
+}

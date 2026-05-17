@@ -3,7 +3,7 @@
 {
   config = {
     # Need to include NUR
-    nixpkgs.config = import ./nixpkgs-config.nix;
+    nixpkgs.config = import ../nixpkgs-config.nix;
 
     # Firefox
     programs.firefox = {
