@@ -112,6 +112,11 @@
 
       # For controller remapping
       antimicrox
+
+      # For tagging music and editing metadata
+      atomicparsley
+      exiftool
+      vorbis-tools
     ];
 
     ## Configure shell
