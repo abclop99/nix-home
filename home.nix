@@ -335,7 +335,7 @@
       autoAdd = false;
       emojiFormat = "emoji";
       scopePrompt = true;
-      messagePrompt = true;
+      messagePrompt = false;
       capitalizeTitle = true;
     	# gitmojisUrl = "https://gitmoji.dev/api/gitmojis";
     });
