@@ -254,6 +254,47 @@
           select.X = ["extend_line_up" "extend_to_line_bounds"];
         };
       };
+      # Languages configuration
+      languages = {
+        language-server = {
+          pyright = {
+            command = "pyright-langserver";
+            args = [ "--stdio" ];
+          };
+          nil.command = "${pkgs.nil}/bin/nil";
+          svlint.command = "${pkgs.svlint}/bin/svlint";
+          svls.command = "${pkgs.svls}/bin/svls";
+        };
+        language = [
+          {
+            # Plain text
+            name = "default";
+            scope = "source.default";
+            roots = [];
+            file-types = [ "*" ];
+            indent = { tab-width = 8; unit = "\t"; };
+            text-width = 80;
+            rulers = [ 80 ];
+            soft-wrap.wrap-at-text-width = true;
+          }
+          {
+            name = "python";
+            language-servers = [
+              "ty"
+              "ruff"
+              "jedi"
+              "pylsp"
+              "pyright"
+              "basedpyright"
+            ];
+          }
+          {
+            name = "verilog";
+            auto-format = true;
+            language-servers = [ "svlangserver" "svlint" "svls" ];
+          }
+        ];
+      };
     };
 
     # git
