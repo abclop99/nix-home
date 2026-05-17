@@ -45,8 +45,8 @@
 
 				monitor = [
 					# Laptop display
-					"eDP-1, preferred, 0x0, 1.2"
-					"desc:LG Electronics LG FHD 0x01010101, preferred, -1920x-360, 1.0"
+					"eDP-1, preferred, 0x0, 1.2" # 1920 / 1.2 = 1600
+					"desc:LG Electronics LG FHD 0x01010101, preferred, 1600x-360, 1.0"
 					# Default, any random monitor connected. Automatically placed to the right
 					",preferred,auto,1"
 				];
