@@ -54,3 +54,10 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 - Default editor is Helix (`hx`), default shell is Fish.
 - Keyboard layout is **Norman** — hyprland keybindings use `n/i/o/h` instead of `h/j/k/l`.
 - Theme is **Catppuccin Frappe** across kitty, firefox, and other apps.
+
+## Claude Code
+
+- A `PreToolUse` hook (`.claude/hooks/block-private.sh`) blocks `Edit`/`Write`/`MultiEdit` on paths matching `*/private/*` — don't attempt edits there (gitignored SSH host config + GPG fingerprint).
+- Project sandbox is enabled (`.claude/settings.local.json`); commands that need unix sockets or `/dev/tty` (`home-manager switch`, signed `git commit`) need the sandbox disabled per-call.
+- `.claude/{settings.json,skills,commands,agents}` are bind-mounted read-only inside any Claude session — to add/modify them, stage in `$TMPDIR` and `cp` from a regular shell.
+- `jq` is not installed; use `python3` for JSON parsing in hooks/scripts.
