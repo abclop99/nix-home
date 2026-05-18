@@ -28,5 +28,13 @@
       enable = true;
       frequency = "weekly";
     };
+
+    services.home-manager.autoExpire.enable = true;
+
+    nix.gc = {
+      automatic = true;
+      dates = "monthly";
+      options = "--delete-older-than 30d";
+    };
   };
 }
