@@ -33,6 +33,7 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
   - `git.nix` — Git, delta, GitHub CLI, GPG, gitmoji config.
   - `services.nix` — Syncthing, MPD, udiskie, gnome-keyring, Thunderbird, HM auto-upgrade.
   - `hyprland.nix` — Hyprland window manager, keybindings, eww bar, hyprlock, hypridle.
+  - `theme.nix` — Catppuccin theme (Latte/Frappe) with darkman auto-switching via HM specialisations; reads coordinates from `private/location.nix`.
   - `firefox.nix` / `librewolf.nix` — Browser configurations with extensions and settings.
   - `vscode.nix` — VS Code extensions and settings.
   - `starship.nix` — Starship prompt configuration (imported as a value, not a module).
@@ -53,7 +54,13 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 - Nix experimental features `nix-command` and `flakes` are enabled.
 - Default editor is Helix (`hx`), default shell is Fish.
 - Keyboard layout is **Norman** — hyprland keybindings use `n/i/o/h` instead of `h/j/k/l`.
-- Theme is **Catppuccin Frappe** across kitty, firefox, and other apps.
+- Theme is **Catppuccin** — Frappe (dark) / Latte (light), auto-switched by darkman; variant exposed as `theme.variant` in `modules/theme.nix`.
+
+## Module quirks
+
+- `programs.eww.configDir = <derivation>` makes `~/.config/eww` a symlink to a generation-specific store path; eww-server's socket name is hashed from the resolved path, so it changes on every switch and breaks `eww reload`. Use per-file `xdg.configFile."eww/<file>"` entries to keep the directory stable.
+- `catppuccin.enable = true` (from catppuccin/nix) auto-enables every per-app submodule and trips assertions against existing `qt.platformTheme = "gtk"` and firefox extension config. Opt in per app: `catppuccin.<name>.enable = true`.
+- Eww uses `grass` for SCSS, which errors `unknown @ rule: @charset "UTF-8";` on any non-ASCII source. Keep `files/eww/eww.scss*` pure ASCII.
 
 ## Claude Code
 
