@@ -119,6 +119,13 @@ in
       color-scheme = "prefer-${colorScheme}";
     };
 
+    # The catppuccin-latte delta feature uses bat's "Catppuccin Latte" syntax
+    # theme for diff tokens; its muted colors wash out against the pink/green
+    # diff backgrounds. Use a darker, high-contrast theme for the light
+    # variant; keep Catppuccin Frappe for dark.
+    programs.delta.options.syntax-theme =
+      if isLight then "GitHub" else "Catppuccin Frappe";
+
     # `dark` mirrors the base config (frappe). Declared so commands like
     # `home-manager switch --specialisation (darkman get)` work symmetrically.
     specialisation.dark.configuration = {
