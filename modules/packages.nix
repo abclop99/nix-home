@@ -14,6 +14,7 @@ let
     bat
     uutils-coreutils-noprefix
     ripgrep
+    semgrep
     eza
     mosh
     feh
