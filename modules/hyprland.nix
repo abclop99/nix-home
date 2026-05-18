@@ -274,14 +274,7 @@
 			package = pkgs.kdePackages.breeze-gtk;
 		};
 
-		# Theme
-		gtk = {
-			enable = true;
-			theme = {
-				name = "Nordic";
-				package = pkgs.nordic;
-			};
-		};
+		# Theme (GTK theme + dconf color-scheme live in modules/theme.nix)
 		qt = {
 			enable = true;
 			platformTheme.name = "gtk";
@@ -321,8 +314,24 @@ end_time = 07:00:00
 		# Bar program
 		programs.eww = {
 			enable = true;
-			configDir = ../files/eww;
 			package = pkgs.eww;
+			# Don't use configDir: it makes ~/.config/eww a symlink to a
+			# generation-specific store path, which changes eww-server's
+			# socket name on every switch and breaks `eww reload`. Use
+			# per-file xdg.configFile entries so ~/.config/eww stays a
+			# real directory with a stable realpath.
+		};
+
+		xdg.configFile = {
+			"eww/bar.yuck".source = ../files/eww/bar.yuck;
+			"eww/clock.yuck".source = ../files/eww/clock.yuck;
+			"eww/controls.yuck".source = ../files/eww/controls.yuck;
+			"eww/eww.yuck".source = ../files/eww/eww.yuck;
+			"eww/hyprland.yuck".source = ../files/eww/hyprland.yuck;
+			"eww/system.yuck".source = ../files/eww/system.yuck;
+			"eww/scripts".source = ../files/eww/scripts;
+			"eww/eww.scss".text =
+				import ../files/eww/eww.scss.nix { inherit (config.theme) palette; };
 		};
 
 		# Lock screen program

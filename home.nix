@@ -1,4 +1,10 @@
 { pkgs, ... }:
+let
+  catppuccin = builtins.fetchTarball {
+    url = "https://github.com/catppuccin/nix/archive/refs/tags/v25.11.tar.gz";
+    sha256 = "07x6wna7nxbqlgnvcyck24lfvhh1z600s39sr6dlydhaxk5g0326";
+  };
+in
 {
   imports = [
     ./modules/packages.nix
@@ -12,6 +18,8 @@
     ./modules/firefox.nix
     ./modules/librewolf.nix
     ./modules/vscode.nix
+    ./modules/theme.nix
+    "${catppuccin}/modules/home-manager"
   ];
 
   config = {

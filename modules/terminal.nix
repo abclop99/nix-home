@@ -19,8 +19,6 @@
         name = "Fira Code";
         package = pkgs.fira-code;
       };
-
-      themeFile = "Catppuccin-Frappe";
     };
   };
 }

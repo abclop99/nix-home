@@ -1,45 +1,39 @@
+{ palette }:
+''
 /*
-Theming for eww bar
+Theming for eww bar (generated from modules/theme.nix; palette tokens
+are interpolated from theme.palette; the body is hand-written SCSS).
 */
 
-/* Polar night colors */
-$nord0: #2E3440;
-$nord1: #3b4252;
-$nord2: #434C5E;
-$nord3: #4C566A;
+/* Catppuccin palette tokens */
+$base:     ${palette.base};
+$mantle:   ${palette.mantle};
+$surface0: ${palette.surface0};
+$surface1: ${palette.surface1};
+$surface2: ${palette.surface2};
+$text:     ${palette.text};
+$subtext0: ${palette.subtext0};
+$overlay0: ${palette.overlay0};
+$red:      ${palette.red};
+$peach:    ${palette.peach};
+$yellow:   ${palette.yellow};
+$green:    ${palette.green};
+$teal:     ${palette.teal};
+$sky:      ${palette.sky};
+$blue:     ${palette.blue};
+$mauve:    ${palette.mauve};
 
-/* Snow storm color */
-$nord4: #D8DEE9;
-$nord5: #E5E9F0;
-$nord6: #ECEFF4;
+/* Back-compat aliases for existing call-sites */
+$orange: $peach;
+$purple: $mauve;
 
-/* Frost colors */
-$nord7: #8FBCBB;
-$nord8: #88C0D0;
-$nord9: #81A1C1;
-$nord10: #5E81AC;
-
-/* Aurora Colors */
-$nord11: #BF616A;
-$nord12: #D08770;
-$nord13: #EBCB8B;
-$nord14: #A3BE8C;
-$nord15: #B48EAD;
-
-/* Aliases for Aurora colors */
-$red: $nord11;
-$orange: $nord12;
-$yellow: $nord13;
-$green: $nord14;
-$purple: $nord15;
-
-/* Theme colors */
-$bg_color: $nord0;
-$fg_color: $nord6;
-$selection_bg_color: $nord2;
-$selection_fg_color: $fg_color;
-$hover_bg_color: $nord1;
-$comment_fg_color: $nord3;
+/* Semantic aliases */
+$bg_color:           $base;
+$fg_color:           $text;
+$selection_bg_color: $surface1;
+$selection_fg_color: $text;
+$hover_bg_color:     $surface0;
+$comment_fg_color:   $overlay0;
 
 /* Other variables */
 $radius: 5px;
@@ -115,12 +109,12 @@ scale trough {
 	min-width: 50px;
 	border-radius: 10px;
 
-	background-color: $nord1;
+	background-color: $surface0;
 	box-shadow: none;
 	border: none;
 }
 scale trough highlight {
-	background-color: $nord7;
+	background-color: $teal;
 	border: 0;
 	border-radius: 10px;
 }
@@ -155,7 +149,7 @@ $brightness-color: $yellow;
 
 /* System info circular bars */
 .system-info .circular-progress {
-	background-color: $nord1;
+	background-color: $surface0;
 }
 .system-info .circular-progress label {
 	font-size: 80%;
@@ -198,10 +192,11 @@ $brightness-color: $yellow;
 	margin-right: $sep;
 }
 .clock .percent {
-	color: $nord8;
+	color: $sky;
 	margin-left: 5px;
 }
 .clock .percent .hour-percent {
-	color: $nord10;
+	color: $blue;
 	margin: 5px;
 }
+''
