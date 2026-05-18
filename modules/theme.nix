@@ -93,6 +93,17 @@ in
     catppuccin = {
       flavor = config.theme.variant;
       kitty.enable = true;
+      bat.enable = true;
+      fish.enable = true;
+      fzf.enable = true;
+      helix.enable = true;
+      delta.enable = true;
+      atuin.enable = true;
+      zellij.enable = true;
+      zathura.enable = true;
+      mpv.enable = true;
+      thunderbird.enable = true;
+      hyprland.enable = true;
     };
 
     gtk = {
