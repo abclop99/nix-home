@@ -61,6 +61,7 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 - `programs.eww.configDir = <derivation>` makes `~/.config/eww` a symlink to a generation-specific store path; eww-server's socket name is hashed from the resolved path, so it changes on every switch and breaks `eww reload`. Use per-file `xdg.configFile."eww/<file>"` entries to keep the directory stable.
 - `catppuccin.enable = true` (from catppuccin/nix) auto-enables every per-app submodule and trips assertions against existing `qt.platformTheme = "gtk"` and firefox extension config. Opt in per app: `catppuccin.<name>.enable = true`.
 - Eww uses `grass` for SCSS, which errors `unknown @ rule: @charset "UTF-8";` on any non-ASCII source. Keep `files/eww/eww.scss*` pure ASCII.
+- `catppuccin.hyprland.enable` is passive: it only `source=`s a color-variable file (`$base`, `$blue`, …) into hyprland.conf — nothing themes until you reference those vars in `col.active_border` / decoration rules.
 
 ## Claude Code
 
