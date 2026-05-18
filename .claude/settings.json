@@ -11,5 +11,20 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(nix-instantiate --parse *)",
+      "Bash(nix-instantiate --eval *)",
+      "Bash(nix eval *)",
+      "Bash(nix search *)",
+      "Bash(nix-env --list-generations *)",
+      "Bash(nix-channel --list *)",
+      "Bash(journalctl --user *)",
+      "Bash(journalctl -u *)",
+      "Bash(gh search *)",
+      "mcp__claude_ai_Context7__resolve-library-id",
+      "mcp__claude_ai_Context7__query-docs"
+    ]
   }
 }
