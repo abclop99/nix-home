@@ -28,7 +28,7 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
   - `packages.nix` — All `home.packages` (categorized: fonts, cliTools, apps, gaming, mediaTools).
   - `shell.nix` — Fish, Bash, Atuin, fzf, zoxide, Starship, pay-respects.
   - `editor.nix` — Helix configuration.
-  - `claude-code.nix` — Claude Code configuration.
+  - `claude-code.nix` — Claude Code configuration (uses unstable HM module + nixpkgs-unstable package).
   - `terminal.nix` — Kitty terminal.
   - `git.nix` — Git, delta, GitHub CLI, GPG, gitmoji config.
   - `services.nix` — Syncthing, MPD, udiskie, gnome-keyring, Thunderbird, HM auto-upgrade.
@@ -48,7 +48,8 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 
 - Commit messages use **gitmoji** format (emoji prefix, e.g. `✨`, `🔧`, `👽️`) with a scope in parentheses (e.g. `hypr`, `firefox`, `home`, `eww`, `helix`). Scope = module/area name.
 - Commits should be atomic (one logical change each). Non-obvious changes should have a reason in the commit body.
-- The configuration targets NixOS 25.11 (unstable channel) with Home Manager state version 23.11.
+- The configuration targets NixOS 25.11 (stable channel) with Home Manager state version 23.11.
+- `nixpkgs-unstable` channel is used selectively (e.g., `claude-code.nix`) for packages needing newer versions.
 - Nix experimental features `nix-command` and `flakes` are enabled.
 - Default editor is Helix (`hx`), default shell is Fish.
 - Keyboard layout is **Norman** — hyprland keybindings use `n/i/o/h` instead of `h/j/k/l`.
