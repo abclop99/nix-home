@@ -40,6 +40,12 @@ All dynamic dependencies are pinned via `flake.nix`:
 
 `flake.lock` is committed and pins everything. Run `nix flake update` to bump them.
 
+**Auto-upgrade risk:** `services.home-manager.autoUpgrade` runs `nix flake update && home-manager switch --flake .` weekly. This advances **every** input on every run, including `nixpkgs-unstable` and `home-manager-unstable` which track `nixpkgs-unstable` and `master` respectively — i.e. moving branches with no stability guarantee. A bad upstream commit landed during the week will be auto-merged into the next switch with no human review. The pre-flake setup had a narrower surface: `nix-channel --update` only refreshed `home-manager` (release branch, stable) and `nixpkgs-unstable`. The new fan-out is the price of locking everything.
+
+**Recovery if a weekly upgrade breaks switch:** `~/.local/state/nix/profiles/home-manager-<N-1>-link/activate` runs the prior generation's activate script directly (no CLI needed). Then `nix flake update --override-input <bad-input> github:…<known-good-rev>` (or temporarily `services.home-manager.autoUpgrade.enable = false;`) until upstream stabilises.
+
+To narrow auto-upgrade in the future: replace `useFlake = true;` with a custom user systemd service that runs `nix flake update nixpkgs home-manager catppuccin nur` (omitting `-unstable` inputs), so unstable inputs only advance when manually requested.
+
 ## Architecture
 
 - **`flake.nix`** — Flake entry point. Declares inputs (see "Inputs" above), constructs `pkgs` with NUR overlay + `allowUnfree`, exposes `homeConfigurations.abclop99` with `extraSpecialArgs = { inherit inputs; }` so every module can take `inputs`.
