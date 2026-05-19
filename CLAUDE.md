@@ -111,10 +111,13 @@ To narrow auto-upgrade in the future: replace `useFlake = true;` with a custom u
 - Hyprlock 0.9.x dropped the `general.grace` config option; setting it just produces a silent config error. The only way to set a grace period now is the `--grace N` CLI flag (e.g. `hyprlock --grace 5`).
 - Hyprlock's `CHyprlockAnimationManager` only registers the `linear` bezier; `animation = fadeIn, 1, 10, default` parses without error but warps to the goal instantly. Pin animations to `linear` (e.g. `animation = fadeIn, 1, 10, linear`) for them to actually animate.
 - To audit silently-ignored hyprlock config errors (removed/renamed options, bad `rgb()`/`color=` formats, etc.) run `timeout 2 hyprlock -v -c ~/.config/hypr/hyprlock.conf --grace 0 2>file` and grep `file` for `Config error`. The running hyprlock prints them too but you usually never see its stderr.
+- `programs.home-manager.package` is `readOnly` in HM 25.11 (auto-derived from `pkgs.callPackage`); don't try to override it. Pin the CLI's `<home-manager/...>` lookup via `programs.home-manager.path = "${inputs.home-manager}"` instead — the wrapper's `setHomeManagerNixPath` (~line 106) injects `-I home-manager=$path` for every `nix-instantiate` site, including the un-gated `build-news.nix` reference at ~line 970.
+- NUR must be wired as an overlay (`inputs.nur.overlays.default`, applied in `flake.nix`). The legacy `inputs.nur = { flake = false; }` + `packageOverrides` pattern in `nixpkgs-config.nix` breaks in pure-flake mode because NUR sub-repos (e.g. `rycee/firefox-addons`) reference `<nixpkgs>` internally; the overlay form lets NUR follow its own pinned nixpkgs.
 
 ## Claude Code
 
 - A `PreToolUse` hook (`.claude/hooks/block-private.sh`) blocks `Edit`/`Write`/`MultiEdit` on paths matching `*/private/*` — for `private/` modifications use Bash (e.g., `cat > private/location.nix`).
 - Project sandbox is enabled (`.claude/settings.local.json`); commands that need unix sockets or `/dev/tty` (`hm-switch`, `hm-build`, signed `git commit`, writing `.git/config`) need the sandbox disabled per-call.
+- The sandbox masks blocked paths with `/dev/null` character devices (mode `crw-rw-rw-`, owner `nobody`) — they appear as untracked entries in `git status` for `.gitconfig`, `.gitmodules`, `.bash_profile`, etc. **Never use `git add .` / `git add -A`**; use selective `git add <path>`.
 - `.claude/{settings.json,skills,commands,agents}` are bind-mounted read-only inside any Claude session — to add/modify them, stage in `$TMPDIR` and `cp` from a regular shell.
 - `jq` is not installed; use `python3` for JSON parsing in hooks/scripts.
