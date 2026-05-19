@@ -150,14 +150,18 @@ in
         set -euo pipefail
         trap '${pkgs.libnotify}/bin/notify-send -u critical "theme switch failed" "dark mode"' ERR
         export PATH=${pkgs.nix}/bin:$PATH
-        ${config.home.profileDirectory}/bin/home-manager switch --specialisation dark
+        ${config.home.profileDirectory}/bin/home-manager switch \
+          --flake /home/abclop99/.config/home-manager#abclop99 \
+          --specialisation dark
         ${pkgs.eww}/bin/eww reload || true
       '';
       lightModeScripts.switch-theme = ''
         set -euo pipefail
         trap '${pkgs.libnotify}/bin/notify-send -u critical "theme switch failed" "light mode"' ERR
         export PATH=${pkgs.nix}/bin:$PATH
-        ${config.home.profileDirectory}/bin/home-manager switch --specialisation light
+        ${config.home.profileDirectory}/bin/home-manager switch \
+          --flake /home/abclop99/.config/home-manager#abclop99 \
+          --specialisation light
         ${pkgs.eww}/bin/eww reload || true
       '';
     };

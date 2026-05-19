@@ -1,10 +1,4 @@
-{ pkgs, ... }:
-let
-  catppuccin = builtins.fetchTarball {
-    url = "https://github.com/catppuccin/nix/archive/refs/tags/v25.11.tar.gz";
-    sha256 = "07x6wna7nxbqlgnvcyck24lfvhh1z600s39sr6dlydhaxk5g0326";
-  };
-in
+{ pkgs, inputs, ... }:
 {
   imports = [
     ./modules/packages.nix
@@ -19,7 +13,6 @@ in
     ./modules/librewolf.nix
     ./modules/vscode.nix
     ./modules/theme.nix
-    "${catppuccin}/modules/home-manager"
   ];
 
   config = {
@@ -70,8 +63,16 @@ in
     xdg.configFile."fontconfig/fonts.conf".source = ./files/fontconfig/fonts.conf;
 
     nixpkgs.config = import ./nixpkgs-config.nix;
-    xdg.configFile."nixpkgs/config.nix".source = ./nixpkgs-config.nix;
 
-    programs.home-manager.enable = true;
+    programs.home-manager = {
+      enable = true;
+      # Patch HOME_MANAGER_PATH into the wrapper so the CLI's un-gated
+      # `<home-manager/home-manager/build-news.nix>` lookup resolves via the
+      # flake input instead of NIX_PATH (which won't contain home-manager
+      # after channel removal). The CLI itself is auto-pinned to the same
+      # nixpkgs revision that this config uses, since `programs.home-manager.package`
+      # is read-only and derives from `pkgs.callPackage ../../home-manager`.
+      path = "${inputs.home-manager}";
+    };
   };
 }

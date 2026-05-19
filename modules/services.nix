@@ -26,6 +26,8 @@
 
     services.home-manager.autoUpgrade = {
       enable = true;
+      useFlake = true;
+      flakeDir = "/home/abclop99/.config/home-manager";
       frequency = "weekly";
     };
 

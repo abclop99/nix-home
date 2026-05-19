@@ -1,12 +1,13 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 let
-  hm-unstable = builtins.fetchTarball
-    "https://github.com/nix-community/home-manager/archive/master.tar.gz";
-  pkgs-unstable = import <nixpkgs-unstable> { config = import ../nixpkgs-config.nix; };
+  pkgs-unstable = import inputs.nixpkgs-unstable {
+    inherit (pkgs) system;
+    config = import ../nixpkgs-config.nix;
+  };
 in
 {
   disabledModules = [ "programs/claude-code.nix" ];
-  imports = [ "${hm-unstable}/modules/programs/claude-code.nix" ];
+  imports = [ "${inputs.home-manager-unstable}/modules/programs/claude-code.nix" ];
 
   config = {
     programs.claude-code = {
