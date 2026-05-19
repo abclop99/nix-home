@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Block commits that modify private/* files (skip-worktree'd locally).
+#
+# The three files below are tracked in git with placeholder content; the real
+# values live only on disk via `git update-index --skip-worktree`. This hook
+# refuses commits that include staged changes to them, so an accidental
+# `git add -f` or `--no-skip-worktree` doesn't leak real content into a public
+# commit. Bypass with `--no-verify` if you really mean to update the
+# placeholder (e.g., when the format changes).
+SKIP_WORKTREE_FILES=(
+  private/location.nix
+  private/ssh/config
+  private/gpg-key-fingerprint
+)
+for f in "${SKIP_WORKTREE_FILES[@]}"; do
+  if ! git diff --cached --quiet HEAD -- "$f" 2>/dev/null; then
+    echo "ERROR: $f has staged changes. These files are skip-worktree'd;"
+    echo "their real content is meant to stay local. If this is intentional"
+    echo "(e.g., updating the placeholder), use --no-verify."
+    exit 1
+  fi
+done
