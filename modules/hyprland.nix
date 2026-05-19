@@ -491,7 +491,7 @@ end_time = 07:00:00
 				listener = [
 					{
 						timeout = 150;       # 2.5 min
-						on-timeout = "{pkgs.brightnessctl}/bin/brightnessctl -s set 10"; # Set monitor backlight to log
+						on-timeout = "${pkgs.brightnessctl}/bin/brightnessctl -s set 10"; # Set monitor backlight to log
 						on-resume = "${pkgs.brightnessctl}/bin/brightnessctl -r";        # Restore monitor backlight
 					}
 
