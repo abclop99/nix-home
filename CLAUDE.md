@@ -62,6 +62,8 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 - `catppuccin.enable = true` (from catppuccin/nix) auto-enables every per-app submodule and trips assertions against existing `qt.platformTheme = "gtk"` and firefox extension config. Opt in per app: `catppuccin.<name>.enable = true`.
 - Eww uses `grass` for SCSS, which errors `unknown @ rule: @charset "UTF-8";` on any non-ASCII source. Keep `files/eww/eww.scss*` pure ASCII.
 - `catppuccin.hyprland.enable` is passive: it only `source=`s a color-variable file (`$base`, `$blue`, …) into hyprland.conf — nothing themes until you reference those vars in `col.active_border` / decoration rules.
+- `home.pointerCursor` only manages one cursor theme (XCursor). For a separate hyprcursor theme, symlink it manually via `xdg.dataFile."icons/<name>".source` and set `HYPRCURSOR_THEME`/`HYPRCURSOR_SIZE` in Hyprland's env list.
+- `kdePackages.breeze-gtk` is the GTK widget theme and ships no cursors despite the name — use `kdePackages.breeze` for actual Breeze XCursor files.
 
 ## Claude Code
 

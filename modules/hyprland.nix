@@ -41,6 +41,8 @@
           # "LIBVA_DRIVER_NAME,nvidia"
           # "XDG_SESSION_TYPE,wayland"
           "WLR_NO_HARDWARE_CURSORS,1"
+          "HYPRCURSOR_THEME,rose-pine-hyprcursor"
+          "HYPRCURSOR_SIZE,24"
         ];
 
 				monitor = [
@@ -266,13 +268,22 @@
 		};
 
 		# Cursors
+		# XCursor: real Breeze (used by XWayland clients and anything querying XCursor).
+		# Hyprcursor: rose-pine-hyprcursor — wired up below via Hyprland env + the
+		# xdg.dataFile symlink so libhyprcursor finds it. (No hyprcursor-format
+		# Breeze exists; rose-pine cursors are Breeze-derived and visually similar.)
 		home.pointerCursor = {
 			gtk.enable = true;
 			x11.enable = true;
 			name = "breeze_cursors";
-			size = 16;
-			package = pkgs.kdePackages.breeze-gtk;
+			size = 24;
+			package = pkgs.kdePackages.breeze;
 		};
+
+		# home.pointerCursor only manages one theme, so expose the hyprcursor theme
+		# manually on the standard ~/.local/share/icons search path.
+		xdg.dataFile."icons/rose-pine-hyprcursor".source =
+			"${pkgs.rose-pine-hyprcursor}/share/icons/rose-pine-hyprcursor";
 
 		# Theme (GTK theme + dconf color-scheme live in modules/theme.nix)
 		qt = {
