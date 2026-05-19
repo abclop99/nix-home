@@ -352,7 +352,10 @@ end_time = 07:00:00
 			# https://wiki.hyprland.org/Hypr-Ecosystem/hyprlock/
 			settings = {
 				general = {
-					grace = 2;
+					# 0 = manual Super+L and suspend-resume require password
+					# immediately. The idle listener overrides this with
+					# --grace 5 (see hypridle config below).
+					grace = 0;
 					ignore_empty_input = true;
 				};
 
@@ -494,7 +497,11 @@ end_time = 07:00:00
 
 					{
 						timeout = 300;       # 5 min
-						on-timeout = "${pkgs.systemd}/bin/loginctl lock-session";  # Lock screen after timeout
+						# Launch hyprlock directly (not via loginctl) so we can pass --grace,
+						# giving 5s after the lock appears where any input dismisses it
+						# without a password. Manual lock + suspend still go through
+						# loginctl/lock_cmd and pick up grace=0 from the hyprlock config.
+						on-timeout = "${pkgs.procps}/bin/pgrep -x hyprlock || ${pkgs.hyprlock}/bin/hyprlock --grace 5";
 					}
 
 					{
