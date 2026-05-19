@@ -359,6 +359,19 @@ end_time = 07:00:00
 					ignore_empty_input = true;
 				};
 
+				# Explicit fadeIn/fadeOut. Hyprlock only registers the
+				# `linear` bezier in its AnimationManager, so the global
+				# default ("default") falls back to a no-op and fades warp
+				# instantly. Pin fadeIn/fadeOut to `linear` so the speed
+				# (deciseconds) actually applies. 10 = ~1s.
+				animations = {
+					enabled = true;
+					animation = [
+						"fadeIn, 1, 10, linear"
+						"fadeOut, 1, 2, linear"
+					];
+				};
+
 				background = [
 					{
 						monitor = "";
@@ -487,10 +500,10 @@ end_time = 07:00:00
 					after_sleep_cmd = "${dpms_command} on"; # To avoid having to press a key twice to turn on the display
 				};
 
-				# Dim the screen after 2.5 minutes
+				# Dim the screen 30s before the lock fires (warning)
 				listener = [
 					{
-						timeout = 150;       # 2.5 min
+						timeout = 270;       # 4.5 min (30s before lock at 300s)
 						on-timeout = "${pkgs.brightnessctl}/bin/brightnessctl -s set 10"; # Set monitor backlight to log
 						on-resume = "${pkgs.brightnessctl}/bin/brightnessctl -r";        # Restore monitor backlight
 					}
