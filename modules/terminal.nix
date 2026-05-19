@@ -13,6 +13,11 @@
         background_opacity = "0.9";
 
         disable_ligatures = "cursor";
+
+        # Kitty's default (0.4) blends ANSI dim text 60% into the bg,
+        # which makes chalk.dim() output (e.g. Claude Code's "Resume
+        # this session with…") unreadable on Catppuccin backgrounds.
+        dim_opacity = "0.75";
       };
 
       font = {
