@@ -64,6 +64,9 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 - `catppuccin.hyprland.enable` is passive: it only `source=`s a color-variable file (`$base`, `$blue`, …) into hyprland.conf — nothing themes until you reference those vars in `col.active_border` / decoration rules.
 - `home.pointerCursor` only manages one cursor theme (XCursor). For a separate hyprcursor theme, symlink it manually via `xdg.dataFile."icons/<name>".source` and set `HYPRCURSOR_THEME`/`HYPRCURSOR_SIZE` in Hyprland's env list.
 - `kdePackages.breeze-gtk` is the GTK widget theme and ships no cursors despite the name — use `kdePackages.breeze` for actual Breeze XCursor files.
+- Hyprlock 0.9.x dropped the `general.grace` config option; setting it just produces a silent config error. The only way to set a grace period now is the `--grace N` CLI flag (e.g. `hyprlock --grace 5`).
+- Hyprlock's `CHyprlockAnimationManager` only registers the `linear` bezier; `animation = fadeIn, 1, 10, default` parses without error but warps to the goal instantly. Pin animations to `linear` (e.g. `animation = fadeIn, 1, 10, linear`) for them to actually animate.
+- To audit silently-ignored hyprlock config errors (removed/renamed options, bad `rgb()`/`color=` formats, etc.) run `timeout 2 hyprlock -v -c ~/.config/hypr/hyprlock.conf --grace 0 2>file` and grep `file` for `Config error`. The running hyprlock prints them too but you usually never see its stderr.
 
 ## Claude Code
 
