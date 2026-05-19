@@ -21,6 +21,8 @@ home-manager switch --show-trace
 
 There are no tests or linters configured for this repository. Use `nil` (Nix LSP) for in-editor diagnostics.
 
+`home-manager build` writes a `./result/` symlink to the would-be generation; inspect the rendered output (e.g. `grep grace ./result/home-files/.config/hypr/hyprlock.conf`) before running `switch` to verify config changes.
+
 ## Architecture
 
 - **`home.nix`** — Main entry point. Imports all modules, declares core identity (username, XDG, SSH, fontconfig, nixpkgs config).
