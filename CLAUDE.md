@@ -25,7 +25,9 @@ nix flake update
 
 There are no tests or linters configured for this repository. Use `nil` (Nix LSP) for in-editor diagnostics.
 
-`hm-build` writes a `./result/` symlink to the would-be generation; inspect the rendered output (e.g. `grep grace ./result/home-files/.config/hypr/hyprlock.conf`) before running `hm-switch` to verify config changes.
+`hm-build` writes a `./result/` symlink to the would-be generation; inspect the rendered output (e.g. `grep grace ./result/home-files/.config/hypr/hyprlock.conf`) before running `hm-switch` to verify config changes. Per-variant outputs land at `./result/specialisation/{light,dark}/home-files/…` — useful when a change is gated on `config.theme.variant`.
+
+**`hm-switch` clobbers the active specialisation.** Plain `hm-switch` activates the base (frappe) and replaces whatever specialisation darkman last picked, until darkman next polls and re-switches. When iterating on a Latte- or Frappe-only change, target the spec directly: `home-manager switch --flake /home/abclop99/.config/home-manager#abclop99 --specialisation light` (or `dark`). Query the current mode with `darkman get` (sandbox blocks the dbus call — needs disabling per-call).
 
 ## Inputs
 
@@ -59,7 +61,7 @@ To narrow auto-upgrade in the future: replace `useFlake = true;` with a custom u
   - `git.nix` — Git, delta, GitHub CLI, GPG, gitmoji config.
   - `services.nix` — Syncthing, MPD, udiskie, gnome-keyring, Thunderbird, HM auto-upgrade (flake-mode: `useFlake = true; flakeDir = …`).
   - `hyprland.nix` — Hyprland window manager, keybindings, eww bar, hyprlock, hypridle.
-  - `theme.nix` — Catppuccin theme (Latte/Frappe) with darkman auto-switching via HM specialisations; darkman scripts hardcode `--flake /home/abclop99/.config/home-manager#abclop99`; reads coordinates from `./private/location.nix`.
+  - `theme.nix` — Catppuccin theme (Latte/Frappe) with darkman auto-switching via HM specialisations; darkman scripts hardcode `--flake /home/abclop99/.config/home-manager#abclop99`; reads coordinates from `./private/location.nix`. Exposes a read-only `config.theme.palette` attrset (e.g. `palette.mauve`, `palette.subtext0`) for theme-conditional logic in other modules; pattern: `let isLight = config.theme.variant == "latte"; in lib.optionalString isLight "…"`.
   - `firefox.nix` / `librewolf.nix` — Browser configurations with extensions and settings (firefox uses `pkgs.nur.repos.rycee.firefox-addons`).
   - `vscode.nix` — VS Code extensions and settings.
   - `starship.nix` — Starship prompt configuration (imported as a value, not a module).
