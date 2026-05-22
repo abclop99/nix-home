@@ -321,7 +321,26 @@ end_time = 07:00:00
 			};
 			Install.WantedBy = [ "timers.target" ];
 		};
-	
+
+		# Polkit authentication agent. Replicates the unit shipped at
+		# ${pkgs.hyprpolkitagent}/share/systemd/user/hyprpolkitagent.service
+		# so HM owns the install link instead of relying on the package's.
+		systemd.user.services.hyprpolkitagent = {
+			Unit = {
+				Description = "Hyprland Polkit Authentication Agent";
+				PartOf = [ "graphical-session.target" ];
+				After = [ "graphical-session.target" ];
+				ConditionEnvironment = "WAYLAND_DISPLAY";
+			};
+			Service = {
+				ExecStart = "${pkgs.hyprpolkitagent}/libexec/hyprpolkitagent";
+				Slice = "session.slice";
+				TimeoutStopSec = "5sec";
+				Restart = "on-failure";
+			};
+			Install.WantedBy = [ "graphical-session.target" ];
+		};
+
 		# Bar program
 		programs.eww = {
 			enable = true;
