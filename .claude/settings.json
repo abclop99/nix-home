@@ -23,6 +23,9 @@
       "Bash(journalctl --user *)",
       "Bash(journalctl -u *)",
       "Bash(gh search *)",
+      "Bash(home-manager build *)",
+      "Bash(systemctl --user status *)",
+      "Bash(darkman get)",
       "mcp__claude_ai_Context7__resolve-library-id",
       "mcp__claude_ai_Context7__query-docs"
     ]
