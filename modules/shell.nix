@@ -2,33 +2,31 @@
 let
   isLight = config.theme.variant == "latte";
   palette = config.theme.palette;
+  # Catppuccin Latte upstream uses flamingo/pink/yellow/overlay0 for
+  # these slots — all 2.3-2.6:1 on #eff1f5, well under WCAG AA (4.5:1).
+  # Darker replacements: pink and yellow now clear AA; flamingo and the
+  # gray sit ≈0.1-0.3 below but are still a large improvement. Frappe
+  # reads fine and is untouched.
+  darkFlamingo = "#b85555";          # 4.16:1 — param
+  darkPink     = "#a83389";          # 5.31:1 — redirection / operator / pager prefix
+  darkYellow   = "#8a5e00";          # 5.04:1 — quote
+  darkGray     = palette.subtext0;   # 4.37:1 — grays / autosuggestion / comment
 in
 {
   config = {
     programs.fish = {
       enable = true;
-      # Catppuccin Latte's fish theme uses flamingo (#dd7878) for params,
-      # pink (#ea76cb) for redirection/operator, and yellow (#df8e1d) for
-      # quotes — all 2.3-2.6:1 on the #eff1f5 background, well under WCAG
-      # AA (4.5:1). The grays (overlay0 #9ca0b0) are similarly faint.
-      # Replace with darker shades that preserve the original warm/cool
-      # hue split (ratios vs #eff1f5):
-      #   - params:                darker flamingo #b85555  (4.16:1, near-AA)
-      #   - redirection/operator:  darker pink     #a83389  (5.31:1, AA)
-      #   - quotes:                darker amber    #8a5e00  (5.04:1, AA)
-      #   - grays/autosuggestion:  subtext0        #6c6f85  (4.37:1, near-AA)
-      # Frappe (dark) reads fine and is left alone.
       interactiveShellInit = lib.optionalString isLight ''
-        set -g fish_color_param '#b85555'
-        set -g fish_color_redirection '#a83389'
-        set -g fish_color_operator '#a83389'
-        set -g fish_color_quote '#8a5e00'
-        set -g fish_color_gray '${palette.subtext0}'
-        set -g fish_color_autosuggestion '${palette.subtext0}'
-        set -g fish_color_comment '${palette.subtext0}'
-        set -g fish_pager_color_progress '${palette.subtext0}'
-        set -g fish_pager_color_prefix '#a83389'
-        set -g fish_pager_color_description '${palette.subtext0}'
+        set -g fish_color_param '${darkFlamingo}'
+        set -g fish_color_redirection '${darkPink}'
+        set -g fish_color_operator '${darkPink}'
+        set -g fish_color_quote '${darkYellow}'
+        set -g fish_color_gray '${darkGray}'
+        set -g fish_color_autosuggestion '${darkGray}'
+        set -g fish_color_comment '${darkGray}'
+        set -g fish_pager_color_progress '${darkGray}'
+        set -g fish_pager_color_prefix '${darkPink}'
+        set -g fish_pager_color_description '${darkGray}'
       '';
       shellAliases = {
         eza = "eza --icons=auto --color-scale=all --group --smart-group --header";
