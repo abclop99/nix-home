@@ -8,7 +8,7 @@
       settings = {
         tab_bar_style = "powerline";
         tab_powerline_style = "slanted";
-        tab_title_max_lenth = 16;
+        tab_title_max_length = 16;
 
         background_opacity = "0.9";
 
