@@ -13,7 +13,7 @@ Fish abbreviations expand automatically; the underlying commands are shown for r
 ```bash
 # Apply the home-manager configuration
 hm-switch
-# → home-manager switch --flake /home/abclop99/.config/home-manager#abclop99
+# → home-manager switch --flake /home/abclop99/.config/home-manager#abclop99 --specialisation (darkman get)
 
 # Check for evaluation errors without applying
 hm-build
@@ -27,7 +27,7 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 
 `hm-build` writes a `./result/` symlink to the would-be generation; inspect the rendered output (e.g. `grep grace ./result/home-files/.config/hypr/hyprlock.conf`) before running `hm-switch` to verify config changes. Per-variant outputs land at `./result/specialisation/{light,dark}/home-files/…` — useful when a change is gated on `config.theme.variant`.
 
-**`hm-switch` clobbers the active specialisation.** Plain `hm-switch` activates the base (frappe) and replaces whatever specialisation darkman last picked, until darkman next polls and re-switches. When iterating on a Latte- or Frappe-only change, target the spec directly: `home-manager switch --flake /home/abclop99/.config/home-manager#abclop99 --specialisation light` (or `dark`). Query the current mode with `darkman get` (sandbox blocks the dbus call — needs disabling per-call).
+**`hm-switch` auto-targets the current darkman mode** via `--specialisation (darkman get)`. To force a different variant, expand the abbreviation in your prompt and edit `(darkman get)` to `light` or `dark` before running. If `darkman` isn't running, the substitution returns empty and the command fails — drop the `--specialisation` flag and invoke `home-manager switch --flake /home/abclop99/.config/home-manager#abclop99` directly. Query the current mode with `darkman get` (sandbox blocks the dbus call — needs disabling per-call).
 
 ## Inputs
 

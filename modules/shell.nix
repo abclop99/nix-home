@@ -47,7 +47,7 @@ in
 
         youtube-download = "yt-dlp -x -f 'bestaudio[ext=m4a]' --add-metadata --embed-thumbnail --sponsorblock-remove music_offtopic";
 
-        hm-switch = "home-manager switch --flake /home/abclop99/.config/home-manager#abclop99";
+        hm-switch = "home-manager switch --flake /home/abclop99/.config/home-manager#abclop99 --specialisation (darkman get)";
         hm-build = "home-manager build --flake /home/abclop99/.config/home-manager#abclop99";
       };
     };
