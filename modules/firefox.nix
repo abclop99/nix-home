@@ -134,6 +134,10 @@
           "privacy.trackingprotection.enabled" = true;
           "privacy.trackingprotection.emailtracking.enabled" = true;
           "privacy.trackingprotection.socialtracking.enabled" = true;
+
+          # Let Mozilla's f1tv webcompat intervention run despite RFP
+          "privacy.resistFingerprinting.exemptedDomains" =
+            "f1tv.formula1.com,account.formula1.com,login.formula1.com,formula1.com";
         };
 
         userChrome = ''
