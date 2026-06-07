@@ -33,11 +33,11 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 
 All dynamic dependencies are pinned via `flake.nix`:
 
-- `nixpkgs` → `github:NixOS/nixpkgs/nixos-25.11`
+- `nixpkgs` → `github:NixOS/nixpkgs/nixos-26.05`
 - `nixpkgs-unstable` → `github:NixOS/nixpkgs/nixpkgs-unstable` — used in `modules/claude-code.nix` for newer packages.
-- `home-manager` → `github:nix-community/home-manager/release-25.11` (follows `nixpkgs`).
+- `home-manager` → `github:nix-community/home-manager/release-26.05` (follows `nixpkgs`).
 - `home-manager-unstable` → `github:nix-community/home-manager/master` (follows `nixpkgs-unstable`) — used in `modules/claude-code.nix` for the unstable `claude-code` HM module.
-- `catppuccin` → `github:catppuccin/nix/v25.11`.
+- `catppuccin` → `github:catppuccin/nix/v26.05`.
 - `nur` → `github:nix-community/NUR` — wired via overlay (`overlays.default`), so `pkgs.nur.repos.<author>.<pkg>` works.
 
 `flake.lock` is committed and pins everything. Run `nix flake update` to bump them.
@@ -78,7 +78,7 @@ To narrow auto-upgrade in the future: replace `useFlake = true;` with a custom u
 
 - Commit messages use **gitmoji** format (emoji prefix, e.g. `✨`, `🔧`, `👽️`) with a scope in parentheses (e.g. `hypr`, `firefox`, `home`, `eww`, `helix`). Scope = module/area name.
 - Commits should be atomic (one logical change each). Non-obvious changes should have a reason in the commit body.
-- The configuration targets NixOS 25.11 with Home Manager state version 23.11.
+- The configuration targets NixOS 26.05 with Home Manager state version 23.11.
 - `inputs.nixpkgs-unstable` is used selectively (e.g., `claude-code.nix`) for packages needing newer versions.
 - Nix experimental features `nix-command` and `flakes` are enabled.
 - Default editor is Helix (`hx`), default shell is Fish.
@@ -107,13 +107,13 @@ To narrow auto-upgrade in the future: replace `useFlake = true;` with a custom u
 - `programs.eww.configDir = <derivation>` makes `~/.config/eww` a symlink to a generation-specific store path; eww-server's socket name is hashed from the resolved path, so it changes on every switch and breaks `eww reload`. Use per-file `xdg.configFile."eww/<file>"` entries to keep the directory stable.
 - `catppuccin.enable = true` (from catppuccin/nix) auto-enables every per-app submodule and trips assertions against existing `qt.platformTheme = "gtk"` and firefox extension config. Opt in per app: `catppuccin.<name>.enable = true`.
 - Eww uses `grass` for SCSS, which errors `unknown @ rule: @charset "UTF-8";` on any non-ASCII source. Keep `files/eww/eww.scss*` pure ASCII.
-- `catppuccin.hyprland.enable` is passive: it only `source=`s a color-variable file (`$base`, `$blue`, …) into hyprland.conf — nothing themes until you reference those vars in `col.active_border` / decoration rules.
+- `catppuccin.hyprland` (v26.05) themes via an inline-lua value (`require('themes.catppuccin')`) that only renders under `wayland.windowManager.hyprland.configType = "lua"`; under the pinned `"hyprlang"` it emits an invalid `colors { _var { … } }` block (runtime "config option does not exist" errors). Disabled in `theme.nix` — this config references none of its color vars. (Pre-v26.05 it was passive: it just `source=`d a `$base`/`$blue` color-variable file, themed only if you referenced those vars in `col.active_border` / decoration rules.)
 - `home.pointerCursor` only manages one cursor theme (XCursor). For a separate hyprcursor theme, symlink it manually via `xdg.dataFile."icons/<name>".source` and set `HYPRCURSOR_THEME`/`HYPRCURSOR_SIZE` in Hyprland's env list.
 - `kdePackages.breeze-gtk` is the GTK widget theme and ships no cursors despite the name — use `kdePackages.breeze` for actual Breeze XCursor files.
 - Hyprlock 0.9.x dropped the `general.grace` config option; setting it just produces a silent config error. The only way to set a grace period now is the `--grace N` CLI flag (e.g. `hyprlock --grace 5`).
 - Hyprlock's `CHyprlockAnimationManager` only registers the `linear` bezier; `animation = fadeIn, 1, 10, default` parses without error but warps to the goal instantly. Pin animations to `linear` (e.g. `animation = fadeIn, 1, 10, linear`) for them to actually animate.
 - To audit silently-ignored hyprlock config errors (removed/renamed options, bad `rgb()`/`color=` formats, etc.) run `timeout 2 hyprlock -v -c ~/.config/hypr/hyprlock.conf --grace 0 2>file` and grep `file` for `Config error`. The running hyprlock prints them too but you usually never see its stderr.
-- `programs.home-manager.package` is `readOnly` in HM 25.11 (auto-derived from `pkgs.callPackage`); don't try to override it. Pin the CLI's `<home-manager/...>` lookup via `programs.home-manager.path = "${inputs.home-manager}"` instead — the wrapper's `setHomeManagerNixPath` (~line 106) injects `-I home-manager=$path` for every `nix-instantiate` site, including the un-gated `build-news.nix` reference at ~line 970.
+- `programs.home-manager.package` is `readOnly` in HM 26.05 (auto-derived from `pkgs.callPackage`); don't try to override it. Pin the CLI's `<home-manager/...>` lookup via `programs.home-manager.path = "${inputs.home-manager}"` instead — the wrapper's `setHomeManagerNixPath` (~line 106) injects `-I home-manager=$path` for every `nix-instantiate` site, including the un-gated `build-news.nix` reference at ~line 970.
 - NUR must be wired as an overlay (`inputs.nur.overlays.default`, applied in `flake.nix`). The legacy `inputs.nur = { flake = false; }` + `packageOverrides` pattern in `nixpkgs-config.nix` breaks in pure-flake mode because NUR sub-repos (e.g. `rycee/firefox-addons`) reference `<nixpkgs>` internally; the overlay form lets NUR follow its own pinned nixpkgs.
 - `modules/shell.nix` overrides several `fish_color_*` and `fish_pager_color_*` slots on Latte via `interactiveShellInit` because Catppuccin Latte's upstream values (flamingo / pink / yellow / overlay0) sit at 2.3-2.6:1 against `#eff1f5` — well under WCAG AA (4.5:1). Named bindings `dark{Flamingo,Pink,Yellow,Gray}` live in the file-top `let` block; pink and yellow clear AA, flamingo and the gray sit ≈0.1-0.3 below. Frappe is untouched.
 
