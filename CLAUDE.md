@@ -79,6 +79,7 @@ To narrow auto-upgrade in the future: replace `useFlake = true;` with a custom u
 - Commit messages use **gitmoji** format (emoji prefix, e.g. `✨`, `🔧`, `👽️`) with a scope in parentheses (e.g. `hypr`, `firefox`, `home`, `eww`, `helix`). Scope = module/area name.
 - Commits should be atomic (one logical change each). Non-obvious changes should have a reason in the commit body.
 - The configuration targets NixOS 26.05 with Home Manager state version 23.11.
+- Several 26.05 default-value changes are pinned to their pre-26.05 values (because state version stays 23.11); see [`docs/26.05-pinned-defaults.md`](docs/26.05-pinned-defaults.md) for the inventory and how to adopt each later.
 - `inputs.nixpkgs-unstable` is used selectively (e.g., `claude-code.nix`) for packages needing newer versions.
 - Nix experimental features `nix-command` and `flakes` are enabled.
 - Default editor is Helix (`hx`), default shell is Fish.
