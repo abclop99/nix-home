@@ -27,7 +27,11 @@
       "Bash(systemctl --user status *)",
       "Bash(darkman get)",
       "mcp__claude_ai_Context7__resolve-library-id",
-      "mcp__claude_ai_Context7__query-docs"
+      "mcp__claude_ai_Context7__query-docs",
+      "Bash(nix flake metadata*)",
+      "Bash(nix flake show*)",
+      "Bash(nix-prefetch-url *)",
+      "Bash(lsusb*)"
     ]
   }
 }
