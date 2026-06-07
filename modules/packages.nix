@@ -45,7 +45,7 @@ let
 
   gaming = with pkgs; [
     lutris
-    wineWowPackages.waylandFull
+    wineWow64Packages.waylandFull
     antimicrox
   ];
 

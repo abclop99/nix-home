@@ -28,6 +28,8 @@
 		# Hyprland itself
 		wayland.windowManager.hyprland = {
 			enable = true;
+			# 26.05 changed the default to "lua"; pin hyprlang to keep our config language.
+			configType = "hyprlang";
 			xwayland.enable = true;
 
 			plugins = with pkgs; [

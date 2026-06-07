@@ -5,6 +5,8 @@
     # Firefox
     programs.firefox = {
       enable = true;
+      # 26.05 moved configPath to XDG; pin the pre-26.05 path to keep the existing profile.
+      configPath = ".mozilla/firefox";
       # TODO: profile settings, such as userchrome, extensions, etc.
 
       profiles.default = {

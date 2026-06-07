@@ -112,6 +112,8 @@ in
         name = gtkName;
         package = gtkPkg;
       };
+      # 26.05 changed gtk4.theme default to null; keep GTK4 mirroring the GTK theme.
+      gtk4.theme = config.gtk.theme;
       gtk3.extraConfig.gtk-application-prefer-dark-theme = !isLight;
     };
 

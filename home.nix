@@ -33,6 +33,8 @@
       userDirs = {
         enable = true;
         createDirectories = true;
+        # 26.05 changed the default to false; pin true to keep exporting XDG_*_DIR vars.
+        setSessionVariables = true;
       };
     };
 
@@ -45,11 +47,11 @@
       enable = true;
       enableDefaultConfig = false;
 
-      matchBlocks."*" = {
-        forwardX11 = true;
-        compression = true;
-        controlMaster = "auto";
-        forwardAgent = true;
+      settings."*" = {
+        ForwardX11 = true;
+        Compression = true;
+        ControlMaster = "auto";
+        ForwardAgent = true;
       };
 
       extraConfig = if (builtins.pathExists ./private/ssh/config) then

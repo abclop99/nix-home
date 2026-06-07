@@ -29,6 +29,9 @@
       useFlake = true;
       flakeDir = "/home/abclop99/.config/home-manager";
       frequency = "weekly";
+      # HM 26.05 changed this default to [ ]; pin the pre-26.05 value so the
+      # weekly auto-upgrade still runs nix flake update before switching.
+      preSwitchCommands = [ "nix flake update" ];
     };
 
     services.home-manager.autoExpire.enable = true;
