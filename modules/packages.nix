@@ -34,9 +34,6 @@ let
     blender
     prismlauncher
     calibre
-    zathura
-    zellij
-    mpv
     mpc
     qmk
     qmk-udev-rules
@@ -60,5 +57,17 @@ in
 {
   config = {
     home.packages = fonts ++ cliTools ++ apps ++ gaming ++ mediaTools;
+
+    # HM-managed so Catppuccin can theme them (see catppuccin.* in modules/theme.nix).
+    programs.zellij = {
+      enable = true;
+      # Keybinds preserved verbatim from the pre-HM config — the repeated `bind`
+      # nodes can't be expressed as a settings attrset, so they go through
+      # extraConfig. Catppuccin theming is injected via catppuccin.zellij
+      # (programs.zellij.settings) in modules/theme.nix.
+      extraConfig = builtins.readFile ../files/zellij/keybinds.kdl;
+    };
+    programs.zathura.enable = true;
+    programs.mpv.enable = true;
   };
 }
