@@ -103,7 +103,10 @@ in
       zathura.enable = true;
       mpv.enable = true;
       thunderbird.enable = true;
-      hyprland.enable = true;
+      # catppuccin.hyprland disabled: v26.05 themes via an inline-lua colors block
+      # (require('themes.catppuccin')) that only renders under configType = "lua";
+      # with our pinned "hyprlang" it emits an invalid `colors { _var { … } }`
+      # block. We don't reference its color vars, so dropping it loses nothing.
     };
 
     gtk = {
