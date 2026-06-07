@@ -245,25 +245,25 @@
 				];
 
 				# Window rules
-				windowrulev2 = [
+				windowrule = [
 					# Add slight transparency to non-fullscreen windows
-					"opacity 0.95,fullscreen:0"
+					"match:fullscreen 0, opacity 0.95"
 
 					# Inhibit idle when fullscreen
-					"idleinhibit fullscreen,fullscreen:1"
+					"match:fullscreen 1, idle_inhibit fullscreen"
 					
 					# Floating, pinned, small in corner Picure-in-Picture window
-					"float,class:firefox,title:Picture-in-Picture"
-					"pin,class:firefox,title:Picture-in-Picture"
-					"size 240 135,class:firefox,title:Picture-in-Picture"
-					"move 990 550,class:firefox,title:Picture-in-Picture"
+					"match:class firefox, match:title Picture-in-Picture, float true"
+					"match:class firefox, match:title Picture-in-Picture, pin true"
+					"match:class firefox, match:title Picture-in-Picture, size 240 135"
+					"match:class firefox, match:title Picture-in-Picture, move 990 550"
 					# Make slightly transparent when not fullscreen
-					"opacity 0.9,class:firefox,title:Picture-in-Picture,fullscreen:0"
+					"match:class firefox, match:title Picture-in-Picture, match:fullscreen 0, opacity 0.9"
 					# TODO: Allow fullscreen for P-i-P
 
 					# Fix menus closing in a few applications
-					"stayfocused, title:^()$,class:^(steam)$"
-					"stayfocused, title:^()$,class:^(zoom)$"
+					"match:title ^()$, match:class ^(steam)$, stay_focused true"
+					"match:title ^()$, match:class ^(zoom)$, stay_focused true"
 				];
 				
 			};
