@@ -1,6 +1,11 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 let
+  pkgs-unstable = import inputs.nixpkgs-unstable {
+    inherit (pkgs.stdenv.hostPlatform) system;
+    config = import ../nixpkgs-config.nix;
+  };
+
   fonts = with pkgs; [
     nerd-fonts.fira-code
     nerd-fonts.victor-mono
@@ -53,10 +58,17 @@ let
     exiftool
     vorbis-tools
   ];
+
+  # Claude Code from nixpkgs-unstable — stable's claude-code is backported in
+  # sporadic bursts and lags by weeks. Installed as a bare package, not via the
+  # programs.claude-code HM module: no Claude config is managed through HM, and
+  # importing the *unstable* module evaluates it against the stable lib, which
+  # lacks lib.hm.strings.isPathLike (breaks eval). See CLAUDE.md.
+  unstable = [ pkgs-unstable.claude-code ];
 in
 {
   config = {
-    home.packages = fonts ++ cliTools ++ apps ++ gaming ++ mediaTools;
+    home.packages = fonts ++ cliTools ++ apps ++ gaming ++ mediaTools ++ unstable;
 
     # HM-managed so Catppuccin can theme them (see catppuccin.* in modules/theme.nix).
     programs.zellij = {

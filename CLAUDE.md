@@ -34,9 +34,8 @@ There are no tests or linters configured for this repository. Use `nil` (Nix LSP
 All dynamic dependencies are pinned via `flake.nix`:
 
 - `nixpkgs` → `github:NixOS/nixpkgs/nixos-26.05`
-- `nixpkgs-unstable` → `github:NixOS/nixpkgs/nixpkgs-unstable` — used in `modules/claude-code.nix` for newer packages.
+- `nixpkgs-unstable` → `github:NixOS/nixpkgs/nixpkgs-unstable` — used in `modules/packages.nix` for the up-to-date `claude-code` package (stable's lags; see the `unstable` group's comment there).
 - `home-manager` → `github:nix-community/home-manager/release-26.05` (follows `nixpkgs`).
-- `home-manager-unstable` → `github:nix-community/home-manager/master` (follows `nixpkgs-unstable`) — used in `modules/claude-code.nix` for the unstable `claude-code` HM module.
 - `catppuccin` → `github:catppuccin/nix/v26.05`.
 - `nur` → `github:nix-community/NUR` — wired via overlay (`overlays.default`), so `pkgs.nur.repos.<author>.<pkg>` works.
 
@@ -44,7 +43,7 @@ All dynamic dependencies are pinned via `flake.nix`:
 
 **Release-bump cache gotcha:** when bumping a nixpkgs release ref (e.g. `nixos-26.05`), `nix flake update` may lock to an intermediate branch commit — or reuse a *stale* cached rev — that sits between channel bumps and isn't fully on `cache.nixos.org`, triggering large source rebuilds (e.g. `wine`). Force a fresh resolve with `nix flake update nixpkgs --refresh` and confirm the lock matches the channel rev: `curl -sL https://channels.nixos.org/nixos-XX.YY/git-revision`.
 
-**Auto-upgrade risk:** `services.home-manager.autoUpgrade` runs `nix flake update && home-manager switch --flake .` weekly. This advances **every** input on every run, including `nixpkgs-unstable` and `home-manager-unstable` which track `nixpkgs-unstable` and `master` respectively — i.e. moving branches with no stability guarantee. A bad upstream commit landed during the week will be auto-merged into the next switch with no human review. The pre-flake setup had a narrower surface: `nix-channel --update` only refreshed `home-manager` (release branch, stable) and `nixpkgs-unstable`. The new fan-out is the price of locking everything.
+**Auto-upgrade risk:** `services.home-manager.autoUpgrade` runs `nix flake update && home-manager switch --flake .` weekly. This advances **every** input on every run, including `nixpkgs-unstable` which tracks the `nixpkgs-unstable` branch — i.e. a moving branch with no stability guarantee. A bad upstream commit landed during the week will be auto-merged into the next switch with no human review. (The previous `home-manager-unstable`/`master` input — formerly imported to supply the unstable `claude-code` HM module — was the worst of these: it once advanced past a `lib.hm.strings.isPathLike` refactor that stable's lib lacked, breaking eval. It has since been dropped; the unstable `claude-code` package is now installed directly via `home.packages` in `modules/packages.nix` (no HM module at all).) The pre-flake setup had a narrower surface: `nix-channel --update` only refreshed `home-manager` (release branch, stable) and `nixpkgs-unstable`. The new fan-out is the price of locking everything.
 
 **Recovery if a weekly upgrade breaks switch:** `~/.local/state/nix/profiles/home-manager-<N-1>-link/activate` runs the prior generation's activate script directly (no CLI needed). Then `nix flake update --override-input <bad-input> github:…<known-good-rev>` (or temporarily `services.home-manager.autoUpgrade.enable = false;`) until upstream stabilises.
 
@@ -54,11 +53,10 @@ To narrow auto-upgrade in the future: replace `useFlake = true;` with a custom u
 
 - **`flake.nix`** — Flake entry point. Declares inputs (see "Inputs" above), constructs `pkgs` with NUR overlay + `allowUnfree`, exposes `homeConfigurations.abclop99` with `extraSpecialArgs = { inherit inputs; }` so every module can take `inputs`.
 - **`home.nix`** — Main HM module. Takes `{ pkgs, inputs, ... }`. Imports all sub-modules, declares core identity (username, XDG, SSH, fontconfig), sets `programs.home-manager.path = inputs.home-manager` so the CLI's `<home-manager/...>` lookups resolve to the flake input.
-- **`modules/`** — Split by concern. Modules that need `inputs` take it explicitly (`claude-code.nix`); others stick with `{ pkgs, ... }:`:
-  - `packages.nix` — All `home.packages` (categorized: fonts, cliTools, apps, gaming, mediaTools).
+- **`modules/`** — Split by concern. Modules that need `inputs` take it explicitly (`packages.nix`); others stick with `{ pkgs, ... }:`:
+  - `packages.nix` — All `home.packages` (categorized: fonts, cliTools, apps, gaming, mediaTools, unstable). The `unstable` group holds packages pulled from `inputs.nixpkgs-unstable` (currently just `claude-code`, installed bare — no `programs.claude-code` HM module, since no Claude config is managed through HM; pinned to unstable because stable's lags by weeks). Also enables the HM-managed `programs.zellij`/`zathura`/`mpv` (for Catppuccin theming).
   - `shell.nix` — Fish, Bash, Atuin, fzf, zoxide, Starship, pay-respects. Also defines the `hm-switch` / `hm-build` fish abbreviations.
   - `editor.nix` — Helix configuration.
-  - `claude-code.nix` — Claude Code configuration (uses `inputs.home-manager-unstable`'s module + `inputs.nixpkgs-unstable`'s package).
   - `terminal.nix` — Kitty terminal.
   - `git.nix` — Git, delta, GitHub CLI, GPG, gitmoji config.
   - `services.nix` — Syncthing, MPD, udiskie, gnome-keyring, Thunderbird, HM auto-upgrade (flake-mode: `useFlake = true; flakeDir = …`).

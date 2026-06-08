@@ -4,7 +4,6 @@
     ./modules/packages.nix
     ./modules/shell.nix
     ./modules/editor.nix
-    ./modules/claude-code.nix
     ./modules/terminal.nix
     ./modules/git.nix
     ./modules/services.nix
