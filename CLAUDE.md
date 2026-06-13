@@ -36,7 +36,7 @@ All dynamic dependencies are pinned via `flake.nix`:
 - `nixpkgs` → `github:NixOS/nixpkgs/nixos-26.05`
 - `nixpkgs-unstable` → `github:NixOS/nixpkgs/nixpkgs-unstable` — used in `modules/packages.nix` for the up-to-date `claude-code` package (stable's lags; see the `unstable` group's comment there).
 - `home-manager` → `github:nix-community/home-manager/release-26.05` (follows `nixpkgs`).
-- `catppuccin` → `github:catppuccin/nix/v26.05`.
+- `catppuccin` → `github:catppuccin/nix/v26.05` (follows `nixpkgs`). Catppuccin's upstream `flake.nix` otherwise pins its *own* moving channel-tarball nixpkgs, which forced the build-time `whiskers` Rust renderer (a `nativeBuildInput` of every catppuccin port, built from source — no `cache.nixos.org` binary, no upstream cachix) to recompile on flake updates that didn't touch our nixpkgs. `follows` dedups it; whiskers still recompiles once when `nixpkgs` itself is bumped.
 - `nur` → `github:nix-community/NUR` — wired via overlay (`overlays.default`), so `pkgs.nur.repos.<author>.<pkg>` works.
 
 `flake.lock` is committed and pins everything. Run `nix flake update` to bump them.
