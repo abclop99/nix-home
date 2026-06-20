@@ -38,6 +38,7 @@ let
     mesa-demos
     blender
     prismlauncher
+    modrinth-app # Minecraft launcher; bundles jdk8/17/21/25 — see CLAUDE.md quirk
     calibre
     mpc
     qmk
