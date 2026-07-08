@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Block commits that modify private/* files (skip-worktree'd locally).
 #
-# The three files below are tracked in git with placeholder content; the real
+# The files below are tracked in git with placeholder content; the real
 # values live only on disk via `git update-index --skip-worktree`. This hook
 # refuses commits that include staged changes to them, so an accidental
 # `git add -f` or `--no-skip-worktree` doesn't leak real content into a public
@@ -11,6 +11,7 @@ SKIP_WORKTREE_FILES=(
   private/location.nix
   private/ssh/config
   private/gpg-key-fingerprint
+  private/rustdesk.nix
 )
 for f in "${SKIP_WORKTREE_FILES[@]}"; do
   if ! git diff --cached --quiet HEAD -- "$f" 2>/dev/null; then

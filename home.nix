@@ -8,6 +8,7 @@
     ./modules/git.nix
     ./modules/services.nix
     ./modules/hyprland.nix
+    ./modules/rustdesk.nix
     ./modules/firefox.nix
     ./modules/librewolf.nix
     ./modules/vscode.nix

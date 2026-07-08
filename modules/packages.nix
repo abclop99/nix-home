@@ -44,6 +44,7 @@ let
     qmk
     qmk-udev-rules
     micromamba
+    rustdesk-flutter # Remote desktop → self-hosted server; config in modules/rustdesk.nix
   ];
 
   gaming = with pkgs; [
