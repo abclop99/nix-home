@@ -124,6 +124,24 @@ in
       color-scheme = "prefer-${colorScheme}";
     };
 
+    # Route the XDG-portal Settings interface (org.freedesktop.appearance
+    # color-scheme) to darkman, so portal-aware apps that "follow system"
+    # (Qt/Flutter/Electron — e.g. RustDesk) actually observe dark/light. The
+    # dconf setting above only reaches apps that read gsettings/dconf directly
+    # (libadwaita); portal-based apps query org.freedesktop.portal.Settings,
+    # which had NO backend here — xdg-desktop-portal-hyprland implements no
+    # Settings interface, and darkman's own darkman.portal ships UseIn=sway
+    # (never auto-selected under Hyprland). Naming darkman explicitly overrides
+    # UseIn; its daemon already owns org.freedesktop.impl.portal.desktop.darkman
+    # and reports its live mode. NB: this file FULLY REPLACES the system
+    # hyprland-portals.conf (first match wins, no merge), so default=hyprland;gtk
+    # is restated to keep ScreenCast/Screenshot/GlobalShortcuts routed.
+    xdg.configFile."xdg-desktop-portal/hyprland-portals.conf".text = ''
+      [preferred]
+      default=hyprland;gtk
+      org.freedesktop.impl.portal.Settings=darkman
+    '';
+
     # delta highlights diff tokens with its OWN embedded theme set, which does
     # not include any Catppuccin theme (catppuccin/nix only registers those for
     # standalone bat). Naming "Catppuccin <flavor>" makes delta warn
