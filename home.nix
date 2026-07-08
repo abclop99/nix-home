@@ -22,6 +22,24 @@
         "nix-command"
         "flakes"
       ];
+      # Raise the GitHub API rate limit (60→5000/hr) so `nix flake update` doesn't
+      # 403 re-fetching the github: inputs. Token lives in a machine-local, non-repo,
+      # non-store file (see CLAUDE.md "GitHub API token"), created out of band.
+      #   - RELATIVE path on purpose: nix resolves includes against the dir of the
+      #     config file it reads (~/.config/nix/), NOT the store symlink target. So
+      #     this points at ~/.config/nix/github-access-tokens.conf with no absolute/
+      #     username path. Do NOT "fix" this to an absolute path.
+      #   - `!include` is the *optional-include* form (a missing file is skipped,
+      #     not an error) — required twice over: at runtime a missing token file
+      #     doesn't break nix, AND the HM build's checkPhase (nix config show, token
+      #     file absent at build time) passes only with the bang. Plain `include`
+      #     would fail the build. Do NOT drop the bang.
+      #   - Do NOT move the token into nix.settings.access-tokens or manage the
+      #     token file via home.file/xdg.configFile — that bakes the PAT into the
+      #     world-readable /nix/store.
+      extraOptions = ''
+        !include github-access-tokens.conf
+      '';
     };
 
     home.username = "abclop99";
