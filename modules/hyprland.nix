@@ -1,4 +1,10 @@
-{ config, pkgs, ... }: {
+{ config, pkgs, ... }:
+let
+	# Host-specific extra Hyprland binds live in a skip-worktree'd private file
+	# (empty-list placeholder in git, real binds on disk). See private/hyprland.nix
+	# and CLAUDE.md. Empty on machines with no host-specific binds → no-op.
+	private = import ../private/hyprland.nix;
+in {
 
 	config = {
 
@@ -225,7 +231,8 @@
 							"$mod SHIFT, ${ws}, movetoworkspace, ${toString (x + 1)}"
 						]
 					) 10)
-				);
+				)
+				++ private.extraBinds;
 
 				# Media key binds
 				bindel = [
