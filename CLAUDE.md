@@ -78,7 +78,7 @@ The file is a plain 0600 nix.conf fragment beside the HM-managed `~/.config/nix/
   - `terminal.nix` — Kitty terminal.
   - `git.nix` — Git, delta, GitHub CLI, GPG, gitmoji config.
   - `services.nix` — Syncthing, MPD, udiskie, gnome-keyring, Thunderbird, HM auto-upgrade (flake-mode: `useFlake = true; flakeDir = …`).
-  - `hyprland.nix` — Hyprland window manager, keybindings, eww bar, hyprlock, hypridle.
+  - `hyprland.nix` — Hyprland window manager, keybindings, eww bar, hyprlock, hypridle. Imports host-specific extra binds from `private/hyprland.nix` (skip-worktree'd: empty-`extraBinds` placeholder in git, real binds on disk) and appends them to `settings.bind`.
   - `theme.nix` — Catppuccin theme (Latte/Frappe) with darkman auto-switching via HM specialisations; darkman scripts hardcode `--flake /home/abclop99/.config/home-manager#abclop99`; reads coordinates from `./private/location.nix`. Exposes a read-only `config.theme.palette` attrset (e.g. `palette.mauve`, `palette.subtext0`) for theme-conditional logic in other modules; pattern: `let isLight = config.theme.variant == "latte"; in lib.optionalString isLight "…"`.
   - `firefox.nix` / `librewolf.nix` — Browser configurations with extensions and settings (firefox uses `pkgs.nur.repos.rycee.firefox-addons`).
   - `vscode.nix` — VS Code extensions and settings.
@@ -89,8 +89,8 @@ The file is a plain 0600 nix.conf fragment beside the HM-managed `~/.config/nix/
   - `firefox/` — Custom CSS (tree-style-tab).
   - `fontconfig/` — Font configuration.
   - `swaylock/` — Custom swaylock effect (C source).
-- **`private/`** — Three tracked-but-skip-worktree files (`location.nix`, `ssh/config`, `gpg-key-fingerprint`). The committed content is a placeholder; real values live only on disk. See "Private files" below.
-- **`hooks/pre-commit`** — Tracked git hook that rejects commits with staged changes to the three `private/` files. Activated per-clone via `git config core.hooksPath hooks`.
+- **`private/`** — Five tracked-but-skip-worktree files (`location.nix`, `ssh/config`, `gpg-key-fingerprint`, `rustdesk.nix`, `hyprland.nix`). The committed content is a placeholder; real values live only on disk. See "Private files" below.
+- **`hooks/pre-commit`** — Tracked git hook that rejects commits with staged changes to the `private/` files. Activated per-clone via `git config core.hooksPath hooks`.
 
 ## Conventions
 
@@ -106,11 +106,11 @@ The file is a plain 0600 nix.conf fragment beside the HM-managed `~/.config/nix/
 
 ## Private files
 
-`private/{location.nix,ssh/config,gpg-key-fingerprint}` are tracked but `--skip-worktree`'d. The committed content is a placeholder; real values live only in the working tree.
+`private/{location.nix,ssh/config,gpg-key-fingerprint,rustdesk.nix,hyprland.nix}` are tracked but `--skip-worktree`'d. The committed content is a placeholder; real values live only in the working tree.
 
 **Per-machine setup (after fresh clone):**
 1. `git config core.hooksPath hooks` — activates the pre-commit guard.
-2. `git update-index --skip-worktree private/location.nix private/ssh/config private/gpg-key-fingerprint` — tell git to ignore local edits.
+2. `git update-index --skip-worktree private/location.nix private/ssh/config private/gpg-key-fingerprint private/rustdesk.nix private/hyprland.nix` — tell git to ignore local edits.
 3. Populate real content (via `cat > private/foo` or your editor; the Claude `block-private.sh` hook blocks Edit/Write/MultiEdit, so use Bash or an editor outside Claude).
 
 **Updating placeholder structure** (e.g., adding fields): edit the file, `git add private/foo`, `git commit --no-verify` (the hook would otherwise refuse). Then re-apply skip-worktree if necessary and restore real content.

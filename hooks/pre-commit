@@ -12,6 +12,7 @@ SKIP_WORKTREE_FILES=(
   private/ssh/config
   private/gpg-key-fingerprint
   private/rustdesk.nix
+  private/hyprland.nix
 )
 for f in "${SKIP_WORKTREE_FILES[@]}"; do
   if ! git diff --cached --quiet HEAD -- "$f" 2>/dev/null; then
