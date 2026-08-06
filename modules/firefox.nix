@@ -132,6 +132,20 @@
           "browser.newtabpage.activity-stream.showSponsored" = false;
           "browser.newtabpage.activity-stream.showSponsoredTopSites" = false;
 
+          # Route file dialogs through xdg-desktop-portal instead of Firefox's
+          # in-process GTK3 chooser, which ABORTS the whole browser here: the
+          # GTK chooser opens org.gtk.Settings.FileChooser via GSettings, that
+          # schema is absent from this session's XDG_DATA_DIRS (`gsettings
+          # list-schemas` → "No schemas installed" — nixpkgs' firefox wrapper
+          # adds only adwaita-icon-theme, and gtk3 ships its schemas under
+          # share/gsettings-schemas/<name>/, which nothing puts on the session
+          # path), and a missing schema is a fatal g_error() → abort. With
+          # `browser.download.useDownloadDir = false` (always ask where to
+          # save) that fired on every single download. The portal's chooser
+          # runs out-of-process in xdg-desktop-portal-gtk, which IS wrapped
+          # with its own gtk3 schemas, so it resolves fine. 1 = always.
+          "widget.use-xdg-desktop-portal.file-picker" = 1;
+
           # Tracking protection
           "privacy.trackingprotection.enabled" = true;
           "privacy.trackingprotection.emailtracking.enabled" = true;
