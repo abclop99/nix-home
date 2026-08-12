@@ -1,9 +1,16 @@
-{ config, pkgs, ... }:
+{ config, lib, pkgs, ... }:
 let
 	# Host-specific extra Hyprland binds live in a skip-worktree'd private file
 	# (empty-list placeholder in git, real binds on disk). See private/hyprland.nix
 	# and CLAUDE.md. Empty on machines with no host-specific binds → no-op.
 	private = import ../private/hyprland.nix;
+
+	# GSettings schema dirs to hand the session; see the GSETTINGS_SCHEMA_DIR env
+	# entry below for why. nixpkgs installs these under share/gsettings-schemas/
+	# <name>/, one level deeper than the share/glib-2.0/schemas that GLib scans.
+	schemaDirs = lib.concatMapStringsSep ":"
+		(p: "${p}/share/gsettings-schemas/${p.name}/glib-2.0/schemas")
+		[ pkgs.gsettings-desktop-schemas pkgs.gtk3 ];
 in {
 
 	config = {
@@ -51,6 +58,31 @@ in {
           "WLR_NO_HARDWARE_CURSORS,1"
           "HYPRCURSOR_THEME,rose-pine-hyprcursor"
           "HYPRCURSOR_SIZE,24"
+          # GTK derives its Xft DPI from the org.gnome.desktop.interface
+          # GSettings schema (text-scaling-factor). That schema ships in
+          # gsettings-desktop-schemas, which is on NO XDG_DATA_DIRS entry here
+          # (neither /run/current-system/sw nor the HM profile expose a
+          # share/glib-2.0/schemas), so GTK never sets xft-dpi and
+          # gdk_screen_get_resolution() keeps its "unset" sentinel of -1.
+          # Firefox converts the system font's *point* size to pixels with
+          # `pt * dpi / 72`, so a -1 DPI yields a NEGATIVE font size (10pt ->
+          # -0.138889px) and every chrome label — tab titles, URL bar, menus —
+          # renders as nothing. Page content is unaffected (CSS px), as are
+          # icons, which is why the browser otherwise looks fine.
+          #
+          # gtk3's own schema dir is listed alongside it because
+          # org.gtk.Settings.FileChooser lives there, NOT in
+          # gsettings-desktop-schemas — and a missing schema is a fatal
+          # g_error(), so GTK3's in-process file chooser aborts the whole
+          # app rather than degrading. That is what crashed Firefox on every
+          # download; see modules/firefox.nix. Apps wrapped by wrapGAppsHook
+          # (chromium, xdg-desktop-portal-gtk) carry their own copies and were
+          # never affected, which is what made this look Firefox-specific.
+          #
+          # GSETTINGS_SCHEMA_DIR is colon-separated and additive (searched
+          # alongside XDG_DATA_DIRS), so this only adds the missing schemas
+          # without hiding any other app's.
+          "GSETTINGS_SCHEMA_DIR,${schemaDirs}"
         ];
 
 				monitor = [
