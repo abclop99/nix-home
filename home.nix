@@ -65,11 +65,15 @@
       enable = true;
       enableDefaultConfig = false;
 
+      # ForwardAgent / ForwardX11 are deliberately absent from this `*` block:
+      # a wildcard applies them to EVERY host you reach. Any server you forward
+      # the agent to can drive your loaded keys to authenticate as you anywhere
+      # else for the life of the connection, and X11 forwarding hands an
+      # untrusted server access to your display. Enable either one per-host in
+      # private/ssh/config, where the real host list already lives.
       settings."*" = {
-        ForwardX11 = true;
         Compression = true;
         ControlMaster = "auto";
-        ForwardAgent = true;
       };
 
       extraConfig = if (builtins.pathExists ./private/ssh/config) then
