@@ -19,7 +19,15 @@
         # goto_layout, which only accepts enabled layouts).
         enabled_layouts = "splits:split_axis=auto,grid,stack";
 
-        background_opacity = "0.9";
+        # Opaque. At 0.9 the wallpaper bled into every default-background
+        # cell, which under Latte cost real readability: measured across the
+        # contrast-audit fixtures, pairs below 3:1 went 34 -> 39 and pairs
+        # below AA went 49 -> 57. (Under Frappe it slightly helped, since
+        # darkening a dark background raises contrast -- but not enough to
+        # justify keeping the variants apart.) Hyprland still applies
+        # "match:fullscreen 0, opacity 0.95" (modules/hyprland.nix), so
+        # non-fullscreen windows keep the translucent look regardless.
+        background_opacity = "1.0";
 
         disable_ligatures = "cursor";
 
