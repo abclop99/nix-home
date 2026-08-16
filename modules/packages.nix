@@ -16,7 +16,6 @@ let
   ];
 
   cliTools = with pkgs; [
-    bat
     uutils-coreutils-noprefix
     ripgrep
     semgrep
@@ -83,5 +82,10 @@ in
     };
     programs.zathura.enable = true;
     programs.mpv.enable = true;
+    # Without this there is no bat config file to write the theme into, and
+    # bat silently renders in Monokai Extended under *both* variants. The
+    # theme it now carries is base16 (modules/theme.nix), not a Catppuccin
+    # one -- see the ANSI note there for why.
+    programs.bat.enable = true;
   };
 }

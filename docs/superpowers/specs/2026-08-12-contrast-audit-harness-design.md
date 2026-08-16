@@ -151,6 +151,15 @@ wrong:
    per-variant theme of their own; swapping the kitty palette does not touch
    them.
 
+> **Superseded in part.** This describes the configuration as it stood when the
+> harness was designed. What the harness then measured led to bat, fish and fzf
+> moving onto ANSI-indexed colour, and delta onto its own defaults plus a
+> per-variant syntax theme — so of the programs named above, only helix, atuin
+> and zellij still carry a truecolor theme, and only helix is exercised by a
+> fixture. See the ANSI notes in `CLAUDE.md` and `modules/theme.nix` for the
+> reasoning and the measurements behind it. The design below is left as written;
+> it is a record of the instrument, not of the configuration it measures.
+
 Getting only the first right would render a Latte terminal running Frappe-themed
 applications — a picture of nothing real. So `drive` sets `XDG_CONFIG_HOME` to
 the matching rendered specialisation,

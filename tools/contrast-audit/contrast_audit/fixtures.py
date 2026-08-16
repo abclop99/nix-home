@@ -52,7 +52,8 @@ FIXTURES: tuple[Fixture, ...] = (
         "delta-diff",
         ["sh", "-c", f"git show {DIFF_REV} -- modules/ | delta"],
         rows=36,
-        note="delta: truecolour, deliberately themed OneHalf* not Catppuccin",
+        note="delta: Catppuccin syntax theme, with delta's own truecolour "
+             "decorations for the +/- backgrounds and line numbers",
     ),
     Fixture(
         "helix-edit",

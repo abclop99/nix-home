@@ -1,33 +1,8 @@
-{ lib, config, ... }:
-let
-  isLight = config.theme.variant == "latte";
-  palette = config.theme.palette;
-  # Catppuccin Latte upstream uses flamingo/pink/yellow/overlay0 for
-  # these slots — all 2.3-2.6:1 on #eff1f5, well under WCAG AA (4.5:1).
-  # Darker replacements: pink and yellow now clear AA; flamingo and the
-  # gray sit ≈0.1-0.3 below but are still a large improvement. Frappe
-  # reads fine and is untouched.
-  darkFlamingo = "#b85555";          # 4.16:1 — param
-  darkPink     = "#a83389";          # 5.31:1 — redirection / operator / pager prefix
-  darkYellow   = "#8a5e00";          # 5.04:1 — quote
-  darkGray     = palette.subtext0;   # 4.37:1 — grays / autosuggestion / comment
-in
+{ ... }:
 {
   config = {
     programs.fish = {
       enable = true;
-      interactiveShellInit = lib.optionalString isLight ''
-        set -g fish_color_param '${darkFlamingo}'
-        set -g fish_color_redirection '${darkPink}'
-        set -g fish_color_operator '${darkPink}'
-        set -g fish_color_quote '${darkYellow}'
-        set -g fish_color_gray '${darkGray}'
-        set -g fish_color_autosuggestion '${darkGray}'
-        set -g fish_color_comment '${darkGray}'
-        set -g fish_pager_color_progress '${darkGray}'
-        set -g fish_pager_color_prefix '${darkPink}'
-        set -g fish_pager_color_description '${darkGray}'
-      '';
       shellAliases = {
         eza = "eza --icons=auto --color-scale=all --group --smart-group --header";
       };
@@ -66,6 +41,13 @@ in
       enable = true;
       enableFishIntegration = true;
       enableBashIntegration = true;
+      # base16 restricts fzf to the terminal's sixteen palette slots. It is not
+      # only about contrast: catppuccin.fzf puts hex into FZF_DEFAULT_OPTS,
+      # which is exported at shell login, so a shell open across a darkman
+      # switch runs even a brand-new fzf with the previous flavour's colours.
+      # Being an environment variable makes it the most stubborn case of that
+      # in this config -- worse than a config file, which at least gets re-read.
+      defaultOptions = [ "--color=base16" ];
     };
 
     programs.zoxide = {

@@ -1,3 +1,4 @@
+import re
 import subprocess
 import time
 
@@ -121,10 +122,18 @@ def test_capability_query_does_not_render_as_text():
 
 
 def test_interactive_shell_actually_highlights():
-    """fish emitting truecolour SGR proves it got far enough to syntax
-    highlight, rather than merely starting."""
+    """Colour SGR on the typed line proves fish got far enough to syntax
+    highlight, rather than merely starting.
+
+    Asserted as basic ANSI rather than truecolour, and truecolour is asserted
+    ABSENT: fish is deliberately left on its built-in defaults so its colours
+    are palette indices the terminal resolves. If truecolour reappears here,
+    something has re-themed fish with baked hex, which brings back both the
+    stale-across-darkman-switch bug and permanent scrollback.
+    """
     out = drive(["fish", "-i"], keys=[(600, b'echo "hi" --flag')], timeout_s=8)
-    assert b"\x1b[38;2;" in out
+    assert re.search(rb"\x1b\[(3[0-7]|9[0-7])m", out), "no ANSI colour emitted"
+    assert b"\x1b[38;2;" not in out, "fish emitted truecolour; it should not"
 
 
 def test_key_resets_the_quiet_timer():
