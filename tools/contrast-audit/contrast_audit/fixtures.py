@@ -92,6 +92,27 @@ FIXTURES: tuple[Fixture, ...] = (
         note="helix + c: preprocessor directives, types, numeric literals",
     ),
     Fixture(
+        "fzf-select",
+        # A pinned list rather than fzf's own directory walk: the walker would
+        # pick up audit/ and every other untracked file, so the frame would
+        # change with whatever happens to be on disk.
+        ["sh", "-c", "git ls-files modules | fzf"],
+        # "nix" matches all thirteen, so the highlight appears on every row at
+        # once; the arrow then moves the pointer off the first, which is what
+        # separates the current line from the rest.  Both are needed: fzf draws
+        # matched characters and the current line in different slots (hl/hl+,
+        # fg+/bg+), and with the pointer on row one they overlap.
+        keys=[(1500, b"nix"), (600, b"\x1b[B")],
+        timeout_s=25.0,
+        # NB this fixture is exempt from the identical-output canary: fzf has
+        # no config file, and FZF_DEFAULT_OPTS is "--color=base16" in both
+        # variants, so identical symbolic output is the correct result rather
+        # than evidence the override was ignored.  The resolved colours still
+        # differ, because the ANSI slots do.
+        note="fzf: --color=base16, so every colour is an ANSI slot -- current "
+             "line, match highlights, pointer, prompt, info and gutter",
+    ),
+    Fixture(
         "fish-syntax",
         ["fish", "-i"],
         keys=[(700, b'echo "hi" > /tmp/x --flag; nosuchcmd $HOME')],
