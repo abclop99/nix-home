@@ -1,2 +1,8 @@
 *.secret
 result
+
+# contrast-audit harness output (regenerable) and Python scratch.
+# audit*/ so alternate-lens sweeps (--out audit-backdrop) are covered too.
+audit*/
+__pycache__/
+.pytest_cache/

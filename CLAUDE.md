@@ -23,7 +23,14 @@ hm-build
 nix flake update
 ```
 
-There are no tests or linters configured for this repository. Use `nil` (Nix LSP) for in-editor diagnostics.
+The Nix side has no tests or linters — use `nil` (Nix LSP) for in-editor diagnostics. The contrast-audit harness does:
+
+```bash
+# Run its test suite (from tools/contrast-audit/)
+nix develop -c pytest
+```
+
+The devShell also carries chromium and the Fira Code Nerd Font, both needed for `--screenshot`. Run the harness itself with `nix run .#contrast-audit` (git-tracked files only — stage new ones first) or, while editing it, `nix develop -c python3 -m contrast_audit`, which uses the working tree.
 
 `hm-build` writes a `./result/` symlink to the would-be generation; inspect the rendered output (e.g. `grep grace ./result/home-files/.config/hypr/hyprlock.conf`) before running `hm-switch` to verify config changes. Per-variant outputs land at `./result/specialisation/{light,dark}/home-files/…` — useful when a change is gated on `config.theme.variant`.
 
