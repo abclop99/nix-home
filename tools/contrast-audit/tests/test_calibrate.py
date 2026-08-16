@@ -4,6 +4,8 @@ from contrast_audit.calibrate import (HUES, MAX_CHROMA, STEPS, at_delta, grid,
                                       key, live_flavor, main, render, rows)
 from contrast_audit.candidate import rgb_to_oklch
 from contrast_audit.palette import hex_to_rgb, lightness_delta, oklab_lightness
+from contrast_audit.shader import NEUTRAL, multipliers
+from contrast_audit.shader import apply as shader_apply
 
 LIGHT = hex_to_rgb("#eff1f5")   # Latte base
 DARK = hex_to_rgb("#303446")    # Frappe base
@@ -134,6 +136,32 @@ def test_descend_reverses_the_rows_without_redrawing_them():
     # from one direction would fail against the other.
     assert [t for t, _ in rows(5, descend=True)] == list(STEPS)[::-1]
     assert dict(rows(5, descend=True)) == dict(rows(5))
+
+
+@pytest.mark.parametrize("bg", [LIGHT, DARK])
+@pytest.mark.parametrize("target", STEPS)
+def test_the_ramp_hits_the_delta_after_the_filter_not_before(bg, target):
+    # The whole point of modelling the shader: a row labelled 0.03 that the
+    # filter moves to 0.10 is not a mislabelled row, it is a wrong reading.
+    mul = multipliers(2600.0)
+    seen_bg = shader_apply(bg, mul)
+    for _, hue, chroma in HUES:
+        cell = at_delta(bg, target, chroma, hue, mul=mul)
+        got = lightness_delta(shader_apply(cell, mul), seen_bg)
+        assert got == pytest.approx(target, abs=0.02)
+
+
+def test_modelling_a_neutral_filter_changes_nothing():
+    for _, hue, chroma in HUES:
+        assert (at_delta(LIGHT, 0.2, chroma, hue)
+                == at_delta(LIGHT, 0.2, chroma, hue, mul=NEUTRAL))
+
+
+def test_the_filter_moves_where_a_row_has_to_sit():
+    # Latte's background goes orange under the shader, so holding a delta
+    # against it needs a different colour than holding one against white.
+    mul = multipliers(2600.0)
+    assert at_delta(LIGHT, 0.2, 0.0, 0.0, mul=mul) != at_delta(LIGHT, 0.2, 0.0, 0.0)
 
 
 def test_the_key_follows_the_direction_it_was_asked_for():

@@ -28,6 +28,7 @@ import sys
 import textwrap
 from pathlib import Path
 
+from contrast_audit import shader
 from contrast_audit.candidate import oklch_to_rgb, rgb_to_oklch
 from contrast_audit.palette import (
     RGB,
@@ -159,7 +160,8 @@ def sample(rng: random.Random) -> str:
 
 
 def at_delta(bg: RGB, target: float, chroma: float, hue: float,
-             lighter: bool | None = None) -> RGB:
+             lighter: bool | None = None,
+             mul: shader.Multipliers = shader.NEUTRAL) -> RGB:
     """A colour `target` lightness away from bg, on the readable side.
 
     Away from the background means darker on a light one and lighter on a dark
@@ -168,13 +170,40 @@ def at_delta(bg: RGB, target: float, chroma: float, hue: float,
     background like fzf's selected row: text lands on both sides of it there,
     and the two sides need not have the same threshold.  Polarity is the whole
     reason the ratio misleads, so it has to be testable rather than inferred.
+
+    `mul` makes the delta hold after a screen filter rather than before it.
+    The colour returned is still what the terminal is told to draw -- the
+    filter is applied by the compositor, not here -- but it is chosen so that
+    what lands on the glass is `target` away from the filtered background.
+    Solving it this way round is the point: label a row 0.03 and show
+    something the filter has moved to 0.10 and the reading is worthless.
     """
-    bg_l = oklab_lightness(bg)
+    filtered_bg = shader.apply(bg, mul)
+    bg_l = oklab_lightness(filtered_bg)
     up = bg_l < 0.5 if lighter is None else lighter
-    lo, hi = (bg_l, 1.0) if up else (0.0, bg_l)
+
+    def delta(nominal: float) -> float:
+        return lightness_delta(shader.apply(oklch_to_rgb(nominal, chroma, hue), mul),
+                               filtered_bg)
+
+    # Where the ramp starts -- the drawable lightness that lands level with the
+    # background once filtered.  Unfiltered that is the background's own
+    # lightness, but a filter moves it, by different amounts per hue, and to
+    # the *dark* side on Frappe: starting the search at the nominal lightness
+    # put the level point outside the interval, so the first two rows could not
+    # be reached and rendered at 0.063 under a label saying 0.03.
+    if mul == shader.NEUTRAL:
+        base = oklab_lightness(bg)
+    else:
+        base = min((i / 256 for i in range(257)), key=delta)
+
+    far = 1.0 if up else 0.0
+    if delta(far) < target:
+        return oklch_to_rgb(far, chroma, hue)   # unreachable even at the extreme
+    lo, hi = (base, far) if up else (far, base)
     for _ in range(24):
         mid = (lo + hi) / 2
-        if lightness_delta(oklch_to_rgb(mid, chroma, hue), bg) < target:
+        if delta(mid) < target:
             if up:
                 lo = mid
             else:
@@ -218,12 +247,16 @@ def rows(seed: int, descend: bool = False) -> list[tuple[float, list[str]]]:
 
 def render(bg: RGB, label: str, anchors: list[tuple[str, RGB]],
            seed: int, lighter: bool | None = None,
-           descend: bool = False) -> str:
-    ink = _readable_on(bg)
+           descend: bool = False,
+           mul: shader.Multipliers = shader.NEUTRAL) -> str:
+    ink = _readable_on(shader.apply(bg, mul))
     side = ("away from the background" if lighter is None
             else "lighter than the background" if lighter
             else "darker than the background")
-    out = [f"\n  background {rgb_to_hex(bg)}  ({label}; ramping {side}; "
+    seen = shader.apply(bg, mul)
+    ground = (rgb_to_hex(bg) if mul == shader.NEUTRAL
+              else f"{rgb_to_hex(bg)} seen as {rgb_to_hex(seen)}")
+    out = [f"\n  background {ground}  ({label}; ramping {side}; "
            f"seed {seed}; "
            f"{'contrast falls downward' if descend else 'contrast rises downward'})\n",
            _cell(ink, bg,
@@ -232,7 +265,7 @@ def render(bg: RGB, label: str, anchors: list[tuple[str, RGB]],
     for target, texts in rows(seed, descend):
         row = _cell(ink, bg, f"  {target:.2f}  ")
         for (_, hue, chroma), text in zip(HUES, texts):
-            row += _cell(at_delta(bg, target, chroma, hue, lighter), bg,
+            row += _cell(at_delta(bg, target, chroma, hue, lighter, mul), bg,
                          f"{text:<{CELL}}")
         out.append(row)
 
@@ -242,8 +275,11 @@ def render(bg: RGB, label: str, anchors: list[tuple[str, RGB]],
         out.append(_cell(ink, bg,
                          f"{'  anchors -- live pairs, and the mark each one has to clear':<{WIDTH}}"))
         for name, fg in anchors:
-            text = (f"  {sample(rng)}   {name} (ΔL {lightness_delta(fg, bg):.3f}, "
-                    f"ratio {contrast_ratio(fg, bg):.2f})")
+            # Reported as seen, so an anchor is comparable to the rows above it
+            # rather than to a number the filter has since moved.
+            text = (f"  {sample(rng)}   {name} "
+                    f"(ΔL {lightness_delta(shader.apply(fg, mul), seen):.3f}, "
+                    f"ratio {contrast_ratio(shader.apply(fg, mul), seen):.2f})")
             out.append(_cell(fg, bg, f"{text:<{WIDTH}}"))
     return "\n".join(out)
 
@@ -293,7 +329,8 @@ def _readable_on(bg: RGB) -> RGB:
 
 
 def _achieved(bg: RGB, lighter: bool | None = None,
-              descend: bool = False) -> str:
+              descend: bool = False,
+              mul: shader.Multipliers = shader.NEUTRAL) -> str:
     """What the ramp actually renders, since sRGB cannot hold chroma everywhere.
 
     Reported rather than silently clipped: at the pale end oklch_to_rgb reduces
@@ -307,7 +344,8 @@ def _achieved(bg: RGB, lighter: bool | None = None,
     for target in (STEPS[::-1] if descend else STEPS):
         row = [f"  {target:.2f}  "]
         for _, hue, chroma in HUES:
-            got = rgb_to_oklch(at_delta(bg, target, chroma, hue, lighter))[1]
+            cell = at_delta(bg, target, chroma, hue, lighter, mul)
+            got = rgb_to_oklch(shader.apply(cell, mul))[1]
             row.append(f"{got:<{CELL}.3f}")
         lines.append("".join(row))
     return "\n".join(lines)
@@ -347,10 +385,23 @@ PROMPT = """
   have already lost, and the bias is the other way going up. {other} The
   truth is between the two marks, so run it both ways if the number matters.
 
+  {filter}
+
   Read at your normal distance and lighting. Fullscreen the terminal first:
   Hyprland composites non-fullscreen windows at 0.95 over the wallpaper,
   which moves every colour here slightly.
 """
+
+FILTERED = ("{name} is running, and the rows above are corrected for it: each "
+            "one is the stated ΔL as it lands on the glass, not as the "
+            "terminal was told to draw it. Mark it as you see it. Measure "
+            "each flavour under the filter state it is actually used in -- a "
+            "day theme measured at night is a measurement of a combination "
+            "that never occurs.")
+
+UNFILTERED = ("No screen shader is running, so the rows are what the terminal "
+              "draws. If one comes on mid-session the numbers stop meaning "
+              "what they say, so finish the pass or start it again.")
 
 ASCENDING = ("Contrast RISES as you go down: the top row is ΔL 0.03 and "
              "should be illegible, the bottom row is 0.35 and should be "
@@ -416,6 +467,11 @@ def main(argv: list[str] | None = None) -> int:
                    help="put the highest contrast at the top, so the threshold "
                         "is approached from above. the two directions bias "
                         "opposite ways; the answer is between them")
+    p.add_argument("--filter", default="auto", metavar="AUTO|OFF|KELVIN",
+                   help="screen shader to correct for. auto follows whatever "
+                        "hyprland is running; off ignores it; a number forces "
+                        "that temperature, which is how to measure the night "
+                        "condition during the day")
     args = p.parse_args(argv)
     lighter = {"auto": None, "lighter": True, "darker": False}[args.direction]
     seed = args.seed if args.seed is not None else random.randrange(1000, 10000)
@@ -443,8 +499,23 @@ def main(argv: list[str] | None = None) -> int:
               "  Switch darkman, or drop --flavor to follow the terminal.\n",
               file=sys.stderr)
 
+    mul, shader_name = shader.NEUTRAL, None
+    if args.filter == "auto":
+        found = shader.active()
+        if found:
+            mul, shader_name = found
+    elif args.filter != "off":
+        try:
+            kelvin = float(args.filter)
+        except ValueError:
+            raise SystemExit(f"--filter wants auto, off or a temperature in "
+                             f"kelvin, not {args.filter!r}")
+        mul, shader_name = shader.multipliers(kelvin), f"a forced {kelvin:.0f}K"
+
     bg = hex_to_rgb(args.on) if args.on else palette.background
     label = flavor if not args.on else f"{flavor}, on {args.on}"
+    if shader_name:
+        label += f"; through {shader_name}"
 
     # Named with the mark each is meant to clear, because the anchors are how
     # the two marks get checked against something already in use: body text
@@ -456,12 +527,14 @@ def main(argv: list[str] | None = None) -> int:
         if token in palette.tokens:
             anchors.append((name, palette.tokens[token]))
 
-    print(render(bg, label, anchors, seed, lighter, args.descend))
+    print(render(bg, label, anchors, seed, lighter, args.descend, mul))
     if args.chroma_table:
-        print(_achieved(bg, lighter, args.descend))
+        print(_achieved(bg, lighter, args.descend, mul))
     print(_wrap(PROMPT.format(
         seed=seed,
         order=DESCENDING if args.descend else ASCENDING,
+        filter=(FILTERED.format(name=shader_name) if shader_name
+                else UNFILTERED),
         other=("Run it again without --descend for the other direction."
                if args.descend else
                "Run it again with --descend for the other direction."))))
