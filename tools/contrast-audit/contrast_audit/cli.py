@@ -20,7 +20,8 @@ from contrast_audit.palette import (
     load_palette,
 )
 from contrast_audit.render import render_comparison, render_html, render_index
-from contrast_audit.report import findings, summarise
+from contrast_audit.report import (BODY_DELTA_L, GLANCE_DELTA_L, findings,
+                                   summarise)
 from contrast_audit.resolve import resolve_grid
 
 VARIANTS = {"latte": "light", "frappe": "dark"}
@@ -118,8 +119,10 @@ def _caption(found, strict: bool) -> str:
     reader has to eyeball whether the move actually bought anything.
     """
     s = summarise(found, strict=strict)
-    return (f"worst {s['worst']:.2f}:1 · {s['below_4_5']} pairs below AA · "
-            f"{s['below_3']} below 3:1")
+    # Delta first: it is the calibrated measure, and leading with the ratio put
+    # the eye on a number that ranks these pairs wrong.
+    return (f"worst ΔL {s['worst_delta']:.3f} · {s['below_body']} below body · "
+            f"{s['below_glance']} below glance · worst {s['worst']:.2f}:1")
 
 
 def _screenshot(html: Path, png: Path, width: int = 1500, height: int = 900) -> bool:
@@ -198,8 +201,10 @@ def main(argv=None):
     print(f"lens:    {lens_text}")
     print(f"scored:  {'everything' if args.strict else 'text only'} "
           f"(decorative pairs {'included' if args.strict else 'listed apart'})")
-    print(f"{'fixture':<24} {'worst':>6} {'dL':>6} {'<4.5':>5} {'<3.0':>5} "
-          f"{'deco':>5}  tiers (of <4.5)")
+    print(f"thresholds: body ΔL {BODY_DELTA_L:.2f}, glance ΔL {GLANCE_DELTA_L:.2f} "
+          f"(calibrated; see contrast_audit.calibrate)")
+    print(f"{'fixture':<24} {'wΔL':>6} {'<body':>6} {'<glnc':>6} {'worst':>6} "
+          f"{'<4.5':>5} {'deco':>5}  tiers (of <4.5)")
 
     # Hoisted: nothing here varies per fixture, and each call bisects fourteen
     # accents through a conversion that may itself bisect on chroma.
@@ -281,15 +286,19 @@ def main(argv=None):
                 "href": f"{args.flavor}/{fixture.name}.html",
                 "worst": s["worst"],
                 "worst_delta_l": s["worst_delta_l"],
+                "worst_delta": s["worst_delta"],
                 "below_4_5": s["below_4_5"],
                 "below_3": s["below_3"],
+                "below_body": s["below_body"],
+                "below_glance": s["below_glance"],
                 "tiers": s["tiers"],
                 "decorative": s["decorative"],
             })
             tiers = " ".join(f"{k}={v}" for k, v in s["tiers"].items())
-            print(f"{fixture.name:<24} {s['worst']:6.2f} "
-                  f"{s['worst_delta_l']:6.3f} {s['below_4_5']:5} "
-                  f"{s['below_3']:5} {s['decorative']:5}  {tiers}")
+            print(f"{fixture.name:<24} {s['worst_delta']:6.3f} "
+                  f"{s['below_body']:6} {s['below_glance']:6} "
+                  f"{s['worst']:6.2f} {s['below_4_5']:5} "
+                  f"{s['decorative']:5}  {tiers}")
 
     entries = _merge_summary(out_dir, entries)
     (out_dir / "summary.json").write_text(json.dumps(entries, indent=2))

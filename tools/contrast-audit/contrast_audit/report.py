@@ -31,6 +31,41 @@ ROLE_GUIDE = "guide"
 ROLE_BACKGROUND = "background"
 DECORATIVE_ROLES = (ROLE_GUIDE, ROLE_BACKGROUND)
 
+# Measured, not chosen.  contrast_audit.calibrate printed ramps at known
+# lightness delta in both flavours, unfiltered, and these are where reading
+# stopped: BODY is "would read a screenful of this without noticing the
+# contrast", GLANCE is "can pull it correctly when I look, but would not want
+# to read anything at it".  Both flavours landed within 0.01 of each other on
+# body, which is why one pair of numbers covers Latte and Frappe.
+#
+# They classify all ten independently judged pairs correctly -- body text at
+# 0.52, comments at 0.25, helix's line numbers at 0.13-0.15 ("readable
+# enough"), fzf's green on its selected row at 0.078 ("really low"), eza's pale
+# end at 0.060 ("unreadable") -- which the WCAG ratio does not: those last two
+# sit at 1.48:1 and 1.16:1, within 0.3 of pairs called fine.
+#
+# A chroma correction was fitted and rejected.  Both flavours' body marks agree
+# on sqrt(dL^2 + (0.8*dab)^2), and it is wrong: it scores fzf's green 0.181
+# against the neighbouring grey's 0.212, near-equal, for pairs judged "really
+# low" and "okay".  The body marks were the least confident ones and the fit was
+# reading their noise.  The confident tier fits a coefficient of 0.0-0.3, so
+# plain lightness delta is what is used.
+BODY_DELTA_L = 0.22
+GLANCE_DELTA_L = 0.07
+
+
+def required_delta_l(role: str) -> float:
+    """The lightness delta this role has to clear to be doing its job.
+
+    Guides get the lower bar on purpose.  A separator that reads as quietly as
+    body text is a separator competing with the text, so the goal for structure
+    is to clear legibility and stop -- which is also why the two grey slots
+    nearest the background are deliberately left below body.
+    """
+    if role == ROLE_TEXT:
+        return BODY_DELTA_L
+    return GLANCE_DELTA_L if role == ROLE_GUIDE else 0.0
+
 _GUIDE_RANGES = (
     (0x2500, 0x257F),  # box drawing: indent guides, borders, separators
     (0x2580, 0x259F),  # block elements: the thin bars used as guides
@@ -61,9 +96,9 @@ class Finding:
     fg: RGB
     bg: RGB
     ratio: float
-    # OKLCH lightness difference, reported beside the ratio because the ratio is
-    # luminance-only and so overstates saturated colours. No threshold is
-    # attached; it is a sanity check, not a second bar to clear.
+    # OKLCH lightness difference, and the one to judge by: the ratio is
+    # luminance-only and so overstates saturated colours.  Thresholds are
+    # BODY_DELTA_L and GLANCE_DELTA_L above, calibrated rather than assumed.
     delta_l: float
     count: int
     sample: str
@@ -189,6 +224,11 @@ def summarise(items: list[Finding], *, strict: bool = False) -> dict:
     """
     scored = items if strict else [f for f in items if f.role == ROLE_TEXT]
     below45 = [f for f in scored if f.ratio < 4.5]
+    # Judged per role, so a guide is not reported as failing a bar it was never
+    # meant to clear.  `items` rather than `scored`: guides are excluded from
+    # the ratio scoring precisely because the ratio has no role model, but they
+    # do have a delta bar of their own and it is worth counting.
+    short = [f for f in items if f.delta_l < required_delta_l(f.role)]
     return {
         "pairs": len(scored),
         "below_4_5": len(below45),
@@ -199,6 +239,11 @@ def summarise(items: list[Finding], *, strict: bool = False) -> dict:
         # perceptually, so they have to describe the same pair.
         "worst_delta_l": min(scored, key=lambda f: f.ratio).delta_l
         if scored else float("nan"),
+        # The actual defect count, by the calibrated measure.
+        "below_body": sum(1 for f in scored if f.delta_l < BODY_DELTA_L),
+        "below_glance": sum(1 for f in scored if f.delta_l < GLANCE_DELTA_L),
+        "short_for_role": len(short),
+        "worst_delta": min((f.delta_l for f in scored), default=float("nan")),
         "tiers": {
             tier: sum(1 for f in below45 if f.tier == tier)
             for tier in (TIER_ANSI, TIER_CATPPUCCIN, TIER_FOREIGN)
