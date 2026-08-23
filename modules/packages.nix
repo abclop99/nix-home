@@ -35,7 +35,6 @@ let
     pavucontrol
     keepassxc
     mesa-demos
-    blender
     prismlauncher
     modrinth-app # Minecraft launcher; bundles jdk8/17/21/25 — see CLAUDE.md quirk
     calibre
@@ -47,8 +46,6 @@ let
   ];
 
   gaming = with pkgs; [
-    lutris
-    wineWow64Packages.waylandFull
     antimicrox
   ];
 
