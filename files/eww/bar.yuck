@@ -4,34 +4,35 @@
 (include "./system.yuck")
 (include "./clock.yuck")
 
-; Overall widget
-(defwidget bar []
+; Overall widget. `screen` is the monitor name this bar belongs to; the left
+; and center sections are per-monitor, the right section is global.
+(defwidget bar [screen]
 	(centerbox  :orientation "horizontal"
 							:halign "fill"
-		(left)
-		(center)
+		(left :screen screen)
+		(center :screen screen)
 		(right)
 	)
 )
 
 ; Left, center, right sections
-(defwidget left []
+(defwidget left [screen]
 	(box  :orientation "h"
 				:space-evenly false
 				:halign "start"
 				:class "section left"
 
-		(workspaces)
+		(workspaces :screen screen)
 	)
 )
 
-(defwidget center []
+(defwidget center [screen]
 	(box  :orientation "h"
 				:space-evenly false
 				:halign "center"
-				:class "section center ${active_window_title == "" ? "empty" : "occupied" }"
+				:class "section center ${(window_titles?.[screen] ?: "") == "" ? "empty" : "occupied" }"
 
-		(active_window)
+		(active_window :screen screen)
 	)
 )
 

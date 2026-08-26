@@ -131,7 +131,7 @@ in {
 				};
 
 				# Define programs to use
-				"$bar" = "${pkgs.eww}/bin/eww open bar";
+				# The bar is not here: it runs as the eww-bars user unit below.
 				# "$browser" = "firefox";
 				"$terminal" = "${pkgs.kitty}/bin/kitty";
 				"$menu" = "${pkgs.bemenu}/bin/bemenu-run";
@@ -140,7 +140,6 @@ in {
 
 				# Execute programs at launch
 				"exec-once" = [
-					"$bar"
 					"$notif"
 
 					# Systray items
@@ -383,6 +382,50 @@ end_time = 07:00:00
 				Slice = "session.slice";
 				TimeoutStopSec = "5sec";
 				Restart = "on-failure";
+			};
+			Install.WantedBy = [ "graphical-session.target" ];
+		};
+
+		# One eww bar per connected monitor, re-synced on hotplug. A user unit
+		# rather than an exec-once so it restarts on failure, stops cleanly on
+		# logout, and can be reloaded with `systemctl --user restart eww-bars`
+		# after a config change (eww's daemon lives in this unit's cgroup, so a
+		# restart tears the old bars down with it).
+		#
+		# Hyprland's first exec-once hands HYPRLAND_INSTANCE_SIGNATURE to the
+		# systemd user environment via dbus-update-activation-environment before
+		# it starts the session target, so the script's socket2 path resolves.
+		#
+		# PATH is deliberately inherited from the user manager (which carries the
+		# HM profile) rather than pinned. eww launches its own deflisten commands
+		# as `bash ./scripts/...`, and those scripts reach for brightnessctl,
+		# pamixer, pactl, python, jaq, socat and friends — pinning PATH would mean
+		# enumerating every one and keeping the list in sync, silently breaking a
+		# widget as soon as one is added.
+		systemd.user.services.eww-bars = {
+			Unit = {
+				Description = "Open an eww bar on each connected monitor";
+				PartOf = [ "graphical-session.target" ];
+				After = [ "graphical-session.target" ];
+				ConditionEnvironment = "HYPRLAND_INSTANCE_SIGNATURE";
+			};
+			Service = {
+				# Kill any daemon this unit doesn't own before starting. A daemon
+				# holds its config parsed in memory, so one left over from a previous
+				# generation (or from the pre-unit exec-once) would serve the *old*
+				# widget tree to the bars this script opens. `-` because there is
+				# nothing to kill on a fresh login. Makes `systemctl --user restart
+				# eww-bars` a guaranteed full config reload.
+				ExecStartPre = "-${pkgs.eww}/bin/eww kill";
+				ExecStart = "${pkgs.bash}/bin/bash ${config.xdg.configHome}/eww/scripts/sync-bars";
+				Slice = "session.slice";
+				# "always", not "on-failure": the script's socat tail exits 0 when
+				# the Hyprland socket closes, which would otherwise leave the unit
+				# inactive and — since eww's daemon lives in this cgroup — take the
+				# bars down with it. At real session end PartOf stops the unit, and
+				# a stop is not a restart trigger, so this only covers spurious death.
+				Restart = "always";
+				RestartSec = 2;
 			};
 			Install.WantedBy = [ "graphical-session.target" ];
 		};

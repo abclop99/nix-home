@@ -1,4 +1,15 @@
 #!/usr/bin/env bash
 
-hyprctl activewindow -j | jaq --raw-output .title
-socat -u UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock - | stdbuf -o0 awk -F '>>|,' '/^activewindow>>/{print $3}'
+# Monitor name -> title of the window focused on that monitor. hyprctl monitors
+# gives each monitor's active workspace id; hyprctl workspaces gives that
+# workspace's last focused window. Empty workspaces emit "" so bar.yuck's
+# .section.center.empty rule still hides the widget.
+titles (){
+  WORKSPACE_TITLES=$(hyprctl workspaces -j | jaq 'map({key: .id | tostring, value: (if .windows > 0 then .lastwindowtitle else "" end)}) | from_entries')
+  hyprctl monitors -j | jaq --arg titles "${WORKSPACE_TITLES}" -c 'map({key: .name, value: (($titles|fromjson)[.activeWorkspace.id|tostring]//"")}) | from_entries'
+}
+
+titles
+socat -u UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock - | while read -r line; do
+  titles
+done

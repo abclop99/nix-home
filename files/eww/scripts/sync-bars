@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+# Keep exactly one bar window open per connected monitor, named bar-<monitor>.
+# No monitor is hardcoded anywhere: plug in any display, or several, and each
+# gets a bar; unplug one and its bar closes. Runs for the session, re-syncing
+# whenever Hyprland reports a monitor added or removed.
+
+sync (){
+  local want have m id
+  want=$(hyprctl monitors -j | jaq -r '.[].name')
+  have=$(eww active-windows 2>/dev/null | cut -d: -f1)
+
+  # Open a bar for every monitor that lacks one.
+  for m in $want; do
+    grep -qx "bar-$m" <<< "$have" || eww open bar --id "bar-$m" --screen "$m"
+  done
+
+  # Close bars whose monitor is gone, plus any `bar` left by the
+  # pre-per-monitor config (its window id had no monitor suffix).
+  for id in $have; do
+    case $id in
+      bar) eww close "$id" ;;
+      bar-*) grep -qx "${id#bar-}" <<< "$want" || eww close "$id" ;;
+    esac
+  done
+}
+
+sync
+socat -u UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock - | while read -r line; do
+  case $line in
+    monitoradded*|monitorremoved*) sync ;;
+  esac
+done

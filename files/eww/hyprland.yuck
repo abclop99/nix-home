@@ -1,13 +1,16 @@
-; Hyprland workspaces module
+; Hyprland workspaces module. `workspaces` is the global 1-10 list with
+; occupancy counts; `active_workspaces` maps monitor name -> its active
+; workspace id, so each bar highlights its own monitor rather than the
+; focused one.
 (deflisten workspaces :initial "[]" "bash ./scripts/get-workspaces")
-(deflisten current_workspace :initial "1" "bash ./scripts/get-active-workspace")
-(defwidget workspaces []
-	(eventbox :onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${current_workspace}"
+(deflisten active_workspaces :initial "{}" "bash ./scripts/get-active-workspace")
+(defwidget workspaces [screen]
+	(eventbox :onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${active_workspaces?.[screen] ?: 1}"
 		(box  :space-evenly true
-			; (label :text "${workspaces}${current_workspace}" :visible false)
+			; (label :text "${workspaces}${active_workspaces}" :visible false)
 			(for workspace in workspaces
 				(eventbox :onclick "hyprctl dispatch workspace ${workspace.id} > /dev/null"
-									:class "workspace-entry ${workspace.id == current_workspace ? "current" : ""} ${workspace.windows > 0 ? "occupied" : "empty"}"
+									:class "workspace-entry ${workspace.id == (active_workspaces?.[screen] ?: 0) ? "current" : ""} ${workspace.windows > 0 ? "occupied" : "empty"}"
 					(label :text "${workspace.id}")
 				)
 			)
@@ -15,10 +18,11 @@
 	)
 )
 
-; Active widow title module
-(deflisten active_window_title :initial "..." "sh ./scripts/get-window-title")
-(defwidget active_window []
+; Active widow title module. Maps monitor name -> the title of the window
+; focused on that monitor, "" when its workspace is empty.
+(deflisten window_titles :initial "{}" "bash ./scripts/get-window-title")
+(defwidget active_window [screen]
 	(box  :class "window_title"
-		(label :text "${active_window_title}")
+		(label :text "${window_titles?.[screen] ?: ""}")
 	)
 )

@@ -1,8 +1,11 @@
 (include "./bar.yuck")
 
-; Window for the bar
-(defwindow bar
-	:monitor 0
+; Window for the bar. One instance per connected monitor, opened by
+; scripts/sync-bars as `bar-<monitor name>`. `screen` is populated from the
+; --screen flag and threaded down so each bar can report its own monitor
+; (eww variables are global, so the widgets index per-monitor maps by name).
+(defwindow bar [screen]
+	:monitor screen
 	:geometry (geometry
 		:x "0%"
 		:y "9px"
@@ -17,5 +20,5 @@
 	:exclusive true
 	:focusable false
 
-	(bar)
+	(bar :screen screen)
 )
