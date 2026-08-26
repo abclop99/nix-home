@@ -89,6 +89,11 @@ in {
 					# Laptop display
 					"eDP-1, preferred, 0x0, 1.2" # 1920 / 1.2 = 1600
 					"desc:LG Electronics LG FHD 0x01010101, preferred, 1600x-360, 1.0"
+					# Xiaomi Mi Monitor. Its EDID caps 4K at 30 Hz over this link, so take
+					# 1440p@60 instead: the same logical size 4K would give at scale 1.5,
+					# but smooth motion. y = 900 - 1440 = -540 bottom-aligns it with the
+					# laptop (eDP-1 is 1920x1080 at scale 1.2 -> 1600x900 logical, at 0x0).
+					"desc:Xiaomi Corporation Mi Monitor 6732000000074, 2560x1440@59.95, 1600x-540, 1"
 					# Default, any random monitor connected. Automatically placed to the right
 					",preferred,auto,1"
 				];
