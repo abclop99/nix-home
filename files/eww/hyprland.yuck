@@ -5,7 +5,7 @@
 (deflisten workspaces :initial "[]" "bash ./scripts/get-workspaces")
 (deflisten active_workspaces :initial "{}" "bash ./scripts/get-active-workspace")
 (defwidget workspaces [screen]
-	(eventbox :onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${active_workspaces?.[screen] ?: 1}"
+	(eventbox :onscroll "bash ~/.config/eww/scripts/change-active-workspace {} ${active_workspaces?.[screen] ?: 1} ${screen}"
 		(box  :space-evenly true
 			; (label :text "${workspaces}${active_workspaces}" :visible false)
 			(for workspace in workspaces

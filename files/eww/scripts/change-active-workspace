@@ -1,22 +1,69 @@
 #!/usr/bin/env bash
 
-function clamp {
-	min=$1
-	max=$2
-	val=$3
-	python -c "print(max($min, min($val, $max)))"
-}
+# Scroll to the next workspace on this monitor. Workspaces are one shared 1-10
+# pool and `hyprctl dispatch workspace` follows a workspace to whichever monitor
+# holds it, taking the cursor along -- so scrolling an unconstrained range walks
+# you onto the other screen. Candidates are the workspaces this monitor owns
+# plus the ones that do not exist yet: hyprctl lists only existing workspaces,
+# so a missing one has no owner and any monitor may claim it. No wrap; at either
+# end of the range, stay put.
 
 direction=$1
 current=$2
-if test "$direction" = "down"
-then 
-	target=$(clamp 1 10 $(($current+1)))
-	echo "jumping from workspace $current to workspace $target"
-	hyprctl dispatch workspace $target > /dev/null
-elif test "$direction" = "up"
-then 
-	target=$(clamp 1 10 $(($current-1)))
-	echo "jumping from workspace $current to workspace $target"
-	hyprctl dispatch workspace $target > /dev/null
+monitor=$3
+
+case $direction in
+	up|down) ;;
+	*) exit 0 ;;
+esac
+
+# Without a monitor the ownership test inverts -- owner.get(n, "") == "" picks
+# exactly the workspaces that do NOT exist -- so refuse rather than scroll into
+# the wrong set.
+test -n "$monitor" || exit 0
+
+target=$(hyprctl workspaces -j | python -c '
+import json, sys
+direction, current, monitor = sys.argv[1:4]
+current = int(current)
+owner = {w["id"]: w["monitor"] for w in json.load(sys.stdin)}
+cands = [n for n in range(1, 11) if owner.get(n, monitor) == monitor]
+if direction == "down":
+    print(next((n for n in cands if n > current), current))
+else:
+    print(next((n for n in reversed(cands) if n < current), current))
+' "$direction" "$current" "$monitor")
+
+# hyprctl reports a dead socket on stdout, not stderr, so json.load chokes on
+# the error text and target comes back empty. Anything that is not a workspace
+# number means we do not know where to go, and dispatching "" is worse than
+# doing nothing.
+case $target in
+	[1-9]|10) ;;
+	*) exit 0 ;;
+esac
+
+test "$target" = "$current" && exit 0
+
+# focusmonitor first. `dispatch workspace` puts a workspace that does not exist
+# yet on the *focused* monitor. That is normally this bar's monitor -- the cursor
+# has to be over the bar to scroll it, and cursor-driven monitor focus is on by
+# default (misc:mouse_move_focuses_monitor, not follow_mouse) -- but this config
+# pins neither option, so name the monitor rather than lean on an unset default.
+#
+# The echo moved after the dispatch so the log stops describing a jump that had
+# not happened yet. It is NOT a failure check, and barely even an error check:
+# hyprctl exits 0 for `Invalid dispatcher`, and --batch discards more than each
+# sub-command's status -- main() calls batchRequest(), which is void, so the
+# request's own status never reaches exitStatus. An unreachable compositor
+# prints `Couldn't connect ...` on stdout and still exits 0. So the else branch
+# is near-dead: only an unset HYPRLAND_INSTANCE_SIGNATURE (checked before any
+# dispatch), a failure to exec hyprctl, or hyprctl dying on a signal -- a
+# session teardown SIGTERMs this cgroup mid-scroll -- reaches it. Catching a real failure
+# would mean testing the reply text for `ok`.
+if out=$(hyprctl --batch "dispatch focusmonitor $monitor ; dispatch workspace $target" 2>&1)
+then
+	echo "jumped from workspace $current to workspace $target"
+else
+	printf 'change-active-workspace: dispatch failed: %s\n' "$out" >&2
 fi
