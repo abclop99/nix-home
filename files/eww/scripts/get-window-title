@@ -1,15 +1,43 @@
 #!/usr/bin/env bash
 
-# Monitor name -> title of the window focused on that monitor. hyprctl monitors
-# gives each monitor's active workspace id; hyprctl workspaces gives that
-# workspace's last focused window. Empty workspaces emit "" so bar.yuck's
-# .section.center.empty rule still hides the widget.
+# Monitor name -> title of the window focused on that monitor. One batched
+# hyprctl call returns both documents: monitors gives each monitor's active
+# workspace id, workspaces gives that workspace's last focused window. Empty
+# workspaces emit "" so bar.yuck's .section.center.empty rule still hides the
+# widget.
 titles (){
-  WORKSPACE_TITLES=$(hyprctl workspaces -j | jaq 'map({key: .id | tostring, value: (if .windows > 0 then .lastwindowtitle else "" end)}) | from_entries')
-  hyprctl monitors -j | jaq --arg titles "${WORKSPACE_TITLES}" -c 'map({key: .name, value: (($titles|fromjson)[.activeWorkspace.id|tostring]//"")}) | from_entries'
+  hyprctl --batch "j/monitors ; j/workspaces" | jaq -sc '
+    (.[1] | map({key: (.id|tostring), value: (if .windows > 0 then .lastwindowtitle else "" end)}) | from_entries) as $t
+    | .[0] | map({key: .name, value: ($t[(.activeWorkspace.id|tostring)] // "")}) | from_entries'
 }
 
 titles
+# Socket2 carries every event, so re-read only on the ones that can change a
+# title or move it to another monitor. This is the listener that genuinely wants
+# the focus stream; the other two do not.
+#
+# activewindow and windowtitle are matched on their v2 form ONLY. Hyprland posts
+# both forms as separate lines, so a title change on the focused window emits
+# four -- windowtitle, windowtitlev2, activewindow, activewindowv2 -- each
+# re-reading identical state. Measured 104 lines over 25s while one terminal
+# animated its title about once a second (an idle desktop delivers zero), all of
+# them from those two families, so dropping the v1 forms halves this listener.
+#
+# Safe because of the pairing invariant, NOT because the two families back each
+# other up -- they do not. Window.cpp emits windowtitle(v2) unconditionally but
+# the activewindow pair only when the retitled window is the focused one, so a
+# title change on an unfocused window fires windowtitlev2 alone, and that is the
+# sole trigger for the OTHER monitor's bar. What makes v2-only correct is that
+# all seven emission sites in 0.55.4 post v1 and v2 as adjacent unconditional
+# statements, so v2 is never emitted without v1. Re-verify on a Hyprland bump.
+#
+# The rest keep plain globs: openwindow and closewindow have NO v2 sibling;
+# movewindow does have one, so it is a doubled wake, kept because it is rare;
+# likewise the workspace and monitor events, where a wrong glob would silently
+# freeze the widget. Note workspace* does not match moveworkspace>>, so both are
+# spelled out.
 socat -u UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock - | while read -r line; do
-  titles
+  case $line in
+    activewindowv2*|windowtitlev2*|openwindow*|closewindow*|movewindow*|workspace*|moveworkspace*|focusedmon*|monitoradded*|monitorremoved*) titles ;;
+  esac
 done

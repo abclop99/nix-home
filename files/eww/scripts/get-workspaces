@@ -10,6 +10,13 @@ spaces (){
 }
 
 spaces
+# Only the events that can change a workspace's owner. Window activity cannot:
+# a workspace coming into or going out of existence fires create/destroyworkspace,
+# and a cross-monitor move fires moveworkspace. The monitor events matter because
+# this list carries ownership -- an unplug migrates workspaces, and without them
+# the indicator would keep naming a monitor that is gone.
 socat -u UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock - | while read -r line; do
-  spaces
+  case $line in
+    createworkspace*|destroyworkspace*|moveworkspace*|monitoradded*|monitorremoved*) spaces ;;
+  esac
 done
