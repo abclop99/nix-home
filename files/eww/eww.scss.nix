@@ -34,6 +34,7 @@ $selection_bg_color: $surface1;
 $selection_fg_color: $text;
 $hover_bg_color:     $surface0;
 $comment_fg_color:   $overlay0;
+$other_monitor_fg_color: $subtext0;
 
 /* Other variables */
 $radius: 5px;
@@ -62,10 +63,18 @@ window {
 	border-radius: $radius;
 }
 
-/* Workspaces widget */
+/* Workspaces widget. The class says where a workspace lives, not how full it
+   is: `empty` means it does not exist yet, so any monitor may claim it;
+   `occupied` means it sits on this bar's monitor; `elsewhere` means another
+   monitor holds it. The three foregrounds are Catppuccin's own text ramp
+   ($text > $subtext0 > $overlay0), so "elsewhere" never reads as "empty". */
 .workspace-entry.empty {
 	background-color: $bg_color;
 	color: $comment_fg_color;
+}
+.workspace-entry.elsewhere {
+	background-color: $bg_color;
+	color: $other_monitor_fg_color;
 }
 .workspace-entry.occupied {
 	background-color: $bg_color;

@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
+# The 1-10 list, each carrying the monitor that owns it. hyprctl only reports
+# workspaces that exist, and Hyprland destroys an empty one unless it is some
+# monitor's active workspace -- so a workspace missing from its output has no
+# owner, and any bar may claim it.
 spaces (){
-  WORKSPACE_WINDOWS=$(hyprctl workspaces -j | jaq 'map({key: .id | tostring, value: .windows}) | from_entries')
-  seq 1 10 | jaq --arg windows "${WORKSPACE_WINDOWS}" --slurp -c 'map(tostring) | map({id: ., windows: (($windows|fromjson)[.]//0)})'
+  WORKSPACES=$(hyprctl workspaces -j | jaq 'map({key: (.id|tostring), value: .monitor}) | from_entries')
+  seq 1 10 | jaq --arg ws "${WORKSPACES}" --slurp -c 'map(tostring) | map({id: ., monitor: (($ws|fromjson)[.] // "")})'
 }
 
 spaces

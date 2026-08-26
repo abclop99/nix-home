@@ -1,7 +1,7 @@
-; Hyprland workspaces module. `workspaces` is the global 1-10 list with
-; occupancy counts; `active_workspaces` maps monitor name -> its active
-; workspace id, so each bar highlights its own monitor rather than the
-; focused one.
+; Hyprland workspaces module. `workspaces` is the global 1-10 list, each entry
+; carrying the monitor that owns it ("" when the workspace does not exist);
+; `active_workspaces` maps monitor name -> its active workspace id, so each bar
+; highlights its own monitor rather than the focused one.
 (deflisten workspaces :initial "[]" "bash ./scripts/get-workspaces")
 (deflisten active_workspaces :initial "{}" "bash ./scripts/get-active-workspace")
 (defwidget workspaces [screen]
@@ -10,7 +10,7 @@
 			; (label :text "${workspaces}${active_workspaces}" :visible false)
 			(for workspace in workspaces
 				(eventbox :onclick "hyprctl dispatch workspace ${workspace.id} > /dev/null"
-									:class "workspace-entry ${workspace.id == (active_workspaces?.[screen] ?: 0) ? "current" : ""} ${workspace.windows > 0 ? "occupied" : "empty"}"
+									:class "workspace-entry ${workspace.id == (active_workspaces?.[screen] ?: 0) ? "current" : ""} ${workspace.monitor == "" ? "empty" : (workspace.monitor == screen ? "occupied" : "elsewhere")}"
 					(label :text "${workspace.id}")
 				)
 			)
