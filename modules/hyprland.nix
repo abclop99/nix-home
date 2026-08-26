@@ -408,6 +408,28 @@ end_time = 07:00:00
 				PartOf = [ "graphical-session.target" ];
 				After = [ "graphical-session.target" ];
 				ConditionEnvironment = "HYPRLAND_INSTANCE_SIGNATURE";
+				# The gap this closes is sync-bars, not the listeners. Every file in
+				# ~/.config/eww is a symlink into one aggregate home-manager-files
+				# derivation, so a scripts-only edit repoints eww.scss and the yuck as
+				# well; eww's filewatch only matches paths ending .yuck/.scss/.css, so
+				# that repoint is precisely what trips it, and a reload calls stop_all()
+				# on the script vars before re-initialising, respawning every deflisten
+				# child. Verified with a comment-only script edit whose rendered scss and
+				# yuck were byte-identical: every listener took a new PID while the
+				# daemon kept its own.
+				# sync-bars is this unit's ExecStart rather than something eww launches,
+				# so no reload can touch it -- it held one PID across every such switch.
+				# Naming the scripts path here covers it, and makes the restart
+				# guaranteed rather than a side effect of how HM bundles files.
+				# sd-switch acts because the field is not on its ignore list: Description
+				# and Documentation are ignored, every other key is significant whether
+				# X-prefixed or not. X-Reload-Triggers would be actively wrong -- it
+				# selects the reload path, and this unit is CanReload=no.
+				# Tracked files only: an untracked new script neither deploys nor
+				# triggers, and is not even reported dirty. Scripts only, deliberately --
+				# the scss is generated per specialisation, so including it would fire
+				# this on every darkman transition.
+				X-Restart-Triggers = [ "${config.xdg.configFile."eww/scripts".source}" ];
 			};
 			Service = {
 				# Kill any daemon this unit doesn't own before starting. A daemon
