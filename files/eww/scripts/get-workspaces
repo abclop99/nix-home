@@ -5,7 +5,15 @@
 # monitor's active workspace -- so a workspace missing from its output has no
 # owner, and any bar may claim it.
 spaces (){
-  WORKSPACES=$(hyprctl workspaces -j | jaq 'map({key: (.id|tostring), value: .monitor}) | from_entries')
+  # Bail rather than emit if hyprctl cannot be reached. It reports a dead socket
+  # on stdout, so jaq fails and WORKSPACES comes back empty -- and an empty --arg
+  # does NOT then fail the second jaq, because `"" | fromjson` is an empty stream
+  # in jaq, so // supplies its default for all ten and we publish a well-formed
+  # lie: every workspace marked nonexistent, the whole bar repainted `empty`, at
+  # exit 0 with nothing logged. Emitting nothing instead leaves deflisten holding
+  # the last good value, which is what the other two emitters already do.
+  WORKSPACES=$(hyprctl workspaces -j | jaq 'map({key: (.id|tostring), value: .monitor}) | from_entries') || return
+  test -n "$WORKSPACES" || return
   seq 1 10 | jaq --arg ws "${WORKSPACES}" --slurp -c 'map(tostring) | map({id: ., monitor: (($ws|fromjson)[.] // "")})'
 }
 

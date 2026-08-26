@@ -7,7 +7,16 @@
 
 sync (){
   local want have m id
-  want=$(hyprctl monitors -j | jaq -r '.[].name')
+  # Bail rather than reconcile against a monitor list we could not read. hyprctl
+  # reports a dead socket on stdout, so jaq fails and want comes back empty --
+  # and the close loop below matches nothing against an empty want, so it would
+  # close every bar and then not run again until the next hotplug. An empty list
+  # is also reachable with no failure at all: with every output gone Hyprland
+  # reports [], because its headless fallback has id -1 and getMonitorData hides
+  # those. Both cases want the same answer, and neither strands a bar -- eww
+  # closes a window itself when its monitor goes and reopens it on reconnect.
+  want=$(hyprctl monitors -j | jaq -r '.[].name') || return
+  test -n "$want" || return
   have=$(eww active-windows 2>/dev/null | cut -d: -f1)
 
   # Open a bar for every monitor that lacks one.
