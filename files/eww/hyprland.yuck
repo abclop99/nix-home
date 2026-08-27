@@ -23,6 +23,17 @@
 (deflisten window_titles :initial "{}" "bash ./scripts/get-window-title")
 (defwidget active_window [screen]
 	(box  :class "window_title"
-		(label :text "${window_titles?.[screen] ?: ""}")
+		; Two limits, and each does a job the other cannot. :truncate ellipsizes,
+		; which drops the label's *minimum* width to the ellipsis -- without it
+		; the label demands its full natural width, centerbox squeezes the left
+		; section below its own natural size, and the low workspace numbers get
+		; clipped off the edge of the bar. But ellipsizing only yields space it
+		; is forced to yield, and nothing forces it until the title meets the
+		; systray, so on a wide monitor it still grows to fill the whole gap.
+		; :limit-width caps the *natural* width at a character count. Dynamic
+		; truncation still applies below that cap (show-truncated defaults on),
+		; so a narrower monitor cuts sooner on its own. The count is a taste
+		; setting -- raise it for more title, lower it for a quieter bar.
+		(label :text "${window_titles?.[screen] ?: ""}" :truncate true :limit-width 60)
 	)
 )
