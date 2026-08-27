@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+
+# Backlight state keyed by the DRM connector that owns it, so a bar can ask
+# whether the monitor it is drawn on is the one this control would affect.
+# An external monitor is not a kernel backlight device at all -- it is driven
+# over I2C with DDC/CI -- so on this laptop the map has exactly one key and the
+# external bar's brightness widget stays hidden. Before it did not, and its
+# slider silently moved the laptop panel instead.
+#
+# poll(POLLPRI) rather than an interval: the backlight class calls
+# sysfs_notify() on actual_brightness for every change, including writes made
+# through logind, which is the path brightnessctl takes here. So this wakes on
+# real changes only and never polls -- verified by capture, where the stream
+# was completely silent at rest and reported both a one-unit nudge and its
+# restore. That is what lets one variable serve both the slider (which wants
+# every change immediately) and the icon (which used to need a second, slower
+# poll of its own to stay honest while the fast one was gated off).
+#
+# Reading is what clears the notification, so every wake must read every fd it
+# registered -- seeking alone leaves POLLPRI asserted and the loop spins.
+
+import json
+import os
+import re
+import select
+import sys
+
+SYSFS = "/sys/class/backlight"
+
+# card1-eDP-1 -> eDP-1, matching the name Hyprland reports and eww passes as
+# `screen`. Fail closed, the same rule the hyprctl callers follow: a device
+# whose connector cannot be read is skipped rather than guessed at, which
+# hides the widget rather than showing it on a monitor it does not control.
+CONNECTOR = re.compile(r"^card\d+-(.+)$")
+
+
+def discover():
+    devices = {}
+    try:
+        names = sorted(os.listdir(SYSFS))
+    except OSError:
+        return devices
+    for name in names:
+        base = os.path.join(SYSFS, name)
+        try:
+            owner = os.path.basename(os.path.realpath(os.path.join(base, "device")))
+            with open(os.path.join(base, "max_brightness")) as f:
+                maximum = int(f.read())
+        except (OSError, ValueError):
+            continue
+        match = CONNECTOR.match(owner)
+        if match:
+            devices[match.group(1)] = {"device": name, "base": base, "max": maximum}
+    return devices
+
+
+devices = discover()
+
+# poll() with nothing registered returns immediately, so a device-less machine
+# would spin here. Emit the empty map and stop: deflisten keeps the last value
+# it was given, and every widget test below is a null check.
+if not devices:
+    print("{}", flush=True)
+    sys.exit(0)
+
+poller = select.poll()
+handles = {}
+for connector, device in devices.items():
+    handle = os.open(os.path.join(device["base"], "actual_brightness"), os.O_RDONLY)
+    poller.register(handle, select.POLLPRI | select.POLLERR)
+    handles[connector] = handle
+
+
+def emit():
+    state = {}
+    for connector, device in devices.items():
+        os.lseek(handles[connector], 0, os.SEEK_SET)
+        state[connector] = {
+            "device": device["device"],
+            "value": int(os.read(handles[connector], 32).decode()),
+            "max": device["max"],
+        }
+    print(json.dumps(state), flush=True)
+
+
+emit()
+while True:
+    poller.poll()
+    emit()

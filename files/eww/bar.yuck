@@ -4,14 +4,16 @@
 (include "./system.yuck")
 (include "./clock.yuck")
 
-; Overall widget. `screen` is the monitor name this bar belongs to; the left
-; and center sections are per-monitor, the right section is global.
+; Overall widget. `screen` is the monitor name this bar belongs to. The left
+; and center sections are per-monitor; the right is mostly global, but takes
+; `screen` too, because brightness belongs to one display rather than to the
+; session.
 (defwidget bar [screen]
 	(centerbox  :orientation "horizontal"
 							:halign "fill"
 		(left :screen screen)
 		(center :screen screen)
-		(right)
+		(right :screen screen)
 	)
 )
 
@@ -36,7 +38,7 @@
 	)
 )
 
-(defwidget right []
+(defwidget right [screen]
 	(box  :orientation "h"
 				:space-evenly false
 				:halign "end"
@@ -46,7 +48,7 @@
 			:orientation 'h'
 		)
 		(sep)
-		(controls)
+		(controls :screen screen)
 		(sep)
 		(system-info)
 		(sep)
