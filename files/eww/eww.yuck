@@ -24,8 +24,10 @@
 )
 
 ; Popups for the volume and brightness sliders, one window per control per
-; monitor (`popup-<monitor>-<kind>`), opened on hover by the bar icon and
-; dismissed by scripts/close-control-popup.
+; monitor (`popup-<monitor>-<kind>`), opened by CLICKING the bar icon and
+; dismissed by scripts/close-control-popup when the pointer leaves both the icon
+; and the popup. Hover does not open anything -- it only records where the
+; pointer is, which is the whole reason pop_icon exists.
 ;
 ; They are windows rather than revealers in the bar because a revealer
 ; participates in layout: opening one widened the right-hand section, which

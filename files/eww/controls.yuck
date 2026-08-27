@@ -30,10 +30,9 @@
 ; not get that cwd -- hyprland.yuck's :onscroll already spells it out in full
 ; for the same reason.
 ; Shared by the bar and the popup, so the popup carries the same glyph and can
-; be told apart from the brightness one at a glance -- both open in the same
-; place, because eww anchors a window to the monitor and the two icons are not
-; at a fixed offset from the right edge on every bar (brightness is absent
-; where there is no backlight, which shifts volume).
+; be told apart from the brightness one at a glance. The two popups sit 13px
+; apart and are 44px wide, so they overlap heavily and the glyph is what
+; actually distinguishes them.
 (defwidget volume-icon []
 	(label :text {sound_info.muted ? "󰝟" : (sound_info.volume <= 33 ? "󰕿" : (sound_info.volume <= 66 ? "󰖀" : "󰕾") )})
 	; 󰕾
@@ -65,15 +64,24 @@
 ; opens anything -- that is what tells close-control-popup the pointer is still
 ; on this control. Mute moves to right-click, since left-click is the opener.
 ;
-; The click closes the sibling popup first. The hover logic would usually have
-; done that already, but this makes "never two at once" a property of the open
-; itself rather than of a race resolving correctly.
+; The click closes the sibling popup first, so the two controls on THIS bar can
+; never both be open. It does not cover two bars: clicking volume on one monitor
+; while the other monitor's volume popup is open leaves both until that one's
+; pending close fires. Harmless and invisible -- the pointer cannot reach the
+; second bar without having fired the first one's hoverlost -- but it is the
+; race resolving correctly, not a guarantee.
+;
+; The click also asserts pop_icon rather than trusting the hover to have set it.
+; The popup fires its own hoverlost as it opens; if pop_icon were empty at that
+; moment the close it schedules would match neither variable and dismiss the
+; popup 0.6s later with the pointer still on the icon. Reachable only if a click
+; arrives with no preceding crossing -- a warped cursor does exactly that.
 (defwidget volume [screen]
 	(box :class "item"
 		(eventbox :class "volume icon"
 		          :onhover      "${EWW_CMD} update pop_icon=${screen}:volume"
 		          :onhoverlost  "${EWW_CMD} update pop_icon=; bash ~/.config/eww/scripts/close-control-popup ${screen} volume"
-		          :onclick      "${EWW_CMD} close popup-${screen}-brightness > /dev/null 2>&1; ${EWW_CMD} open volume-popup --toggle --id popup-${screen}-volume --screen ${screen} --arg screen=${screen}"
+		          :onclick      "${EWW_CMD} update pop_icon=${screen}:volume; ${EWW_CMD} close popup-${screen}-brightness > /dev/null 2>&1; ${EWW_CMD} open volume-popup --toggle --id popup-${screen}-volume --screen ${screen} --arg screen=${screen}"
 		          :onrightclick "pamixer --toggle-mute"
 					    :tooltip "Volume: ${sound_info.muted ? 'Muted' : sound_info.volume + '%'}"
 			(volume-icon)
@@ -121,9 +129,13 @@
 (deflisten backlight :initial "{}" "python3 ./scripts/get-brightness")
 
 ; A bare label, shared by the bar and the popup so the popup carries the same
-; glyph. It holds no eventbox of its own: a nested eventbox covering its parent
-; stops the parent ever seeing a clean enter/leave, which is what silently
-; killed :onhoverlost on the volume widget.
+; glyph. No eventbox of its own simply because it needs no click of its own --
+; NOT because nesting is a hazard. Nesting was blamed once for :onhoverlost
+; never firing. Measurement found the real cause elsewhere entirely (eww reaps
+; the close script; see scripts/close-control-popup), which accounts for the
+; symptom completely and leaves nothing for nesting to explain. Against it: the
+; pre-popup revealer used exactly that nested pair and its hover worked. Do not
+; resurrect the theory from this file.
 (defwidget brightness-icon [pct]
 	(label :text {pct <= 25 ? "󰃞" : (pct <= 50 ? "󰃟" : (pct <= 75 ? "󰃝" : "󰃠"))})
 )
@@ -142,7 +154,7 @@
 		(eventbox :class "brightness icon"
 		          :onhover     "${EWW_CMD} update pop_icon=${screen}:brightness"
 		          :onhoverlost "${EWW_CMD} update pop_icon=; bash ~/.config/eww/scripts/close-control-popup ${screen} brightness"
-		          :onclick     "${EWW_CMD} close popup-${screen}-volume > /dev/null 2>&1; ${EWW_CMD} open brightness-popup --toggle --id popup-${screen}-brightness --screen ${screen} --arg screen=${screen}"
+		          :onclick     "${EWW_CMD} update pop_icon=${screen}:brightness; ${EWW_CMD} close popup-${screen}-volume > /dev/null 2>&1; ${EWW_CMD} open brightness-popup --toggle --id popup-${screen}-brightness --screen ${screen} --arg screen=${screen}"
 			        :tooltip "Brightness: ${100 * (backlight?.[screen]?.value ?: 0) / (backlight?.[screen]?.max ?: 1)}%"
 			(brightness-icon :pct {100 * (backlight?.[screen]?.value ?: 0) / (backlight?.[screen]?.max ?: 1)})
 		)
@@ -165,13 +177,16 @@
 		     :space-evenly false
 			(scale :class "slider"
 			       :value {100 * (backlight?.[screen]?.value ?: 0) / (backlight?.[screen]?.max ?: 1)}
-			       ; -d is not for choosing between devices -- there is one -- it
-			       ; is what makes the open-time fire harmless. GTK emits
-			       ; value-changed when the scale's value is first set, before
-			       ; anything has been dragged. The "none" placeholder makes that
-			       ; run fail on a device that cannot exist; without -d it would
-			       ; be a real `brightnessctl set` at the clamped :min, dimming
-			       ; the panel every time the popup opened.
+			       ; GTK emits value-changed when the scale's value is first set,
+			       ; so every open issues one write before anything is dragged.
+			       ; It is harmless because :value is the CURRENT reading, so the
+			       ; write is a no-op -- NOT because of the "none" placeholder.
+			       ; Through the UI that placeholder never fires: the popup opens
+			       ; only from an icon that is hidden unless `backlight` has an
+			       ; entry for this monitor, so -d always names the real device.
+			       ; Keep it anyway -- `eww open brightness-popup --arg
+			       ; screen=<a monitor with no backlight>` still reaches this, and
+			       ; an empty -d makes brightnessctl swallow the next argument.
 			       :onchange "brightnessctl -d ${backlight?.[screen]?.device ?: "none"} set {}% > /dev/null"
 			       :orientation "v"
 			       :flipped true

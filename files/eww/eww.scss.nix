@@ -164,10 +164,12 @@ $brightness-color: $yellow;
    not look like a CSS mistake at all: eww falls back to raw GTK defaults, so
    the entire bar turns white and unstyled.
 
-   .popup-body is the whole window and stays transparent; it is the hover
-   target that keeps the popup alive, and is deliberately larger than the
-   visible body so the crossing down from the bar has somewhere to land.
-   .popup is the part you actually see. */
+   .popup-body is the eventbox wrapping the whole window; it carries no style of
+   its own and exists only as the hover target that keeps the popup alive. It is
+   NOT a margin around the visible body -- an eventbox is a GtkBin, so .popup
+   gets its entire allocation and the two are the same 44x170 box. The landing
+   area for the crossing is that whole box, which is already wide against a
+   ~17px icon. */
 .popup {
 	background-color: $bg_color;
 	border-radius: $radius;
