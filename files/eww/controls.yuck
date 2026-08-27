@@ -48,18 +48,51 @@
 )
 
 (defvar br_reveal false)
+; The gate must name `brightness` -- the poll's own output -- or it never
+; engages at all. eww registers every script var a window references at
+; window-open and again on every reload without consulting :run-while, and
+; only *evaluates* :run-while when a variable the expression mentions is
+; assigned. Nothing assigns br_reveal at startup (the defvar above only
+; initialises it), so `:run-while br_reveal` alone polled at 5 Hz from
+; window-open until the first :onhoverlost below -- the first time the
+; pointer crossed the widget and left -- and every reload put it back.
+; Naming `brightness` means the poll's own first tick assigns a variable the
+; gate mentions, forcing a re-evaluation that sees br_reveal false and stops
+; it. `brightness >= 0` is always true and exists ONLY to get that name into
+; the expression -- do not "simplify" it away. && is lazy, so a non-numeric
+; reading cannot wedge the gate shut.
 (defpoll brightness :interval "0.2s"
-                    :initial "852" 
-                    :run-while br_reveal
+                    :initial "852"
+                    :run-while {br_reveal && brightness >= 0}
                     "brightnessctl get"
 )
+
+; The gate above stops `brightness` the moment the pointer leaves, so on its
+; own the icon would sit on whatever the last hover happened to read. This
+; ungated poll keeps a coarse value for it -- two forks a minute rather than
+; three hundred -- so a change made by any route that never touches the widget
+; (a brightness keybind, brightnessctl from a shell) still reaches the icon.
+(defpoll brightness_slow :interval "30s" :initial "852" "brightnessctl get")
+
 (defpoll max_brightness :interval "1h" :initial "852" "brightnessctl max")
+
+; Split out so the source-switching expression is written once per reader
+; rather than once per branch of the icon's ternary.
+(defwidget brightness-icon [pct]
+	(eventbox :class "icon"
+		(label :text {pct <= 25 ? "󰃞" : (pct <= 50 ? "󰃟" : (pct <= 75 ? "󰃝" : "󰃠"))})
+	)
+)
+
+; Both readers take the fast poll while the slider is open, so they cannot
+; disagree with the handle mid-drag, and the slow one otherwise, where the
+; fast poll is stopped and its value is as old as the last hover.
 (defwidget brightness []
 	(box :class "item"
 		(eventbox :class "brightness"
 		          :onhover     "${EWW_CMD} update br_reveal=true"
 		          :onhoverlost "${EWW_CMD} update br_reveal=false"
-			        :tooltip "Brightness: ${100 * brightness / max_brightness}%"
+			        :tooltip "Brightness: ${100 * (br_reveal ? brightness : brightness_slow) / max_brightness}%"
 			(box :space-evenly false
 				(revealer :transition "slideright"
 				          :reveal br_reveal
@@ -72,9 +105,7 @@
 					       :min 1
 					)
 				)
-				(eventbox :class "icon"
-					(label :text {100 * brightness / max_brightness <= 25 ? "󰃞" : (100 * brightness / max_brightness <= 50 ? "󰃟" : (100 * brightness / max_brightness <= 75 ? "󰃝" : "󰃠"))})
-				)
+				(brightness-icon :pct {100 * (br_reveal ? brightness : brightness_slow) / max_brightness})
 			)
 		)
 	)
