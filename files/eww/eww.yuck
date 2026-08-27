@@ -22,3 +22,93 @@
 
 	(bar :screen screen)
 )
+
+; Popups for the volume and brightness sliders, one window per control per
+; monitor (`popup-<monitor>-<kind>`), opened on hover by the bar icon and
+; dismissed by scripts/close-control-popup.
+;
+; They are windows rather than revealers in the bar because a revealer
+; participates in layout: opening one widened the right-hand section, which
+; shoved the centred window title sideways on every hover. Nothing inside the
+; bar can avoid that, which is why this is a window and not a widget change.
+;
+; Two definitions rather than one taking a `kind` argument, so there is no
+; invisible twin scale -- eww evaluates a widget's attributes whether or not it
+; is visible, so a hidden scale's :onchange still fires when the window opens.
+;
+; `:exclusive false` is the load-bearing one: the bar reserves struts, and a
+; popup that did the same would carve a strip out of the usable screen for as
+; long as it was open, shoving tiled windows around on every hover.
+;
+; The x offsets are constants because eww anchors windows to the *monitor* and
+; nothing can ask where a widget actually landed -- `eww debug` prints the scope
+; graph, not geometry. They work because the right section is `:halign "end"`,
+; so everything packs from the right edge and each icon sits a stable distance
+; from it no matter how wide the systray has grown.
+;
+; Each popup gets its own offset. Brightness is drawn to the *left* of volume,
+; so hiding it on a monitor with no backlight moves only what is further left
+; still -- volume's distance from the right edge is identical on every bar. An
+; earlier version shared one offset, on the belief that hiding brightness would
+; shift volume; that had the packing direction backwards, and the shared value
+; sat between the two icons rather than under either.
+;
+; MEASURED, not estimated. `:x` is the distance from the monitor's right edge to
+; the window's RIGHT edge -- confirmed by opening a popup at x=248 on a 1600-wide
+; output and reading `hyprctl layers`, which put it at x=1308 with w=44
+; (1600 - 248 - 44). So centring a 44px window on an icon whose centre is C is
+; x = monitor_width - (C + 22).
+;
+; Icon centres came from logging `hyprctl cursorpos` against pop_icon while the
+; pointer was swept over them: brightness 1344, volume 1362 on eDP-1 (logical
+; 1600 wide -- it runs at scale 1.20, so 1920 physical is the WRONG number to
+; work in, and an earlier set of offsets was wrong partly for that reason). Note
+; a *warped* cursor is no use here: hyprctl dispatch movecursor teleports without
+; the crossing GTK needs, so an automated sweep reports nothing at all.
+;
+; Volume is one value for two monitors that disagree by 10px, because the icons
+; sit a fixed distance from the BAR's right edge while the bar itself is inset by
+; 1% of the monitor (16px on eDP-1, 26px on DP-4). eDP-1 alone wants 216 and DP-4
+; alone wants 226; 221 splits it, leaving ~5px of error against a 17px icon.
+; Brightness only ever opens where there is a backlight, so 234 is exact.
+;
+; `:y` is measured from the bottom of the bar's EXCLUSIVE ZONE, not from the top
+; of the screen -- the bar reserves a 40px strut, so y=39 rendered at y=78 and
+; left a 39px dead strip between bar and popup. That strip, not any debounce
+; length, is why a slow crossing kept dismissing the popup: the pointer was over
+; neither window for the whole traverse. y=0 puts the popup flush against the bar.
+;
+; The two geometries are duplicated rather than shared because `geometry` is a
+; struct, not a widget, so a defwidget cannot return one. Keep y and the size in
+; step by hand; only x is meant to differ.
+(defwindow volume-popup [screen]
+	:monitor screen
+	:geometry (geometry
+		:x "221px"
+		:y "0px"
+		:width "44px"
+		:height "170px"
+		:anchor "top right"
+	)
+	:stacking "overlay"
+	:exclusive false
+	:focusable false
+
+	(volume-popup-body :screen screen)
+)
+
+(defwindow brightness-popup [screen]
+	:monitor screen
+	:geometry (geometry
+		:x "234px"
+		:y "0px"
+		:width "44px"
+		:height "170px"
+		:anchor "top right"
+	)
+	:stacking "overlay"
+	:exclusive false
+	:focusable false
+
+	(brightness-popup-body :screen screen)
+)

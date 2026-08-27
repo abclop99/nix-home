@@ -13,36 +13,92 @@
 
 (deflisten sound_info :initial '{"volume": "50", "muted": "false", "mic_muted": "false"}' "bash ./scripts/get-sound-info")
 
-; Holds the name of the hovered bar, not a boolean. eww variables are global,
-; so a shared `true` slid both bars' sliders open at once -- the same trap the
-; workspace data already works around by keying on monitor. There is one
-; pointer, so one name is enough state for any number of bars; "" is no bar,
-; and cannot collide with a monitor name.
-(defvar vol_reveal "")
+; Where the pointer is, as "<monitor>:<kind>" or "" for nowhere. Two variables,
+; one per end, and each is written ONLY by its own widget -- that separation is
+; the whole point. A popup fires hoverlost when it opens, before the pointer has
+; ever been over it, so a single shared variable got cleared by the popup the
+; instant the icon set it, and the popup blinked shut again while the pointer
+; was still sitting on the icon. Split, that spurious event clears only
+; pop_body, pop_icon still names the control, and close-control-popup keeps the
+; window open. eww variables are global, so these double as the per-monitor key;
+; a bare boolean would have driven every bar's popup at once.
+(defvar pop_icon "")
+(defvar pop_body "")
+
+; Scripts are named by absolute path here, not `./scripts/...`. The relative
+; form works for deflisten, whose cwd is the config dir, but event commands do
+; not get that cwd -- hyprland.yuck's :onscroll already spells it out in full
+; for the same reason.
+; Shared by the bar and the popup, so the popup carries the same glyph and can
+; be told apart from the brightness one at a glance -- both open in the same
+; place, because eww anchors a window to the monitor and the two icons are not
+; at a fixed offset from the right edge on every bar (brightness is absent
+; where there is no backlight, which shifts volume).
+(defwidget volume-icon []
+	(label :text {sound_info.muted ? "󰝟" : (sound_info.volume <= 33 ? "󰕿" : (sound_info.volume <= 66 ? "󰖀" : "󰕾") )})
+	; 󰕾
+)
+
+; The popup's copy of the icon is the mute button. The bar's icon cannot be,
+; because its click opens the popup -- but once the popup is open its glyph is
+; a bigger target than the bar's and is already showing mute state, so mute
+; lands back on a plain left-click where it started.
+(defwidget volume-mute-button []
+	(eventbox :class "icon mute"
+	          :onclick "pamixer --toggle-mute"
+	          :tooltip "${sound_info.muted ? 'Unmute' : 'Mute'}"
+		(volume-icon)
+	)
+)
+
+; One eventbox carrying both the hover and the click handlers. This was two
+; nested ones, .volume outside for hover and .icon inside for clicks, and the
+; merge is kept only because one widget is simpler than two -- NOT because the
+; nesting was broken. It was blamed for :onhoverlost never firing; that was
+; wrong, and the earlier revealer proves it, since it opened and closed on hover
+; through exactly that nested structure. The real cause was eww reaping the
+; close script (see scripts/close-control-popup). Do not cite nesting as a
+; hazard on the strength of this comment.
+;
+; Opening is a click, closing is not: moving the pointer off both the icon and
+; the popup dismisses it. Hover still writes pop_icon even though it no longer
+; opens anything -- that is what tells close-control-popup the pointer is still
+; on this control. Mute moves to right-click, since left-click is the opener.
+;
+; The click closes the sibling popup first. The hover logic would usually have
+; done that already, but this makes "never two at once" a property of the open
+; itself rather than of a race resolving correctly.
 (defwidget volume [screen]
 	(box :class "item"
-		(eventbox :class "volume"
-		          :onhover     "${EWW_CMD} update vol_reveal=${screen}"
-		          :onhoverlost "${EWW_CMD} update vol_reveal="
+		(eventbox :class "volume icon"
+		          :onhover      "${EWW_CMD} update pop_icon=${screen}:volume"
+		          :onhoverlost  "${EWW_CMD} update pop_icon=; bash ~/.config/eww/scripts/close-control-popup ${screen} volume"
+		          :onclick      "${EWW_CMD} close popup-${screen}-brightness > /dev/null 2>&1; ${EWW_CMD} open volume-popup --toggle --id popup-${screen}-volume --screen ${screen} --arg screen=${screen}"
+		          :onrightclick "pamixer --toggle-mute"
 					    :tooltip "Volume: ${sound_info.muted ? 'Muted' : sound_info.volume + '%'}"
-			(box :space-evenly false
-				(revealer :transition "slideright"
-				          :reveal {vol_reveal == screen}
-				          :duration "200ms"
-					(scale :class "slider"
-					       :value {sound_info.volume}
-					       :onchange "pamixer --set-volume {}"
-					       :orientation "h"
-					       :max 101
-					       :min 0
-					)
-				)
-				(eventbox :class "icon"
-				          :onclick "pamixer --toggle-mute"
-					(label :text {sound_info.muted ? "󰝟" : (sound_info.volume <= 33 ? "󰕿" : (sound_info.volume <= 66 ? "󰖀" : "󰕾") )})
-					; 󰕾
-				)
+			(volume-icon)
+		)
+	)
+)
+
+; :flipped puts the maximum at the top -- a GTK vertical range runs minimum-up
+; by default, which reads backwards for a level.
+(defwidget volume-popup-body [screen]
+	(eventbox :class "popup-body"
+	          :onhover     "${EWW_CMD} update pop_body=${screen}:volume"
+	          :onhoverlost "${EWW_CMD} update pop_body=; bash ~/.config/eww/scripts/close-control-popup ${screen} volume"
+		(box :class "popup volume"
+		     :orientation "v"
+		     :space-evenly false
+			(scale :class "slider"
+			       :value {sound_info.volume}
+			       :onchange "pamixer --set-volume {}"
+			       :orientation "v"
+			       :flipped true
+			       :max 101
+			       :min 0
 			)
+			(volume-mute-button)
 		)
 	)
 )
@@ -64,16 +120,12 @@
 ; fast gated poll plus a slow ungated one; see the script for the mechanism.
 (deflisten backlight :initial "{}" "python3 ./scripts/get-brightness")
 
-; Name of the hovered bar rather than a boolean, for the reason spelled out
-; above vol_reveal.
-(defvar br_reveal "")
-
-; Split out so the lookup is written once per reader rather than once per
-; branch of the icon's four-way ternary.
+; A bare label, shared by the bar and the popup so the popup carries the same
+; glyph. It holds no eventbox of its own: a nested eventbox covering its parent
+; stops the parent ever seeing a clean enter/leave, which is what silently
+; killed :onhoverlost on the volume widget.
 (defwidget brightness-icon [pct]
-	(eventbox :class "icon"
-		(label :text {pct <= 25 ? "󰃞" : (pct <= 50 ? "󰃟" : (pct <= 75 ? "󰃝" : "󰃠"))})
-	)
+	(label :text {pct <= 25 ? "󰃞" : (pct <= 50 ? "󰃟" : (pct <= 75 ? "󰃝" : "󰃠"))})
 )
 
 ; Rendered only on the bar whose monitor owns a backlight. An external monitor
@@ -87,42 +139,46 @@
 	; positive max_brightness.
 	(box :class "item"
 	     :visible {(backlight?.[screen]?.max ?: 0) > 0}
-		(eventbox :class "brightness"
-		          :onhover     "${EWW_CMD} update br_reveal=${screen}"
-		          :onhoverlost "${EWW_CMD} update br_reveal="
+		(eventbox :class "brightness icon"
+		          :onhover     "${EWW_CMD} update pop_icon=${screen}:brightness"
+		          :onhoverlost "${EWW_CMD} update pop_icon=; bash ~/.config/eww/scripts/close-control-popup ${screen} brightness"
+		          :onclick     "${EWW_CMD} close popup-${screen}-volume > /dev/null 2>&1; ${EWW_CMD} open brightness-popup --toggle --id popup-${screen}-brightness --screen ${screen} --arg screen=${screen}"
 			        :tooltip "Brightness: ${100 * (backlight?.[screen]?.value ?: 0) / (backlight?.[screen]?.max ?: 1)}%"
-			(box :space-evenly false
-				(revealer :transition "slideright"
-				          :reveal {br_reveal == screen}
-				          :duration "200ms"
-					; Percent, with constant bounds, rather than the device's raw
-					; range. The raw form drew an empty slider: at window-open
-					; `backlight` is still {}, so :max evaluated to 1 + 1 while :min
-					; was 1, GTK clamped the incoming reading to 2, and re-setting
-					; :max afterwards does not lift a value already clamped down.
-					; The tooltip disagreed because it does its own arithmetic and
-					; never touches GTK's adjustment. Constant bounds cannot be
-					; wrong at any point in startup. brightnessctl truncates a
-					; fractional percentage, so no rounding is needed here.
-					(scale :class "slider"
-					       :value {100 * (backlight?.[screen]?.value ?: 0) / (backlight?.[screen]?.max ?: 1)}
-					       ; -d is not for choosing between devices -- there is one --
-					       ; it is what makes the startup fire harmless. GTK emits
-					       ; value-changed when the scale's value is first set, which
-					       ; happens while `backlight` is still {}, so this runs once
-					       ; before the listener's first line lands. The "none"
-					       ; placeholder makes that run fail on an unknown device;
-					       ; without -d it would be a real `brightnessctl set`,
-					       ; dimming the panel every time a bar opened. Costs one
-					       ; error line per open.
-					       :onchange "brightnessctl -d ${backlight?.[screen]?.device ?: "none"} set {}% > /dev/null"
-					       :orientation "h"
-					       :max 101
-					       :min 1
-					)
-				)
-				(brightness-icon :pct {100 * (backlight?.[screen]?.value ?: 0) / (backlight?.[screen]?.max ?: 1)})
+			(brightness-icon :pct {100 * (backlight?.[screen]?.value ?: 0) / (backlight?.[screen]?.max ?: 1)})
+		)
+	)
+)
+
+; Percent, with constant bounds, rather than the device's raw range. The raw
+; form drew an empty slider: at window-open `backlight` is still {}, so :max
+; evaluated to 1 + 1 while :min was 1, GTK clamped the incoming reading to 2,
+; and re-setting :max afterwards does not lift a value already clamped down.
+; The tooltip disagreed because it does its own arithmetic and never touches
+; GTK's adjustment. Constant bounds cannot be wrong at any point in startup.
+; brightnessctl truncates a fractional percentage, so no rounding is needed.
+(defwidget brightness-popup-body [screen]
+	(eventbox :class "popup-body"
+	          :onhover     "${EWW_CMD} update pop_body=${screen}:brightness"
+	          :onhoverlost "${EWW_CMD} update pop_body=; bash ~/.config/eww/scripts/close-control-popup ${screen} brightness"
+		(box :class "popup brightness"
+		     :orientation "v"
+		     :space-evenly false
+			(scale :class "slider"
+			       :value {100 * (backlight?.[screen]?.value ?: 0) / (backlight?.[screen]?.max ?: 1)}
+			       ; -d is not for choosing between devices -- there is one -- it
+			       ; is what makes the open-time fire harmless. GTK emits
+			       ; value-changed when the scale's value is first set, before
+			       ; anything has been dragged. The "none" placeholder makes that
+			       ; run fail on a device that cannot exist; without -d it would
+			       ; be a real `brightnessctl set` at the clamped :min, dimming
+			       ; the panel every time the popup opened.
+			       :onchange "brightnessctl -d ${backlight?.[screen]?.device ?: "none"} set {}% > /dev/null"
+			       :orientation "v"
+			       :flipped true
+			       :max 101
+			       :min 1
 			)
+			(brightness-icon :pct {100 * (backlight?.[screen]?.value ?: 0) / (backlight?.[screen]?.max ?: 1)})
 		)
 	)
 )

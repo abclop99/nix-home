@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+# Close this control's popup, unless the pointer is still on either end of it.
+#
+# The popup is a separate window from the bar, so moving the pointer from the
+# icon down into the popup fires the icon's hoverlost BEFORE the popup's hover.
+# Closing on hoverlost alone would therefore make the popup unreachable: it
+# would vanish while the pointer was still travelling towards it. So both ends
+# call this, and the wait outlives the window-to-window transition -- by then
+# whichever end the pointer actually landed on has written itself back.
+#
+# THE DETACH IS LOAD-BEARING. eww does not let a handler's command outlive the
+# handler: it reaps the process it spawned, so anything that waits is killed
+# mid-wait. Measured, not guessed -- an instrumented build logged ENTER on every
+# single invocation and never once reached the line after the sleep, and no
+# stray processes were left behind because they were being killed rather than
+# hanging. Re-exec through setsid first, which puts this in its own session and
+# process group and out of eww's reach. Without it the popup never closes at
+# all, no matter how the rest of the logic is arranged.
+#
+# Two variables, not one, because a popup fires hoverlost when it OPENS, before
+# the pointer has ever been over it. Sharing one variable meant that spurious
+# event wiped what the icon had just set. Each end writing only its own variable
+# makes it harmless: it clears pop_body while pop_icon still names the control.
+#
+# A different control in either variable closes this one, so moving from volume
+# to brightness swaps popups rather than leaving both open.
+#
+# Chosen over eww's own --duration, which counts from the moment the window
+# opens and so would yank the slider out from under a slow drag.
+
+test $# -eq 2 || exit 0
+
+if test -z "$POPUP_DETACHED"; then
+	POPUP_DETACHED=1 setsid --fork bash "$0" "$@" < /dev/null > /dev/null 2>&1
+	exit 0
+fi
+
+# Long enough to outlast a slow hand. The popup is positioned to touch the bar
+# so there is no unhovered strip to cross, but GTK still delivers the leave and
+# the enter as separate events with the pointer briefly on neither, and a slow
+# crossing stretches that. 0.25 was too short and shut the popup on the way in.
+key="$1:$2"
+sleep 0.6
+
+test "$(eww get pop_icon)" = "$key" && exit 0
+test "$(eww get pop_body)" = "$key" && exit 0
+
+eww close "popup-$1-$2" > /dev/null 2>&1

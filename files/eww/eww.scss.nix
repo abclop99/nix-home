@@ -143,17 +143,58 @@ scale slider {
 $volume-color: $orange;
 $brightness-color: $yellow;
 
-.volume .icon {
+/* Compound, not descendant. The hover and click handlers sit on one eventbox
+   rather than a nested pair, so `volume` and `icon` are two classes on the same
+   element and `.volume .icon` would match nothing at all -- a silent loss of
+   colour, since a selector that matches nothing is not an error. */
+.volume.icon {
 	color: $volume-color;
 }
-.volume highlight {
-	background-color: $volume-color;
-}
-.brightness .icon {
+.brightness.icon {
 	color: $brightness-color;
 }
-.brightness highlight {
+
+/* Control popups. The sliders live in their own windows rather than in the
+   bar: a revealer takes part in layout, so opening one widened the right-hand
+   section and shoved the centred window title sideways on every hover.
+
+   This block MUST sit below the $volume-color / $brightness-color definitions
+   above. SCSS resolves variables in source order, and grass treats an
+   undefined one as a hard error that fails the WHOLE stylesheet -- which does
+   not look like a CSS mistake at all: eww falls back to raw GTK defaults, so
+   the entire bar turns white and unstyled.
+
+   .popup-body is the whole window and stays transparent; it is the hover
+   target that keeps the popup alive, and is deliberately larger than the
+   visible body so the crossing down from the bar has somewhere to land.
+   .popup is the part you actually see. */
+.popup {
+	background-color: $bg_color;
+	border-radius: $radius;
+	padding: $sep;
+}
+/* The generic rule above pins min-width for horizontal troughs; a vertical
+   one needs the two swapped or it collapses to nothing. */
+.popup scale trough {
+	min-width: 5px;
+	min-height: 120px;
+}
+.popup.volume highlight {
+	background-color: $volume-color;
+}
+.popup.brightness highlight {
 	background-color: $brightness-color;
+}
+/* Both popups open at the same spot, so each carries its control's glyph --
+   otherwise the only thing telling them apart is the slider position. */
+.popup label {
+	margin-top: $sep;
+}
+.popup.volume label {
+	color: $volume-color;
+}
+.popup.brightness label {
+	color: $brightness-color;
 }
 
 /* System info circular bars */
