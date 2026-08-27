@@ -25,6 +25,15 @@ let
     trashy
     usbutils
     wl-clipboard
+    # On PATH purely so the filter can be driven by hand -- `hyprshade on
+    # blue-light-filter`, `off`, `toggle`, `current`, `ls`. The schedule in
+    # modules/hyprland.nix invokes ${pkgs.hyprshade}/bin/hyprshade by absolute
+    # store path, so it worked without this and there was no command to type.
+    # Deliberately nixpkgs' build rather than upstream's flake: this is the
+    # same derivation the unit runs, so the CLI and the timer can never be
+    # different versions, and it is the version built against this nixpkgs'
+    # Hyprland.
+    hyprshade
     yt-dlp
     nix-index
     nil
