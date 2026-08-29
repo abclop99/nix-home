@@ -7,6 +7,97 @@
       enable = true;
       # 26.05 moved configPath to XDG; pin the pre-26.05 path to keep the existing profile.
       configPath = ".mozilla/firefox";
+
+      # Ctrl+W closes a tab; repoint it at delete-previous-word instead.
+      #
+      # This has to happen in chrome, and there is no smaller lever -- checked
+      # against this Firefox's omni.ja, not assumed. browser.xhtml:269 declares
+      # (abridged) <key id="key_close" command="cmd_close" modifiers="accel"
+      # reserved="true"/> and nothing gates it: no pref (Firefox ships
+      # browser.quitShortcut.disabled for Ctrl+Q and never added the close-tab
+      # equivalent), and nothing keyboard-related in policies-schema.json,
+      # which is what programs.firefox.policies exposes.
+      #
+      # reserved="true" is why this cannot be an extension: MarkAsReservedByChrome
+      # sets mNoRemoteProcessDispatch, so the page is never sent the event at
+      # all rather than losing a race for it. Measured -- a capture-phase
+      # keydown listener in content counts zero while the word still deletes.
+      #
+      # nixpkgs' wrapper writes extraPrefs into lib/firefox/mozilla.cfg (JS
+      # evaluated once at startup, parent process only) and extraAutoConfig into
+      # lib/firefox/defaults/pref/autoconfig.js.
+      #
+      # sandbox_enabled=false is insurance, NOT currently required: nsReadConfig
+      # derives its default from the compile-time channel
+      # (beta/release => sandboxed) and nixpkgs builds MOZ_UPDATE_CHANNEL
+      # "default", so this file already gets the system principal. Keep the pref
+      # so a channel change upstream cannot silently break the patch. Were the
+      # sandbox on, the script would get a NullPrincipal with no chrome APIs at
+      # all -- no Services, no Components -- and per nsJSConfigTriggers.cpp the
+      # flag selects nothing but that principal: not the content sandbox, not
+      # process isolation, not extensions.
+      #
+      # The DOMContentLoaded listener must test its target and must NOT use
+      # { once: true }. An in-process about:blank subframe fires DOMContentLoaded
+      # that bubbles to the chrome window BEFORE browser.xhtml's own, so `once`
+      # is spent on the subframe; it happens to work anyway because the guard
+      # below tests the window's href rather than the event target, but that is
+      # an accident of load ordering with a silent failure mode. Measured across
+      # four window paths (startup, new window, private, openWindow): target
+      # test + self-removal fires exactly once per window; `once` plus a target
+      # test patches nothing at all; dropping `once` alone patches twice and
+      # deletes two words per keypress.
+      #
+      # goDoCommand routes through the focused element's controller, reaching
+      # the URL bar directly and page text fields via ControllersParent's
+      # ControllerCommands:Do forwarding. The command attribute has to go first:
+      # nsXULElement::GetEventTargetParent stops building the event target chain
+      # while a non-empty command attribute is present, so a listener on the
+      # <key> would never fire. A listener rather than an oncommand attribute
+      # because no <key> in browser.xhtml uses oncommand.
+      #
+      # menu_close keeps command="cmd_close", so File > Close Tab still closes
+      # the tab; dropping its `key` only stops it advertising an accelerator
+      # that no longer closes anything. (It is show-only-for-keyboard, so it is
+      # visible only when the menubar was opened with the keyboard anyway.)
+      #
+      # Failure mode if a Firefox update breaks this: most likely Ctrl+W goes
+      # SILENT, not back to closing tabs -- the command attribute is stripped
+      # before anything that can plausibly fail, and goDoCommand no-ops without
+      # logging when a command is unsupported. Only a failure earlier than that
+      # (observer topic gone, key_close renamed) restores tab-closing. The catch
+      # below covers only addObserver; the listener runs later and reports to
+      # the Browser Console (Ctrl+Shift+J).
+      package = pkgs.firefox.override {
+        extraAutoConfig = ''
+          pref("general.config.sandbox_enabled", false);
+        '';
+        extraPrefs = ''
+          try {
+            Services.obs.addObserver(function (win) {
+              win.addEventListener("DOMContentLoaded", function patch(ev) {
+                if (ev.target !== win.document) {
+                  return;
+                }
+                win.removeEventListener("DOMContentLoaded", patch);
+                if (win.location.href !== "chrome://browser/content/browser.xhtml") {
+                  return;
+                }
+                const key = win.document.getElementById("key_close");
+                if (key) {
+                  key.removeAttribute("command");
+                  key.addEventListener("command", function () {
+                    win.goDoCommand("cmd_deleteWordBackward");
+                  });
+                }
+                win.document.getElementById("menu_close")?.removeAttribute("key");
+              });
+            }, "chrome-document-global-created");
+          } catch (e) {
+            Components.utils.reportError(e);
+          }
+        '';
+      };
       # TODO: profile settings, such as userchrome, extensions, etc.
 
       profiles.default = {
