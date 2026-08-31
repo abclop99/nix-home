@@ -89,11 +89,42 @@ in {
 					# Laptop display
 					"eDP-1, preferred, 0x0, 1.2" # 1920 / 1.2 = 1600
 					"desc:LG Electronics LG FHD 0x01010101, preferred, 1600x-360, 1.0"
-					# Xiaomi Mi Monitor. Its EDID caps 4K at 30 Hz over this link, so take
-					# 1440p@60 instead: the same logical size 4K would give at scale 1.5,
-					# but smooth motion. y = 900 - 1440 = -540 bottom-aligns it with the
-					# laptop (eDP-1 is 1920x1080 at scale 1.2 -> 1600x900 logical, at 0x0).
-					"desc:Xiaomi Corporation Mi Monitor 6732000000074, 2560x1440@59.95, 1600x-540, 1"
+					# Xiaomi Mi Monitor, on the mini-DisplayPort. 3840 / 1.5 = 2560 and
+					# 2160 / 1.5 = 1440, so the logical size is the same 2560x1440 this
+					# ran at before — only the pixel density changes. y = 900 - 1440 =
+					# -540 bottom-aligns it with the laptop (eDP-1 is 1920x1080 at scale
+					# 1.2 -> 1600x900 logical, at 0x0).
+					#
+					# The mode is spelled out rather than left as `preferred` for
+					# explicitness, not because the two differ here: a scale of 1.5
+					# only means something against a known 3840x2160, and on this
+					# connector both forms pick the same mode. That `(preferred)` tag
+					# lives ONLY in hyprland.log, on aquamarine's `drm: Mode N:`
+					# lines — `hyprctl monitors` prints a bare `availableModes` list
+					# carrying no tag at all, so checking this the obvious way looks
+					# like the comment is wrong.
+					#
+					# This rule is keyed by `desc:`, so it follows the monitor onto
+					# ANY connector — but the mode is now the port-dependent half,
+					# and that is a real loss against the 2560x1440@59.95 it
+					# replaced, which both connectors offered. The dump from the
+					# previous one (DP-4) had no 4K@60 at all, and Hyprland matches
+					# nearest with resolution ranked above refresh, so there this
+					# would settle on 4K@29.97 rather than fall back to 1440p@60 —
+					# silently, because a mode miss raises no config error and the
+					# DEBUG line that would say so is suppressed by the default
+					# `debug:disable_logs`. The blast radius is refresh, NOT layout:
+					# 3840/1.5 is still 2560, so the logical size and the -540
+					# alignment above both survive and all you lose is 60 Hz.
+					# Re-check the mode if it ever moves ports.
+					#
+					# Deliberately NOT asserted: why the two connectors advertised
+					# different modes. It is not a plain link ceiling — a narrower
+					# link can only prune, yet DP-4 offered 4K@25 and 4K@23.98 that
+					# DP-3 does not, so the lists are not nested and the sink's own
+					# EDID must have differed. Which physical socket DP-4 is was
+					# never determined either.
+					"desc:Xiaomi Corporation Mi Monitor 6732000000074, 3840x2160@60, 1600x-540, 1.5"
 					# Default, any random monitor connected. Automatically placed to the right
 					",preferred,auto,1"
 				];

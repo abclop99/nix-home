@@ -64,14 +64,25 @@
 ; Icon centres came from logging `hyprctl cursorpos` against pop_icon while the
 ; pointer was swept over them: brightness 1344, volume 1362 on eDP-1 (logical
 ; 1600 wide -- it runs at scale 1.20, so 1920 physical is the WRONG number to
-; work in, and an earlier set of offsets was wrong partly for that reason). Note
-; a *warped* cursor is no use here: hyprctl dispatch movecursor teleports without
-; the crossing GTK needs, so an automated sweep reports nothing at all.
+; work in, and an earlier set of offsets was wrong partly for that reason).
+; BOTH outputs are fractionally scaled now -- the external is 3840x2160 at scale
+; 1.5, so 2560 is ITS logical width -- so there is no output left where the
+; physical number is safe to reach for. Note a *warped* cursor is no use here:
+; hyprctl dispatch movecursor teleports without the crossing GTK needs, so an
+; automated sweep reports nothing at all.
 ;
 ; Volume is one value for two monitors that disagree by 10px, because the icons
 ; sit a fixed distance from the BAR's right edge while the bar itself is inset by
-; 1% of the monitor (16px on eDP-1, 26px on DP-4). eDP-1 alone wants 216 and DP-4
-; alone wants 226; 221 splits it, leaving ~5px of error against a 17px icon.
+; 1% of the monitor (16px on eDP-1, 26px on the 2560-wide external). eDP-1 alone
+; wants 216 and the external alone wants 226; 221 splits it, leaving ~5px of error
+; against a 17px icon. What the inset tracks is LOGICAL width -- which is the
+; physical width DIVIDED BY the scale, so the scale is an input to it, not an
+; irrelevance. The external survived a move to 4K at scale 1.5 only because that
+; PRODUCT is unchanged at 2560; scale 2.0 on the same panel would give 1920
+; logical and a 19px inset. Re-measured after that move: `hyprctl layers` puts
+; its bar at x=1626, which is 26 into a monitor whose own origin is x=1600 (the
+; :x convention above is monitor-relative; on eDP-1 the two coincide because it
+; sits at 0x0). Identify this monitor by that logical width, not by a connector.
 ; Brightness only ever opens where there is a backlight, so 234 is exact.
 ;
 ; `:y` is measured from the bottom of the bar's EXCLUSIVE ZONE, not from the top
