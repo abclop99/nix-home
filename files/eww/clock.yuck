@@ -1,18 +1,22 @@
 
-(defvar time_rev false)
+; Holds the hovered bar's monitor name, not a boolean: eww variables are
+; global, so a bare `false`/`true` slid the date open on EVERY bar at once.
+; One pointer means one name is enough state for any number of bars, and ""
+; cannot collide with a monitor name.
+(defvar time_rev "")
 ; Percent of the day passed. It's complicated enough that I don't want to
 ; write it multiple times.
 (defpoll day_percent :initial 0 :interval "10m" "echo $(( ($(date '+%-H') * 60 + $(date '+%-M')) * 100 / 1440 ))")
-(defwidget clock []
+(defwidget clock [screen]
 	(eventbox 
-			:onhover "${EWW_CMD} update time_rev=true"
-			:onhoverlost "${EWW_CMD} update time_rev=false"
+			:onhover "${EWW_CMD} update time_rev=${screen}"
+			:onhoverlost "${EWW_CMD} update time_rev="
 			:class "module"
 
 		(box  :space-evenly "false"
 					:class "clock"
 			(revealer :transition "slideright"
-								:reveal time_rev
+								:reveal {time_rev == screen}
 								:duration "200ms"
 
 				(box :class "date" {formattime(EWW_TIME, "%F")})

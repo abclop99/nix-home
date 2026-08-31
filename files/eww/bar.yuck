@@ -52,7 +52,7 @@
 		(sep)
 		(system-info)
 		(sep)
-		(clock)
+		(clock :screen screen)
 	)
 )
 
