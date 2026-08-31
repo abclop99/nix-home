@@ -1,7 +1,7 @@
 ; Both sliders need `screen`, for different reasons. Brightness needs it to
 ; know whether this bar's monitor is the one it can control at all; volume
 ; needs it only to know which bar is hovered, since it acts on the one default
-; sink either way. Microphone has no revealer and no per-monitor state.
+; sink either way. Microphone has no popup and no per-monitor state.
 (defwidget controls [screen]
 	(box  :class "module controls"
 	      :space-evenly false
