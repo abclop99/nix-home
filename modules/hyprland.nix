@@ -55,7 +55,12 @@ in {
 				env = [
           # "LIBVA_DRIVER_NAME,nvidia"
           # "XDG_SESSION_TYPE,wayland"
-          "WLR_NO_HARDWARE_CURSORS,1"
+          # WLR_NO_HARDWARE_CURSORS was set here and did nothing: Hyprland
+          # dropped wlroots at 0.42, and this closure holds no wlroots
+          # derivation at all, so nothing could ever have read it. Software
+          # cursors are in force regardless, via `cursor:no_hardware_cursors`
+          # at its default of Auto — CLAUDE.md carries the mechanism, and what
+          # forcing it to 0 would and would not settle.
           "HYPRCURSOR_THEME,rose-pine-hyprcursor"
           "HYPRCURSOR_SIZE,24"
           # GTK derives its Xft DPI from the org.gnome.desktop.interface
