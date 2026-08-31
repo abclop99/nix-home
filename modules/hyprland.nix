@@ -103,11 +103,9 @@ in {
 					# The mode is spelled out rather than left as `preferred` for
 					# explicitness, not because the two differ here: a scale of 1.5
 					# only means something against a known 3840x2160, and on this
-					# connector both forms pick the same mode. That `(preferred)` tag
-					# lives ONLY in hyprland.log, on aquamarine's `drm: Mode N:`
-					# lines — `hyprctl monitors` prints a bare `availableModes` list
-					# carrying no tag at all, so checking this the obvious way looks
-					# like the comment is wrong.
+					# connector both forms pick the same mode. (CLAUDE.md covers how
+					# to check which mode an EDID prefers, and what actually makes
+					# the obvious way work.)
 					#
 					# This rule is keyed by `desc:`, so it follows the monitor onto
 					# ANY connector — but the mode is now the port-dependent half,
