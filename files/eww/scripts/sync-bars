@@ -4,9 +4,15 @@
 # No monitor is hardcoded anywhere: plug in any display, or several, and each
 # gets a bar; unplug one and its bar closes. Runs for the session, re-syncing
 # whenever Hyprland reports a monitor added or removed.
+#
+# Starting the daemon is not this script's job -- eww-daemon.service owns it.
+# `eww open` is the call that has to be told so, because it answers a failed
+# connect by forking a server instead of failing. `open-many` shares that code
+# path; `close` and `active-windows`, the two used here, just exit 1, so the
+# flag would be noise on them.
 
 sync (){
-  local want have m id
+  local want have m id try ok failed
   # Bail rather than reconcile against a monitor list we could not read. hyprctl
   # reports a dead socket on stdout, so jaq fails and want comes back empty --
   # and the close loop below matches nothing against an empty want, so it would
@@ -15,13 +21,53 @@ sync (){
   # reports [], because its headless fallback has id -1 and getMonitorData hides
   # those. Both cases want the same answer, and neither strands a bar -- eww
   # closes a window itself when its monitor goes and reopens it on reconnect.
-  want=$(hyprctl monitors -j | jaq -r '.[].name') || return
-  test -n "$want" || return
-  have=$(eww active-windows 2>/dev/null | cut -d: -f1)
+  # Hence 0 and not a failure: skipping a round here costs nothing, and non-zero
+  # is reserved for the cases worth restarting the unit over.
+  want=$(hyprctl monitors -j | jaq -r '.[].name') || return 0
+  test -n "$want" || return 0
 
-  # Open a bar for every monitor that lacks one.
+  # The bar list needs the same scepticism and used to get none. `eww
+  # active-windows` exits 1 and prints nothing when the daemon cannot be
+  # reached, which is byte-for-byte what it prints when no bar is open -- the
+  # status is the only thing separating the two, and it has to be captured in a
+  # statement of its own, because through a pipeline bash reports cut's status
+  # instead. Reading unreachable as "none open" is what put two bars on every
+  # monitor: the open loop below ran for all of them, and eww answered the
+  # failed connect by forking a second daemon, which rebound the socket and left
+  # the first one drawing a full set of bars that nothing could see or close.
+  #
+  # Being unreachable is normally brief -- the daemon is mid-reload from the
+  # hotplug this is also reacting to, or has not finished starting (measured
+  # 348ms and 452ms from fork to answering IPC, two samples). Each failed call
+  # costs eww its own internal retry before returning, and what that costs
+  # depends on how the daemon is broken: ~1.03s when nothing holds the socket,
+  # ~1.55s when a wedged one still has it bound. With the sleeps that is 10-13s
+  # of patience rather than the five seconds the loop looks like, and the wedged
+  # end is the one to reckon with, being the case the give-up below exists for.
+  ok=
+  for try in 1 2 3 4 5; do
+    have=$(eww active-windows 2>/dev/null) && { ok=1; break; }
+    sleep 1
+  done
+  if test -z "$ok"; then
+    # Past that it is wedged rather than busy, and no amount of waiting in here
+    # fixes a daemon that is alive but not answering -- systemd supervises the
+    # process, not its IPC, so nothing else will notice. Asking for a restart is
+    # what the old code got by accident when `eww open` forked a replacement.
+    # --no-block because this stops us too, by way of eww-bars being PartOf it.
+    systemctl --user --no-block restart eww-daemon.service
+    return 1
+  fi
+  have=$(cut -d: -f1 <<< "$have")
+
+  # Open a bar for every monitor that lacks one. The status has to be caught
+  # explicitly: --no-daemonize turned a failed open from "forks a rival and
+  # still reports success" into a plain exit 1, and acting on that signal is
+  # most of the point of the flag.
+  failed=0
   for m in $want; do
-    grep -qx "bar-$m" <<< "$have" || eww open bar --id "bar-$m" --screen "$m"
+    grep -qx "bar-$m" <<< "$have" ||
+      eww --no-daemonize open bar --id "bar-$m" --screen "$m" || failed=1
   done
 
   # Close bars whose monitor is gone, plus any `bar` left by the
@@ -32,11 +78,25 @@ sync (){
       bar-*) grep -qx "${id#bar-}" <<< "$want" || eww close "$id" ;;
     esac
   done
+
+  # Explicit, because falling out of the function would return whichever `eww
+  # close` ran last -- and closing an already-gone window exits 1. eww reaps a
+  # window itself when its monitor goes, so on the very unplug this runs for, an
+  # entry read a moment earlier is often already closed. That is a correct
+  # reconcile, and letting it set the status would restart the unit for nothing.
+  return "$failed"
 }
 
-sync
-socat -u UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock - | while read -r line; do
+# Failing is how this asks to be restarted, so the exit has to actually happen.
+# The loop reads from a process substitution rather than the right-hand side of
+# a pipe: as a pipeline it would be a subshell, and `exit` there ends only the
+# subshell while bash goes on to wait for socat -- which is blocked in read() on
+# the Hyprland socket and cannot notice its closed stdout until it next writes.
+# The unit would sit `active` with nothing reconciling until some unrelated
+# event happened along, which on an idle desktop is never.
+sync || exit 1
+while read -r line; do
   case $line in
-    monitoradded*|monitorremoved*) sync ;;
+    monitoradded*|monitorremoved*) sync || exit 1 ;;
   esac
-done
+done < <(socat -u UNIX-CONNECT:$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock -)

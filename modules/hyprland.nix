@@ -165,7 +165,8 @@ in {
 				};
 
 				# Define programs to use
-				# The bar is not here: it runs as the eww-bars user unit below.
+				# The bar is not here: it runs as the eww-daemon and eww-bars user
+				# units below.
 				# "$browser" = "firefox";
 				"$terminal" = "${pkgs.kitty}/bin/kitty";
 				"$menu" = "${pkgs.bemenu}/bin/bemenu-run";
@@ -420,15 +421,42 @@ end_time = 07:00:00
 			Install.WantedBy = [ "graphical-session.target" ];
 		};
 
-		# One eww bar per connected monitor, re-synced on hotplug. A user unit
-		# rather than an exec-once so it restarts on failure, stops cleanly on
-		# logout, and can be reloaded with `systemctl --user restart eww-bars`
-		# after a config change (eww's daemon lives in this unit's cgroup, so a
-		# restart tears the old bars down with it).
+		# eww's daemon, supervised. It used to start as a side effect of the first
+		# `eww open` in sync-bars, which left nothing watching it: this unit's Main
+		# PID was the script, so systemd saw a healthy unit while a dead daemon
+		# took every bar with it, and nothing recovered until the next hotplug.
+		# The worse half is that `eww open` starts a daemon whenever it cannot
+		# *reach* one, so a daemon that was merely busy got a second forked
+		# alongside it -- the newcomer rebound the socket and the original kept
+		# drawing a full set of bars that `eww active-windows` could no longer see
+		# or close, which is how every monitor ended up with two. Owning the
+		# lifetime here settles "is the daemon alive" by process supervision
+		# instead of over the very IPC that had broken, and lets sync-bars refuse to
+		# start one at all -- it passes --no-daemonize, which is only safe because
+		# this unit guarantees the daemon exists.
 		#
-		# Hyprland's first exec-once hands HYPRLAND_INSTANCE_SIGNATURE to the
-		# systemd user environment via dbus-update-activation-environment before
-		# it starts the session target, so the script's socket2 path resolves.
+		# This is the unit to restart for a full config reload -- a daemon holds
+		# its config parsed in memory, and systemd's default KillMode of
+		# control-group takes it down along with the listeners it spawned.
+		# eww-bars is PartOf it, so it comes too and reopens the bars.
+		#
+		# RestartSec=5, with StartLimitIntervalSec=0 behind it. `eww daemon` exits 1
+		# in ~40ms with "Failed to initialize GTK" whenever the compositor is not
+		# reachable -- a logout race, or a cold boot this unit wins -- and at 2s
+		# spacing a run of that walks into the default burst of 5 per 10s, which
+		# latches the unit `failed` for the rest of the session with nothing to
+		# restart it. ConditionEnvironment is no help: HYPRLAND_INSTANCE_SIGNATURE
+		# outlives Hyprland in the user manager's environment, so the condition
+		# still passes.
+		#
+		# At 5s the count cannot reach the burst before the 10s window resets, so
+		# the limit is already out of reach and StartLimitIntervalSec=0 is a
+		# backstop rather than the thing doing the work -- kept so that lowering
+		# RestartSec later cannot quietly restore a session-long silent latch. It
+		# is not free: a *propagated* restart bypasses RestartSec entirely, and with
+		# the limit switched off nothing else brakes such a loop -- a synthetic
+		# reproduction of that shape spins at ~33ms per cycle. What keeps sync-bars
+		# off it is the 10-13s its retries take before it asks for a restart.
 		#
 		# PATH is deliberately inherited from the user manager (which carries the
 		# HM profile) rather than pinned. eww launches its own deflisten commands
@@ -436,12 +464,74 @@ end_time = 07:00:00
 		# pamixer, pactl, python, jaq, socat and friends — pinning PATH would mean
 		# enumerating every one and keeping the list in sync, silently breaking a
 		# widget as soon as one is added.
-		systemd.user.services.eww-bars = {
+		systemd.user.services.eww-daemon = {
 			Unit = {
-				Description = "Open an eww bar on each connected monitor";
+				Description = "eww widget daemon";
 				PartOf = [ "graphical-session.target" ];
 				After = [ "graphical-session.target" ];
 				ConditionEnvironment = "HYPRLAND_INSTANCE_SIGNATURE";
+				StartLimitIntervalSec = 0;
+				# Pull the bars up alongside the daemon. Every other edge between these
+				# two points bars -> daemon, so nothing propagates a *start* downward:
+				# `systemctl stop eww-daemon` leaves eww-bars `inactive` with
+				# Result=success -- invisible to `systemctl --failed` -- and a later
+				# `start eww-daemon` would not bring it back. `restart` was always fine;
+				# it is stop-then-start that stranded it.
+				Wants = [ "eww-bars.service" ];
+			};
+			Service = {
+				# Kill any daemon this unit doesn't own before starting. A daemon
+				# holds its config parsed in memory, so one left over from a
+				# previous generation (or from the pre-unit exec-once) would serve
+				# the *old* widget tree. `-` because there is nothing to kill on a
+				# fresh login. This only reaches strays that still answer IPC --
+				# against a wedged one it fails and `eww daemon` rebinds the socket
+				# over the top, orphaning it, so this is a courtesy rather than a
+				# guarantee; for the unit's own daemon the cgroup teardown does it.
+				ExecStartPre = "-${pkgs.eww}/bin/eww kill";
+				ExecStart = "${pkgs.eww}/bin/eww daemon --no-daemonize";
+				Slice = "session.slice";
+				Restart = "always";
+				RestartSec = 5;
+			};
+			Install.WantedBy = [ "graphical-session.target" ];
+		};
+
+		# One eww bar per connected monitor, re-synced on hotplug. A user unit
+		# rather than an exec-once so it restarts on failure and stops cleanly on
+		# logout.
+		#
+		# Hyprland's first exec-once hands HYPRLAND_INSTANCE_SIGNATURE to the
+		# systemd user environment via dbus-update-activation-environment before
+		# it starts the session target, so the script's socket2 path resolves.
+		systemd.user.services.eww-bars = {
+			Unit = {
+				Description = "Open an eww bar on each connected monitor";
+				# A fresh daemon has no windows open, so the bars have to be
+				# reopened against it. PartOf propagates a *restart* and not merely
+				# a stop, which is what makes that automatic -- verified on systemd
+				# 260 with transient units: SIGKILLing the depended-on unit's main
+				# process gave the dependent a new InvocationID at NRestarts=0, so
+				# the restart was job-driven and not its own Restart=. After only
+				# orders the start and settles nothing here.
+				#
+				# Requires= is deliberately absent. Isolated the same way, it turns
+				# out to propagate an auto-restart just as PartOf does, so it adds no
+				# reach -- but it does add a failure mode: when the daemon exhausts a
+				# start limit, a Requires= dependent's start job is refused and it
+				# lands `inactive` with Result=success, absent from `systemctl
+				# --failed` and looking like a clean exit. Its immediate start job
+				# also bypasses RestartSec and spends one of the daemon's tries.
+				PartOf = [ "graphical-session.target" "eww-daemon.service" ];
+				After = [ "graphical-session.target" "eww-daemon.service" ];
+				ConditionEnvironment = "HYPRLAND_INSTANCE_SIGNATURE";
+				# As on the daemon, and a backstop for the same reason once RestartSec
+				# matches. Latching `failed` would be the worse failure here: a broken
+				# widget tree fails every start, and nothing would recover it, because
+				# fixing the yuck changes no unit text for sd-switch to act on. Looping
+				# in the journal is visible and self-clearing instead -- eww's filewatch
+				# reloads the daemon, and the next restart of this unit then succeeds.
+				StartLimitIntervalSec = 0;
 				# The gap this closes is sync-bars, not the listeners. Every file in
 				# ~/.config/eww is a symlink into one aggregate home-manager-files
 				# derivation, so a scripts-only edit repoints eww.scss and the yuck as
@@ -453,6 +543,10 @@ end_time = 07:00:00
 				# daemon kept its own.
 				# sync-bars is this unit's ExecStart rather than something eww launches,
 				# so no reload can touch it -- it held one PID across every such switch.
+				# Since the split this restart no longer reaches the daemon, so a changed
+				# *listener* script is picked up only by eww's filewatch above; this
+				# trigger covers sync-bars itself. Before it, the restart went through
+				# ExecStartPre=-eww kill and this cgroup and forced a re-parse too.
 				# Naming the scripts path here covers it, and makes the restart
 				# guaranteed rather than a side effect of how HM bundles files.
 				# sd-switch acts because the field is not on its ignore list: Description
@@ -466,22 +560,24 @@ end_time = 07:00:00
 				X-Restart-Triggers = [ "${config.xdg.configFile."eww/scripts".source}" ];
 			};
 			Service = {
-				# Kill any daemon this unit doesn't own before starting. A daemon
-				# holds its config parsed in memory, so one left over from a previous
-				# generation (or from the pre-unit exec-once) would serve the *old*
-				# widget tree to the bars this script opens. `-` because there is
-				# nothing to kill on a fresh login. Makes `systemctl --user restart
-				# eww-bars` a guaranteed full config reload.
-				ExecStartPre = "-${pkgs.eww}/bin/eww kill";
 				ExecStart = "${pkgs.bash}/bin/bash ${config.xdg.configHome}/eww/scripts/sync-bars";
 				Slice = "session.slice";
 				# "always", not "on-failure": the script's socat tail exits 0 when
 				# the Hyprland socket closes, which would otherwise leave the unit
-				# inactive and — since eww's daemon lives in this cgroup — take the
-				# bars down with it. At real session end PartOf stops the unit, and
-				# a stop is not a restart trigger, so this only covers spurious death.
+				# inactive with nothing reconciling. It also covers the script
+				# exiting 1 after the daemon stayed unreachable through every retry
+				# -- re-running the whole reconcile is the recovery. At real session
+				# end PartOf stops the unit, and a stop is not a restart trigger.
 				Restart = "always";
-				RestartSec = 2;
+				# 5 rather than 2, matching the daemon. Not every failure path pays the
+				# retry loop's 10-13s: a config that loads but has no `bar` widget
+				# answers active-windows fine and fails only at `eww open`, so sync
+				# returns 1 at once and this interval alone sets the retry cadence. At 2s
+				# that is five starts inside ten seconds -- exactly the default burst --
+				# so what the unit did next would hinge on StartLimitIntervalSec rather
+				# than on this. At 5s the burst stays out of reach and that override goes
+				# back to being the backstop it is described as.
+				RestartSec = 5;
 			};
 			Install.WantedBy = [ "graphical-session.target" ];
 		};
