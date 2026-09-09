@@ -96,7 +96,7 @@ The file is a plain 0600 nix.conf fragment beside the HM-managed `~/.config/nix/
   - `firefox/` — Custom CSS (tree-style-tab).
   - `fontconfig/` — Font configuration.
   - `swaylock/` — Custom swaylock effect (C source).
-- **`private/`** — Five tracked-but-skip-worktree files (`location.nix`, `ssh/config`, `gpg-key-fingerprint`, `rustdesk.nix`, `hyprland.nix`). The committed content is a placeholder; real values live only on disk. See "Private files" below.
+- **`private/`** — Five tracked-but-skip-worktree files (`location.nix`, `ssh/config`, `git.nix`, `rustdesk.nix`, `hyprland.nix`). The committed content is a placeholder; real values live only on disk. See "Private files" below.
 - **`hooks/pre-commit`** — Tracked git hook that rejects commits with staged changes to the `private/` files. Activated per-clone via `git config core.hooksPath hooks`.
 
 ## Conventions
@@ -113,11 +113,11 @@ The file is a plain 0600 nix.conf fragment beside the HM-managed `~/.config/nix/
 
 ## Private files
 
-`private/{location.nix,ssh/config,gpg-key-fingerprint,rustdesk.nix,hyprland.nix}` are tracked but `--skip-worktree`'d. The committed content is a placeholder; real values live only in the working tree.
+`private/{location.nix,ssh/config,git.nix,rustdesk.nix,hyprland.nix}` are tracked but `--skip-worktree`'d. The committed content is a placeholder; real values live only in the working tree.
 
 **Per-machine setup (after fresh clone):**
 1. `git config core.hooksPath hooks` — activates the pre-commit guard.
-2. `git update-index --skip-worktree private/location.nix private/ssh/config private/gpg-key-fingerprint private/rustdesk.nix private/hyprland.nix` — tell git to ignore local edits.
+2. `git update-index --skip-worktree private/location.nix private/ssh/config private/git.nix private/rustdesk.nix private/hyprland.nix` — tell git to ignore local edits.
 3. Populate real content (via `cat > private/foo` or your editor; the Claude `block-private.sh` hook blocks Edit/Write/MultiEdit, so use Bash or an editor outside Claude).
 
 **Updating placeholder structure** (e.g., adding fields): edit the file, `git add private/foo`, `git commit --no-verify` (the hook would otherwise refuse). Then re-apply skip-worktree if necessary and restore real content.

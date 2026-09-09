@@ -10,7 +10,7 @@
 SKIP_WORKTREE_FILES=(
   private/location.nix
   private/ssh/config
-  private/gpg-key-fingerprint
+  private/git.nix
   private/rustdesk.nix
   private/hyprland.nix
 )
