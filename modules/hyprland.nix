@@ -40,9 +40,9 @@ in {
 			swaynotificationcenter  # Notification center
 			
 			# Runtime tools eww's scripts shell out to. Interpreters are not
-			# here: ewwScripts resolves those into each script's shebang at
-			# build time, so python3 is a dependency of the scripts rather
-			# than of this profile.
+			# among them: ewwScripts bakes those into each script's shebang, so
+			# nothing here resolves python3 from PATH -- even though
+			# modules/packages.nix does put it there, for an unrelated reason.
 			jaq
 			socat
 			pamixer                 # Volume info and control

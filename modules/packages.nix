@@ -37,6 +37,18 @@ let
     yt-dlp
     nix-index
     nil
+    # On PATH for Claude Code's security-guidance plugin. Its sg-python.sh shim
+    # probes python3.13/3.12/3.11/3.10, then python3/python/py -3, and offers no
+    # way to be pointed at an interpreter, so it needs one under a bare name.
+    # Its claude_agent_sdk venv under ~/.claude/security is built against
+    # whichever it found; without a match the hook exits 1 and the plugin stops
+    # doing anything, non-blocking and near-silent.
+    #
+    # Nothing in this repo needs it. eww's scripts carry their own interpreter
+    # in their shebangs (ewwScripts, modules/hyprland.nix) and the contrast-audit
+    # harness carries its own python3.withPackages (flake.nix), so both keep
+    # working if this line ever goes away again.
+    python3
   ];
 
   apps = with pkgs; [
