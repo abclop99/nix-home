@@ -17,25 +17,28 @@ case $direction in
 	*) exit 0 ;;
 esac
 
-# Without a monitor the ownership test inverts -- owner.get(n, "") == "" picks
-# exactly the workspaces that do NOT exist -- so refuse rather than scroll into
-# the wrong set.
+# Without a monitor the ownership test inverts -- every existing workspace
+# counts as held by someone else, so the candidates become exactly the
+# workspaces that do NOT exist -- so refuse rather than scroll into the wrong
+# set.
 test -n "$monitor" || exit 0
 
-target=$(hyprctl workspaces -j | python -c '
-import json, sys
-direction, current, monitor = sys.argv[1:4]
-current = int(current)
-owner = {w["id"]: w["monitor"] for w in json.load(sys.stdin)}
-cands = [n for n in range(1, 11) if owner.get(n, monitor) == monitor]
-if direction == "down":
-    print(next((n for n in cands if n > current), current))
-else:
-    print(next((n for n in reversed(cands) if n < current), current))
-' "$direction" "$current" "$monitor")
+# Candidates are the workspaces this monitor owns plus the ones with no owner:
+# equivalently, every id in 1-10 that some other monitor does not hold. No wrap
+# -- at either end first/last yield nothing and // keeps the current workspace.
+target=$(hyprctl workspaces -j | jaq -r \
+	--arg monitor "$monitor" --arg current "$current" --arg direction "$direction" '
+[ .[] | select(.monitor != $monitor) | .id ] as $others
+| [ range(1;11) | select( . as $n | any($others[]; . == $n) | not ) ] as $cands
+| ($current | tonumber) as $c
+| ( if $direction == "down"
+    then first($cands[] | select(. > $c))
+    else last($cands[] | select(. < $c))
+    end ) // $c
+')
 
-# hyprctl reports a dead socket on stdout, not stderr, so json.load chokes on
-# the error text and target comes back empty. Anything that is not a workspace
+# hyprctl reports a dead socket on stdout, not stderr, so jaq chokes on the
+# error text and target comes back empty. Anything that is not a workspace
 # number means we do not know where to go, and dispatching "" is worse than
 # doing nothing.
 case $target in
