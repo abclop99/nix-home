@@ -39,11 +39,12 @@ in {
 			grimblast               # Screenshot tool for hyprland
 			swaynotificationcenter  # Notification center
 			
-			# Used in eww's scripts
-			# TODO: Wrap dependencies in the scripts?
+			# Runtime tools eww's scripts shell out to. Interpreters are not
+			# here: ewwScripts resolves those into each script's shebang at
+			# build time, so python3 is a dependency of the scripts rather
+			# than of this profile.
 			jaq
 			socat
-			python3
 			pamixer                 # Volume info and control
 			pulseaudio              # pactl subscribe
 			brightnessctl           # Brightness control
@@ -479,9 +480,11 @@ end_time = 07:00:00
 		# PATH is deliberately inherited from the user manager (which carries the
 		# HM profile) rather than pinned. eww launches its own deflisten commands
 		# as `bash ./scripts/...`, and those scripts reach for brightnessctl,
-		# pamixer, pactl, python, jaq, socat and friends — pinning PATH would mean
+		# pamixer, pactl, jaq, socat and friends — pinning PATH would mean
 		# enumerating every one and keeping the list in sync, silently breaking a
-		# widget as soon as one is added.
+		# widget as soon as one is added. Interpreters are the exception and are
+		# pinned, in ewwScripts: one per script, resolved automatically, so there
+		# is no list to keep in sync and python3 need not be on PATH at all.
 		systemd.user.services.eww-daemon = {
 			Unit = {
 				Description = "eww widget daemon";
