@@ -11,6 +11,24 @@ let
 	schemaDirs = lib.concatMapStringsSep ":"
 		(p: "${p}/share/gsettings-schemas/${p.name}/glib-2.0/schemas")
 		[ pkgs.gsettings-desktop-schemas pkgs.gtk3 ];
+
+	# eww's scripts with their interpreters resolved to store paths. The sources
+	# are not executable and every call site names an interpreter, so this sets
+	# the exec bit too; get-brightness is then invoked as ./scripts/get-brightness
+	# and needs no python3 on PATH. The bash call sites are unaffected either way,
+	# since `bash foo` ignores foo's shebang.
+	#
+	# This output's hash moves whenever python3 or bash does, so a nixpkgs bump
+	# now also fires eww-bars' X-Restart-Triggers. Harmless, but it shows up in
+	# the journal.
+	ewwScripts = pkgs.runCommand "eww-scripts" {
+		nativeBuildInputs = [ pkgs.python3 pkgs.bash ];
+	} ''
+		cp -r ${../files/eww/scripts} $out
+		chmod -R u+w $out
+		chmod +x $out/*
+		patchShebangs $out
+	'';
 in {
 
 	config = {
@@ -600,7 +618,7 @@ end_time = 07:00:00
 			"eww/eww.yuck".source = ../files/eww/eww.yuck;
 			"eww/hyprland.yuck".source = ../files/eww/hyprland.yuck;
 			"eww/system.yuck".source = ../files/eww/system.yuck;
-			"eww/scripts".source = ../files/eww/scripts;
+			"eww/scripts".source = ewwScripts;
 			"eww/eww.scss".text =
 				import ../files/eww/eww.scss.nix { inherit (config.theme) palette; };
 		};

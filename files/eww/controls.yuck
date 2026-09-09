@@ -126,7 +126,7 @@
 ; and the icon, which stays correct even when brightness is changed by
 ; something that never touches the widget. That combination is what retired a
 ; fast gated poll plus a slow ungated one; see the script for the mechanism.
-(deflisten backlight :initial "{}" "python3 ./scripts/get-brightness")
+(deflisten backlight :initial "{}" "./scripts/get-brightness")
 
 ; A bare label, shared by the bar and the popup so the popup carries the same
 ; glyph. No eventbox of its own simply because it needs no click of its own --
