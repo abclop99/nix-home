@@ -193,4 +193,4 @@ The file is a plain 0600 nix.conf fragment beside the HM-managed `~/.config/nix/
 - Project sandbox is enabled (`.claude/settings.local.json`); commands that need unix sockets or `/dev/tty` (`hm-switch`, `hm-build`, signed `git commit`, writing `.git/config`) need the sandbox disabled per-call.
 - The sandbox masks blocked paths with `/dev/null` character devices (mode `crw-rw-rw-`, owner `nobody`) — they appear as untracked entries in `git status` for `.gitconfig`, `.gitmodules`, `.bash_profile`, etc. **Never use `git add .` / `git add -A`**; use selective `git add <path>`.
 - `.claude/{settings.json,skills,commands,agents}` are bind-mounted read-only inside any Claude session — to add/modify them, stage in `$TMPDIR` and `cp` from a regular shell.
-- `jq` is not installed; use `python3` for JSON parsing in hooks/scripts.
+- `jq` is not installed; use `jaq` for JSON parsing in hooks/scripts. It comes from `home.packages` (`modules/hyprland.nix`) — the system profile carries neither, so a hook that needs it must fail closed if it is absent, as `block-private.sh` does.
