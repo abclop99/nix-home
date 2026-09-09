@@ -60,12 +60,42 @@ let
       };
   gtkName = if isLight then "Catppuccin-GTK-Light" else "Catppuccin-GTK-Dark-Frappe";
 
-  locationFile = ../private/location.nix;
-  location =
-    if builtins.pathExists locationFile then
-      import locationFile
-    else
-      throw "Create ${toString locationFile} with `{ latitude = <num>; longitude = <num>; }` before enabling darkman.";
+  # Theme schedule. Coordinates win when set, and darkman runs its own solar
+  # calculation. Otherwise darkman is handed no location at all -- which turns
+  # its automatic transitions off, per darkman(1) -- and the fixed times drive
+  # it instead. Both are valid states, so an unpopulated private/location.nix
+  # is not an error. The `or` defaults keep files predating these keys working.
+  location = import ../private/location.nix;
+  solar = location.latitude != null && location.longitude != null;
+
+  # HH:MM:SS, enforced. Two parsers with different tolerances read these times:
+  # systemd's OnCalendar accepts short forms like "7:00", the lexicographic
+  # comparison in scheduleScript does not. A short form still yields a working
+  # timer but silently picks the midnight-wrapping branch below, which puts
+  # light mode through 00:00-06:59.
+  checkTime =
+    name: v:
+    lib.throwIf (builtins.match "[0-9]{2}:[0-9]{2}:[0-9]{2}" v == null)
+      "private/location.nix: ${name} must be HH:MM:SS (got \"${v}\")" v;
+  lightAt = checkTime "lightAt" (location.lightAt or "07:00:00");
+  darkAt = checkTime "darkAt" (location.darkAt or "19:00:00");
+
+  # HH:MM:SS is zero-padded, so lexicographic comparison is chronological. Which
+  # test applies depends only on whether the light window wraps midnight, which
+  # is known at eval time -- so the script carries just the branch it needs.
+  scheduleScript = pkgs.writeShellScript "darkman-schedule" ''
+    now=$(${pkgs.coreutils}/bin/date +%H:%M:%S)
+    if ${
+      if lightAt < darkAt then
+        ''[[ ! "$now" < "${lightAt}" && "$now" < "${darkAt}" ]]''
+      else
+        ''[[ ! "$now" < "${lightAt}" || "$now" < "${darkAt}" ]]''
+    }
+    then mode=light
+    else mode=dark
+    fi
+    exec ${pkgs.darkman}/bin/darkman set "$mode"
+  '';
 in
 {
   options.theme = {
@@ -284,10 +314,15 @@ in
 
     services.darkman = {
       enable = true;
+      # lat/lng are omitted rather than zeroed when unset: darkman disables
+      # automatic transitions when it knows no location, which is what hands
+      # the schedule to darkman-schedule.timer below. Zeroed coordinates would
+      # instead be believed, putting sunrise and sunset on the equator.
       settings = {
+        usegeoclue = false;
+      } // lib.optionalAttrs solar {
         lat = location.latitude;
         lng = location.longitude;
-        usegeoclue = false;
       };
       # gsettings broadcast is omitted: org.gnome.desktop.interface schema
       # isn't registered on this system (no gnome-settings-daemon). HM's
@@ -311,6 +346,63 @@ in
           --specialisation light
         ${pkgs.eww}/bin/eww reload || true
       '';
+    };
+
+    # Fixed-time schedule, used only when no coordinates are set. darkman runs
+    # its mode scripts on any transition, manual ones included, so `darkman set`
+    # drives the same specialisation switch that a solar transition would --
+    # nothing downstream distinguishes the two.
+    #
+    # One service that reads the clock, rather than one per boundary: Persistent
+    # replays a trigger missed while suspended, and systemd tracks one last-fire
+    # per timer unit, so a single unit carrying both times replays once instead
+    # of two units racing to set opposite modes. Shape follows the hyprshade
+    # service/timer pair in modules/hyprland.nix.
+    systemd.user.services.darkman-schedule = lib.mkIf (!solar) {
+      Unit = {
+        Description = "Set darkman mode from a fixed schedule";
+        # After, not Wants. darkman.service is BindsTo=graphical-session.target,
+        # a requirement dependency, so wanting it lets this unit pull the
+        # graphical session up. Were that to happen before Hyprland exists, eww's
+        # units -- gated on HYPRLAND_INSTANCE_SIGNATURE -- would be skipped, and
+        # when Hyprland then started hyprland-session.target its own BindsTo
+        # would already be satisfied, so no start job would be issued and the
+        # bars would stay absent for the rest of the session.
+        After = [
+          "darkman.service"
+          "graphical-session.target"
+        ];
+        PartOf = [ "graphical-session.target" ];
+        ConditionEnvironment = "HYPRLAND_INSTANCE_SIGNATURE";
+      };
+      Service = {
+        Type = "oneshot";
+        ExecStart = "${scheduleScript}";
+      };
+      # Seeds the mode at session start; the timer cannot. It fires only at the
+      # boundaries, and Persistent replays an elapse only when one was *missed*
+      # while the timer was inactive -- on a first activation there is no stamp
+      # file, so systemd records one and waits. Without this a fresh clone keeps
+      # whatever mode darkman last held until the next boundary, up to a day off.
+      Install.WantedBy = [ "graphical-session.target" ];
+    };
+
+    systemd.user.timers.darkman-schedule = lib.mkIf (!solar) {
+      Unit = {
+        Description = "Switch theme on a fixed schedule";
+      };
+      Timer = {
+        OnCalendar = [
+          lightAt
+          darkAt
+        ];
+        Persistent = true;
+      };
+      # graphical-session.target, not timers.target: a timer that can elapse
+      # outside a graphical session is what would make the dependency above
+      # dangerous. Scoped this way Persistent's catch-up also lands at login
+      # rather than at boot.
+      Install.WantedBy = [ "graphical-session.target" ];
     };
   };
 }
