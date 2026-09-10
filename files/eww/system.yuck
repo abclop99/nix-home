@@ -47,7 +47,9 @@ map(.core + \": \" + (.usage|tostring) + \", \" + (.freq/1000|tostring) ) | join
 			"high"
 		}"
 		:value {EWW_BATTERY.total_avg}
-		:tooltip EWW_BATTERY
+		; Reads total_avg rather than BAT0.capacity so the tooltip and the ring
+		; can never disagree -- :value is the same expression.
+		:tooltip "${round(EWW_BATTERY.total_avg, 0)}% (${EWW_BATTERY.BAT0?.status ?: "Unknown"})"
 		:start-at 25
 		:thickness 2.5
 		:clockwise true
