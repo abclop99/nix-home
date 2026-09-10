@@ -190,7 +190,8 @@ The file is a plain 0600 nix.conf fragment beside the HM-managed `~/.config/nix/
 ## Claude Code
 
 - A `PreToolUse` hook (`.claude/hooks/block-private.sh`) blocks `Edit`/`Write`/`MultiEdit` on paths matching `*/private/*` — for `private/` modifications use Bash (e.g., `cat > private/location.nix`).
-- Project sandbox is enabled (`.claude/settings.local.json`); commands that need unix sockets or `/dev/tty` (`hm-switch`, `hm-build`, signed `git commit`, writing `.git/config`) need the sandbox disabled per-call.
+- Project sandbox is enabled (`.claude/settings.local.json`); commands that need unix sockets or `/dev/tty` (`hm-switch`, `hm-build`, signed `git commit`, writing `.git/config`) need the sandbox disabled per-call — which also leaves `$TMPDIR` unset, so a `$TMPDIR/…` scratch path silently becomes `/…`. Use `$CLAUDE_TMPDIR`, which is set either way.
 - The sandbox masks blocked paths with `/dev/null` character devices (mode `crw-rw-rw-`, owner `nobody`) — they appear as untracked entries in `git status` for `.gitconfig`, `.gitmodules`, `.bash_profile`, etc. **Never use `git add .` / `git add -A`**; use selective `git add <path>`.
-- `.claude/{settings.json,skills,commands,agents}` are bind-mounted read-only inside any Claude session — to add/modify them, stage in `$TMPDIR` and `cp` from a regular shell.
+- Finished work is usually committed to `main` and left unpushed, so `git diff HEAD` comes up empty (it is committed) and so does `git diff main...HEAD` whenever HEAD *is* `main` — diff or review with `origin/main..HEAD` (e.g. `/code-review low origin/main..HEAD`), or `@{upstream}..HEAD` if the branch has itself been pushed.
+- `.claude/{settings.json,skills,commands,agents}` are bind-mounted read-only inside any Claude session — to add/modify them, stage in `$CLAUDE_TMPDIR` (`/tmp/claude-<uid>`, so the path can also be typed by hand) and `cp` from a regular shell.
 - `jq` is not installed; use `jaq` for JSON parsing in hooks/scripts. It comes from `home.packages` (`modules/hyprland.nix`) — the system profile carries neither, so a hook that needs it must fail closed if it is absent, as `block-private.sh` does.
