@@ -478,9 +478,9 @@ end_time = 07:00:00
 		# backstop rather than the thing doing the work -- kept so that lowering
 		# RestartSec later cannot quietly restore a session-long silent latch. It
 		# is not free: a *propagated* restart bypasses RestartSec entirely, and with
-		# the limit switched off nothing else brakes such a loop -- a synthetic
-		# reproduction of that shape spins at ~33ms per cycle. What keeps sync-bars
-		# off it is the 10-13s its retries take before it asks for a restart.
+		# the limit switched off nothing else brakes such a loop. What keeps
+		# sync-bars off it is the 10-13s its retries take before it asks for a
+		# restart.
 		#
 		# PATH is deliberately inherited from the user manager (which carries the
 		# HM profile) rather than pinned. eww launches its own deflisten commands
@@ -536,19 +536,16 @@ end_time = 07:00:00
 				Description = "Open an eww bar on each connected monitor";
 				# A fresh daemon has no windows open, so the bars have to be
 				# reopened against it. PartOf propagates a *restart* and not merely
-				# a stop, which is what makes that automatic -- verified on systemd
-				# 260 with transient units: SIGKILLing the depended-on unit's main
-				# process gave the dependent a new InvocationID at NRestarts=0, so
-				# the restart was job-driven and not its own Restart=. After only
-				# orders the start and settles nothing here.
+				# a stop, which is what makes that automatic. After only orders the
+				# start and settles nothing here.
 				#
-				# Requires= is deliberately absent. Isolated the same way, it turns
-				# out to propagate an auto-restart just as PartOf does, so it adds no
-				# reach -- but it does add a failure mode: when the daemon exhausts a
-				# start limit, a Requires= dependent's start job is refused and it
-				# lands `inactive` with Result=success, absent from `systemctl
-				# --failed` and looking like a clean exit. Its immediate start job
-				# also bypasses RestartSec and spends one of the daemon's tries.
+				# Requires= is deliberately absent. It propagates a restart just as
+				# PartOf does, so it adds no reach -- but it does add a failure mode:
+				# when the daemon exhausts a start limit, a Requires= dependent's start
+				# job is refused and it lands `inactive` with Result=success, absent
+				# from `systemctl --failed` and looking like a clean exit. Its
+				# immediate start job also bypasses RestartSec and spends one of the
+				# daemon's tries.
 				PartOf = [ "graphical-session.target" "eww-daemon.service" ];
 				After = [ "graphical-session.target" "eww-daemon.service" ];
 				ConditionEnvironment = "HYPRLAND_INSTANCE_SIGNATURE";

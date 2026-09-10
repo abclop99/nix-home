@@ -37,13 +37,12 @@ sync (){
   # the first one drawing a full set of bars that nothing could see or close.
   #
   # Being unreachable is normally brief -- the daemon is mid-reload from the
-  # hotplug this is also reacting to, or has not finished starting (measured
-  # 348ms and 452ms from fork to answering IPC, two samples). Each failed call
-  # costs eww its own internal retry before returning, and what that costs
-  # depends on how the daemon is broken: ~1.03s when nothing holds the socket,
-  # ~1.55s when a wedged one still has it bound. With the sleeps that is 10-13s
-  # of patience rather than the five seconds the loop looks like, and the wedged
-  # end is the one to reckon with, being the case the give-up below exists for.
+  # hotplug this is also reacting to, or has not finished starting. Each failed
+  # call costs eww its own internal retry before returning, and a wedged daemon
+  # that still holds the socket costs more than one that is simply gone. With
+  # the sleeps that is 10-13s of patience rather than the five seconds the loop
+  # looks like, and the wedged end is the one to reckon with, being the case the
+  # give-up below exists for.
   ok=
   for try in 1 2 3 4 5; do
     have=$(eww active-windows 2>/dev/null) && { ok=1; break; }
