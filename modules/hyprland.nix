@@ -39,10 +39,15 @@ in {
 			grimblast               # Screenshot tool for hyprland
 			swaynotificationcenter  # Notification center
 			
-			# Runtime tools eww's scripts shell out to. Interpreters are not
-			# among them: ewwScripts bakes those into each script's shebang, so
-			# nothing here resolves python3 from PATH -- even though
-			# modules/packages.nix does put it there, for an unrelated reason.
+			# Tools reached for at runtime by bare name. NOT the full inventory of
+			# what eww's scripts need: get-sound-info also uses rg, which works
+			# only because ripgrep sits in cliTools (modules/packages.nix). Nor is
+			# everything here a script dependency -- brightnessctl is called from
+			# controls.yuck's :onchange, and bemenu is Hyprland's $menu, which the
+			# bind names by store path. Interpreters are not here either:
+			# ewwScripts bakes those into each script's shebang, so nothing
+			# resolves python3 from PATH -- even though modules/packages.nix does
+			# put it there, for an unrelated reason.
 			jaq
 			socat
 			pamixer                 # Volume info and control
@@ -479,12 +484,13 @@ end_time = 07:00:00
 		#
 		# PATH is deliberately inherited from the user manager (which carries the
 		# HM profile) rather than pinned. eww launches its own deflisten commands
-		# as `bash ./scripts/...`, and those scripts reach for brightnessctl,
-		# pamixer, pactl, jaq, socat and friends — pinning PATH would mean
-		# enumerating every one and keeping the list in sync, silently breaking a
-		# widget as soon as one is added. Interpreters are the exception and are
-		# pinned, in ewwScripts: one per script, resolved automatically, so there
-		# is no list to keep in sync and python3 need not be on PATH at all.
+		# as `bash ./scripts/...`, and those shell out to a shifting set of tools --
+		# pinning PATH would mean enumerating every one and keeping that list in
+		# sync, silently breaking a widget as soon as one is added. The runtime
+		# tools group in home.packages is not that inventory either, and says so.
+		# Interpreters are the exception and are pinned, in ewwScripts: one per
+		# script, resolved automatically, so there is no list to keep in sync and
+		# python3 need not be on PATH at all.
 		systemd.user.services.eww-daemon = {
 			Unit = {
 				Description = "eww widget daemon";
